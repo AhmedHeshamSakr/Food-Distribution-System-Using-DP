@@ -32,7 +32,7 @@ CREATE TABLE `Address` (
   `name` varchar(100) NOT NULL,
   `parent_id` int(11) DEFAULT NULL,
   `level` enum('Country','State','City','Neighborhood') NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -45,7 +45,7 @@ CREATE TABLE `Badge` (
   `badgeName` varchar(255) DEFAULT NULL,
   `badgeLvl` int(11) DEFAULT NULL,
   `expiryDate` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -56,7 +56,7 @@ CREATE TABLE `Badge` (
 CREATE TABLE `Cooking` (
   `cookID` int(11) NOT NULL,
   `mealID` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -67,7 +67,7 @@ CREATE TABLE `Cooking` (
 CREATE TABLE `Coordinating` (
   `userID` int(11) NOT NULL,
   `eventID` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -78,7 +78,7 @@ CREATE TABLE `Coordinating` (
 CREATE TABLE `Delivering` (
   `deliveryGuyID` int(11) NOT NULL,
   `deliveryID` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -92,7 +92,7 @@ CREATE TABLE `Delivery` (
   `startLocation` int(11) DEFAULT NULL,
   `endLocation` int(11) DEFAULT NULL,
   `deliveryGuy` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -103,7 +103,7 @@ CREATE TABLE `Delivery` (
 CREATE TABLE `DeliveryGuy` (
   `userID` int(11) NOT NULL,
   `vehicleID` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -116,7 +116,7 @@ CREATE TABLE `Donor` (
   `name` varchar(255) DEFAULT NULL,
   `paymentMethod` int(11) DEFAULT NULL,
   `donationAmount` decimal(10,2) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -128,7 +128,7 @@ CREATE TABLE `Event` (
   `eventID` int(11) NOT NULL,
   `eventDate` date DEFAULT NULL,
   `eventLocation` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -139,7 +139,7 @@ CREATE TABLE `Event` (
 CREATE TABLE `Login` (
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -152,7 +152,7 @@ CREATE TABLE `Meal` (
   `needOfDelevery` tinyint(1) DEFAULT NULL,
   `nOFMeals` int(11) DEFAULT NULL,
   `mealDescription` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -166,7 +166,7 @@ CREATE TABLE `Person` (
   `email` varchar(255) NOT NULL,
   `phoneNo` varchar(20) DEFAULT NULL,
   `address` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -180,7 +180,7 @@ CREATE TABLE `Report` (
   `personAddress` varchar(255) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
   `phoneNo` varchar(20) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -191,7 +191,7 @@ CREATE TABLE `Report` (
 CREATE TABLE `Reporting` (
   `userID` int(11) NOT NULL,
   `reportID` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -203,7 +203,7 @@ CREATE TABLE `UserBadge` (
   `userID` int(11) NOT NULL,
   `badgeID` int(11) NOT NULL,
   `dateAwarded` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -214,7 +214,7 @@ CREATE TABLE `UserBadge` (
 CREATE TABLE `Vehicle` (
   `vehicleID` int(11) NOT NULL,
   `licensePlateNo` varchar(20) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -227,7 +227,7 @@ CREATE TABLE `Volunteer` (
   `address` varchar(255) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `badge` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -238,7 +238,7 @@ CREATE TABLE `Volunteer` (
 CREATE TABLE `Volunteering` (
   `userID` int(11) NOT NULL,
   `eventID` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Indexes for dumped tables
