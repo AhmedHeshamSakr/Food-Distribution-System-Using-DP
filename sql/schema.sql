@@ -162,7 +162,9 @@ CREATE TABLE `Meal` (
 
 CREATE TABLE `Person` (
   `userID` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `userTypeID` int(11) NOT NULL,
+  `firstName` varchar(255) NOT NULL,
+  `lastName` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `phoneNo` varchar(20) DEFAULT NULL,
   `address` varchar(255) DEFAULT NULL
