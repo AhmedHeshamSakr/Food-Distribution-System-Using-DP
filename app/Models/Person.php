@@ -54,6 +54,7 @@ abstract class Person
         $this->email = $email;
         $this->phoneNo = $phoneNo;
         $this->login = $login;
+        $this->insertPerson($userTypeID,$firstName, $lastName, $email, $phoneNo);
     }
 
     public function insertPerson(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo): bool
