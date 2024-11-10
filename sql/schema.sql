@@ -214,8 +214,9 @@ CREATE TABLE `UserBadge` (
 --
 
 CREATE TABLE `Vehicle` (
-  `vehicleID` int(11) NOT NULL,
+  `vehicleID` int(11) NOT NULL AUTO_INCREMENT,
   `licensePlateNo` varchar(20) DEFAULT NULL
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
