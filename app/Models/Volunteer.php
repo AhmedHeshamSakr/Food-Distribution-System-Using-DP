@@ -195,9 +195,34 @@ class Volunteer extends User
     
 }
 
- abstract class VolunteerRoles extends User
- {
 
 
- }
+abstract class VolunteerRoles extends User
+{
+    private User $ref;  // Decorated User object
+
+    // Constructor that also initializes the parent User class
+    public function __construct(User $ref)
+    {
+        parent::__construct(
+            $ref->getUserTypeID(),
+            $ref->getFirstName(),
+            $ref->getLastName(),
+            $ref->getEmail(),
+            $ref->getPhoneNo(),
+            $ref->getLogin()
+        );
+        $this->ref = $ref;
+    }
+
+    // Override chooseRole and decorate with additional functionality
+    public function chooseRole(string $role): bool
+    {
+        
+        return $this->ref->chooseRole($role);  
+    }
+
+ 
+}
+
 ?>
