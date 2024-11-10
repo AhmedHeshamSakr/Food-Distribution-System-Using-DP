@@ -4,9 +4,10 @@ return(object)array(
 
         // Database configuration
         'DB_SERVER'=>'localhost',
-        'DB_USERNAME'=>'root', // Replace with your database username
-        'DB_PASSWORD'=>'',     // Replace with your database password
-        'DB_DATABASE'=> 'FDS',  // Replace with your database name
+        'DB_PORT' => 3307, //!!!!!!!!!!!!!!COMMENT THIS OUT IF YOU ARE NOT JUMANA!!!!!!!!!!!!!!!!!!!!!!
+        'DB_USERNAME'=>'root', 
+        'DB_PASSWORD'=>'',     
+        'DB_DATABASE'=> 'FDS',  
 
         // DB Tables
         'DB_PERSON_TABLE'             => 'Person',
