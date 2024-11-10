@@ -80,7 +80,7 @@ class Volunteer extends User
         Badge $badge
     ) {
         // Call the parent constructor to initialize the User (and Person) properties
-        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login, );
+        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login );
 
         // Initialize the Volunteer-specific properties
         $this->address = $address;
