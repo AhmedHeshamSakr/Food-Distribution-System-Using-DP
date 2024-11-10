@@ -147,6 +147,10 @@ abstract class Person
     {
         return $this->phoneNo;
     }
+    public function getLogin(): iLogin
+    {
+        return $this->login;
+    }
 
 
     public function setUserTypeID(int $userTypeID): bool
@@ -194,6 +198,11 @@ abstract class Person
             'phoneNo' => $this->phoneNo
         ];
        return $this->updatePerson($fieldsToUpdate); 
+    }
+
+    public function setLogin(iLogin $login): void
+    {
+        $this->login = $login;
     }
 
 
