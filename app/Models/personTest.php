@@ -10,7 +10,7 @@ require_once 'Person.php';
 $dummyLogin = new DummyLogin();
 
 // Create a new person instance for testing (using dummy data)
-$person = new class(1, 'John', 'Doe', 'john.doe@example.com', '1234567890', $dummyLogin) extends Person {
+$person = new class(1, 'Nina', 'Richie', 'john.ddoe@example.com', '1234567890', $dummyLogin) extends Person {
     public function __construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login) {
         parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
     }
@@ -22,9 +22,8 @@ $firstName = 'Jane';
 $lastName = 'Smith';
 $email = 'jane.smith@example.com';
 $phoneNo = '0987654321';
-$insertResult = $person->insertPerson($userTypeID, $firstName, $lastName, $email, $phoneNo);
 
-echo $insertResult ? "Insert Success\n" : "Insert Failed\n";
+
 
 // Test Select Query (get person by email for example)
 $query = "SELECT * FROM person WHERE email = 'jane.smith@example.com'";

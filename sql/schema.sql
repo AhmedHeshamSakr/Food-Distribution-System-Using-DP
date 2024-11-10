@@ -227,8 +227,8 @@ CREATE TABLE `Vehicle` (
 CREATE TABLE `Volunteer` (
   `userID` int(11) NOT NULL,
   `address` varchar(255) DEFAULT NULL,
-  `phone` varchar(20) DEFAULT NULL,
-  `badge` int(11) DEFAULT NULL
+  `badge` int(11) DEFAULT NULL,
+  `nationalID` varchar(255) not null
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
