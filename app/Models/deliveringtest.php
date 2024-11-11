@@ -5,6 +5,40 @@ require_once 'DeliveryGuy.php';
 require_once 'Delivering.php';
 require_once '../../config/DB.php';
 
+################################################## DUMMY
+interface iLogin
+{
+    public function authenticate(string $username, string $password): bool;
+    public function logout(): bool;
+    public function login($credentials): bool;
+}
+
+class DummyLogin implements iLogin
+{
+    public $isAuthenticated = false;
+
+    public function login($credentials): bool
+    {
+        // Simulate successful login
+        $this->isAuthenticated = true;
+        return $this->isAuthenticated;
+    }
+
+    public function authenticate(string $username, string $password): bool
+    {
+        // Simulate successful authentication
+        $this->isAuthenticated = true;
+        return $this->isAuthenticated;
+    }
+
+    public function logout(): bool
+    {
+        $this->isAuthenticated = false;
+        return !$this->isAuthenticated;
+    }
+}
+// ######################################################################
+
 // Custom function to simulate database query execution (mocked)
 function setupVolunteer()
 {
@@ -35,7 +69,7 @@ function testDeliveringClass()
 {
     // Mock DeliveryGuy and Delivery objects
     $volunteer = setupVolunteer();
-    $vehicle = new Vehicle('car1221', 2);
+    $vehicle = new Vehicle('car12231', 2);
     $deliveryGuy = new DeliveryGuy($volunteer, $vehicle);
     $delivery = new Delivery('2024-11-12', 'Warehouse', 'Customer', $deliveryGuy->getUserID());
 
