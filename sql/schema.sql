@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Nov 11, 2024 at 11:30 AM
+-- Host: localhost
+-- Generation Time: Nov 11, 2024 at 08:58 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `fds`
+-- Database: `FDS`
 --
 
 -- --------------------------------------------------------
@@ -110,15 +110,41 @@ CREATE TABLE `deliveryguy` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `donor`
+-- Table structure for table `Donating`
 --
 
-CREATE TABLE `donor` (
+CREATE TABLE `Donating` (
   `userID` int(11) NOT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  `paymentMethod` int(11) DEFAULT NULL,
-  `donationAmount` decimal(10,2) DEFAULT NULL
+  `donationID` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `Donating`
+--
+
+INSERT INTO `Donating` (`userID`, `donationID`) VALUES
+(15, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Donation`
+--
+
+CREATE TABLE `Donation` (
+  `donationID` int(11) NOT NULL,
+  `donationDate` date NOT NULL,
+  `donationAmount` decimal(10,2) NOT NULL,
+  `paymentMethod` enum('Cash','Credit Card','Bank Transfer','Online Payment') NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `Donation`
+--
+
+INSERT INTO `Donation` (`donationID`, `donationDate`, `donationAmount`, `paymentMethod`) VALUES
+(1, '2024-11-11', 150.75, 'Online Payment'),
+(2, '2024-11-11', 100.50, 'Credit Card');
 
 -- --------------------------------------------------------
 
@@ -129,7 +155,9 @@ CREATE TABLE `donor` (
 CREATE TABLE `event` (
   `eventID` int(11) NOT NULL,
   `eventDate` date DEFAULT NULL,
-  `eventLocation` int(11) DEFAULT NULL
+  `eventLocation` int(11) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `eventDescription` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -171,6 +199,13 @@ CREATE TABLE `person` (
   `phoneNo` varchar(20) DEFAULT NULL,
   `address` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `person`
+--
+
+INSERT INTO `person` (`userID`, `userTypeID`, `firstName`, `lastName`, `email`, `phoneNo`, `address`) VALUES
+(15, 3, 'Johnny', 'DoeUpdated', 'johnny.doe@example.com', '0987654321', NULL);
 
 -- --------------------------------------------------------
 
@@ -310,10 +345,17 @@ ALTER TABLE `deliveryguy`
   ADD KEY `vehicleID` (`vehicleID`);
 
 --
--- Indexes for table `donor`
+-- Indexes for table `Donating`
 --
-ALTER TABLE `donor`
-  ADD PRIMARY KEY (`userID`);
+ALTER TABLE `Donating`
+  ADD PRIMARY KEY (`userID`,`donationID`),
+  ADD KEY `donationID` (`donationID`);
+
+--
+-- Indexes for table `Donation`
+--
+ALTER TABLE `Donation`
+  ADD PRIMARY KEY (`donationID`);
 
 --
 -- Indexes for table `event`
@@ -403,6 +445,12 @@ ALTER TABLE `delivery`
   MODIFY `deliveryID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `Donation`
+--
+ALTER TABLE `Donation`
+  MODIFY `donationID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `event`
 --
 ALTER TABLE `event`
@@ -418,7 +466,7 @@ ALTER TABLE `meal`
 -- AUTO_INCREMENT for table `person`
 --
 ALTER TABLE `person`
-  MODIFY `userID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `userID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `report`
@@ -471,10 +519,11 @@ ALTER TABLE `deliveryguy`
   ADD CONSTRAINT `deliveryguy_ibfk_2` FOREIGN KEY (`vehicleID`) REFERENCES `vehicle` (`vehicleID`);
 
 --
--- Constraints for table `donor`
+-- Constraints for table `Donating`
 --
-ALTER TABLE `donor`
-  ADD CONSTRAINT `donor_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `person` (`userID`);
+ALTER TABLE `Donating`
+  ADD CONSTRAINT `donating_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `Person` (`userID`) ON DELETE CASCADE,
+  ADD CONSTRAINT `donating_ibfk_2` FOREIGN KEY (`donationID`) REFERENCES `Donation` (`donationID`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `login`

@@ -45,15 +45,6 @@ CCREATE TABLE Report (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
--- Create the Donor table
-CREATE TABLE Donor (
-    userID INT PRIMARY KEY,
-    name VARCHAR(255),
-    paymentMethod INT,
-    donationAmount DECIMAL(10, 2),
-    FOREIGN KEY (userID) REFERENCES Person(userID),
-    FOREIGN KEY (name) REFERENCES Person(name)
-);
 
 -- Create the Volunteer table
 CREATE TABLE Volunteer (
@@ -77,13 +68,7 @@ CREATE TABLE Vehicle (
     licensePlateNo VARCHAR(20) UNIQUE
 );
 
--- Create the DeliveryGuy table
-CREATE TABLE DeliveryGuy (
-    userID INT PRIMARY KEY,
-    vehicleID INT,
-    FOREIGN KEY (userID) REFERENCES Volunteer (userID),
-    FOREIGN KEY (vehicleID) REFERENCES Vehicle(vehicleID)
-);
+
 
 -- Create the Address table
 CREATE TABLE Address (
@@ -95,14 +80,6 @@ CREATE TABLE Address (
     street VARCHAR(255)
 );
 
--- Create the Delivery table
-CREATE TABLE Delivery (
-    deliveryID INT PRIMARY KEY AUTO_INCREMENT,
-    deliveryDate DATE,
-    startLocation INT,
-    endLocation INT,
-    deliveryGuy INT,
-);
 
     CREATE TABLE Meal (
     mealID INT PRIMARY KEY AUTO_INCREMENT,
@@ -119,6 +96,41 @@ CREATE TABLE Delivery (
     FOREIGN KEY (mealID) REFERENCES Meal(mealID)
 );
 
+
+
+-- Create the Donation table with paymentMethod as ENUM
+CREATE TABLE Donation (
+    donationID INT PRIMARY KEY AUTO_INCREMENT,
+    donationDate DATE,
+    donationAmount DECIMAL(10, 2),
+    paymentMethod ENUM('Cash', 'Credit Card', 'Bank Transfer', 'Online Payment'),
+);
+
+-- Create the Donating table (Many-to-Many relationship)
+CREATE TABLE Donating (
+    donorID INT,
+    donationID INT,
+    PRIMARY KEY (donorID, donationID),
+    FOREIGN KEY (donationID) REFERENCES Donation(donationID)
+);
+
+-- Create the DeliveryGuy table
+CREATE TABLE DeliveryGuy (
+    userID INT PRIMARY KEY,
+    vehicleID INT,
+    FOREIGN KEY (userID) REFERENCES Volunteer (userID),
+    FOREIGN KEY (vehicleID) REFERENCES Vehicle(vehicleID)
+);
+
+
+-- Create the Delivery table
+CREATE TABLE Delivery (
+    deliveryID INT PRIMARY KEY AUTO_INCREMENT,
+    deliveryDate DATE,
+    startLocation INT,
+    endLocation INT,
+    deliveryGuy INT,
+);
 -- Create the Delivering table
 CREATE TABLE Delivering (
     deliveryGuyID INT PRIMARY KEY,
@@ -127,6 +139,7 @@ CREATE TABLE Delivering (
     FOREIGN KEY (deliveryGuyID) REFERENCES Volunteer(userID),
     FOREIGN KEY (deliveryID) REFERENCES Delivery(deliveryID)
 );
+
 
 
 CREATE TABLE Coordinating (
@@ -140,10 +153,12 @@ CREATE TABLE Coordinating (
 
     CREATE TABLE Event (
     eventID  INT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
     eventDate dATE,
-    eventLocation INt
-
+    eventLocation INt,
+    eventDescription TEXT
 );
+
 
 CREATE TABLE Volunteering (
     userID INT,
