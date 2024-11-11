@@ -4,30 +4,30 @@
 
 
 
-interface iLogin
-{
-    public function authenticate(string $username, string $password): bool;
-    public function logout(): bool;
+// interface iLogin
+// {
+//     public function authenticate(string $username, string $password): bool;
+//     public function logout(): bool;
     
-}
+// }
 
-class DummyLogin implements iLogin
-{
-    public $isAuthenticated = false;
+// class DummyLogin implements iLogin
+// {
+//     public $isAuthenticated = false;
 
-    public function authenticate(string $username, string $password): bool
-    {
-        // Simulate successful authentication
-        $this->isAuthenticated = true;
-        return $this->isAuthenticated;
-    }
+//     public function authenticate(string $username, string $password): bool
+//     {
+//         // Simulate successful authentication
+//         $this->isAuthenticated = true;
+//         return $this->isAuthenticated;
+//     }
 
-    public function logout(): bool
-    {
-        $this->isAuthenticated = false;
-        return !$this->isAuthenticated;
-    }
-}
+//     public function logout(): bool
+//     {
+//         $this->isAuthenticated = false;
+//         return !$this->isAuthenticated;
+//     }
+// }
 
 
 
@@ -35,6 +35,7 @@ class DummyLogin implements iLogin
 ///////////////////////////////////
 
 require_once __DIR__ . "/../../config/DB.php";
+require_once __DIR__ . '/Login.php'; 
 
 abstract class Person
 {
