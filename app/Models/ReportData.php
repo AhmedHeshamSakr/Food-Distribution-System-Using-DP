@@ -35,28 +35,54 @@ class ReportingData {
         return false;
     }
 
-    public function deleteReport() {
-        $query = "UPDATE report SET is_deleted = TRUE WHERE reportID = '{$this->reportID}'";
+    public function deleteReport($reportID = null) {
+        // Use the specified reportID, or default to the object's reportID if available
+        $id = $reportID ?? $this->reportID;
+    
+        // Check if reportID is available
+        if (!$id) {
+            echo "Error: Report ID not specified.\n";
+            return false;
+        }
+    
+        // Perform the soft delete by setting `is_deleted` to TRUE
+        $query = "UPDATE report SET is_deleted = TRUE WHERE reportID = '$id'";
         return run_query($query);
     }
+    
 
     // Update report details
-    public function updateReport($fieldsToUpdate) {
+    public function updateReport($fieldsToUpdate, $reportID = null) {
+        $id = $reportID ?? $this->reportID; // Use passed reportID or object’s reportID
+        if (!$id) {
+            echo "Error: Report ID not specified.\n";
+            return false;
+        }
+
         $setQuery = [];
         foreach ($fieldsToUpdate as $field => $value) {
             $setQuery[] = "$field = '$value'";
         }
         $setQueryStr = implode(', ', $setQuery);
-        $query = "UPDATE report SET $setQueryStr WHERE reportID = '{$this->reportID}' AND is_deleted = FALSE";
+        $query = "UPDATE report SET $setQueryStr WHERE reportID = '$id' AND is_deleted = FALSE";
         return run_query($query);
     }
 
+    //REAADD
     public function getReportDetails($reportID) {
         $query = "SELECT * FROM report WHERE reportID = $reportID AND is_deleted = FALSE";
         $result = run_select_query($query);
         return $result ? $result[0] : null; // Return the first result as an associative array or null if not found
     }
 
+    public function getAllActiveReports() {
+        $query = "SELECT * FROM report WHERE is_deleted = FALSE";
+        return run_select_query($query);
+    }
+
+
+
+    
     public function getReportID() {
         return $this->reportID;
     }
