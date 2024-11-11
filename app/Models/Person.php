@@ -4,30 +4,37 @@
 
 
 
-// interface iLogin
-// {
-//     public function authenticate(string $username, string $password): bool;
-//     public function logout(): bool;
-    
-// }
+interface iLogin
+{
+    public function authenticate(string $username, string $password): bool;
+    public function logout(): bool;
+    public function login($credentials): bool;
+}
 
-// class DummyLogin implements iLogin
-// {
-//     public $isAuthenticated = false;
+class DummyLogin implements iLogin
+{
+    public $isAuthenticated = false;
 
-//     public function authenticate(string $username, string $password): bool
-//     {
-//         // Simulate successful authentication
-//         $this->isAuthenticated = true;
-//         return $this->isAuthenticated;
-//     }
+    public function login($credentials): bool
+    {
+        // Simulate successful login
+        $this->isAuthenticated = true;
+        return $this->isAuthenticated;
+    }
 
-//     public function logout(): bool
-//     {
-//         $this->isAuthenticated = false;
-//         return !$this->isAuthenticated;
-//     }
-// }
+    public function authenticate(string $username, string $password): bool
+    {
+        // Simulate successful authentication
+        $this->isAuthenticated = true;
+        return $this->isAuthenticated;
+    }
+
+    public function logout(): bool
+    {
+        $this->isAuthenticated = false;
+        return !$this->isAuthenticated;
+    }
+}
 
 
 
@@ -68,6 +75,16 @@ abstract class Person
         // SQL query to insert the person into the database
         $query = "INSERT INTO person (userTypeID, firstName, lastName, email, phoneNo) 
                 VALUES ('{$userTypeID}', '{$firstName}', '{$lastName}', '{$email}', '{$phoneNo}')";
+
+        $checkEmailQuery = "SELECT userID FROM person WHERE email = '{$email}' LIMIT 1";
+        $checkEmailResult = run_select_query($checkEmailQuery);
+
+        // If the result is not empty, email is already taken
+        if ($checkEmailResult) {
+            // Email is duplicated, return false
+            $this->userID = $checkEmailResult[0]['userID']; 
+            return false;
+        }
 
         // Run the query and return whether it was successful
         $result = run_query($query);

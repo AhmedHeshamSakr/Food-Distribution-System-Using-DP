@@ -6,9 +6,10 @@ abstract class User extends Person
 {
     protected const USER_TYPE_ID_MAP = [
 
-        'volunteer' => 1,
-        'donor' => 2,
-        'reporter' => 3,
+        'volunteer' => 0,
+        'donor' => 5,
+        'reporter' => 6,
+        ''=> 7,
     ];
 
     // Constructor that calls the parent constructor
@@ -18,9 +19,9 @@ abstract class User extends Person
         parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
     }
 
-    public function chooseRole(string $role): bool
+    public function chooseRole(): bool
     {
-        return $this->setUserTypeID(self::USER_TYPE_ID_MAP[$role]);
+        return $this->setUserTypeID(self::USER_TYPE_ID_MAP['']);
     }
 }
 ?>

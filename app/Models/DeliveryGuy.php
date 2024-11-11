@@ -155,5 +155,10 @@ class DeliveryGuy extends VolunteerRoles
         return false;
     }
 
+    public function chooseRole(): bool {
+        $this->roleType |= 0b010;  // Set DeliveryGuy bit
+        return true;
+    }
+
 
 }

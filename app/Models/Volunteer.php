@@ -232,7 +232,10 @@ abstract class VolunteerRoles extends User
         return $roles;
     }
 
-    //public abstract function chooseRole(string $role): bool; //keda keda fel user
+    public function chooseRole(): bool{
+         $this->roleType = 0;
+         return true;
+    }
     
 
  
