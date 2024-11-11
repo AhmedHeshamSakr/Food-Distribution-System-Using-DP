@@ -14,7 +14,6 @@ return(object)array(
         'DB_LOGIN_TABLE'              => 'Login',
         'DB_REPORTING_TABLE'          => 'Reporting',
         'DB_REPORTI_DATA_TABLE'       => 'Report',
-        'DB_DONOR_TABLE'              => 'Donor',
         'DB_VOLUNTEER_TABLE'          => 'Volunteer',
         'DB_VOLUNTEERING_TABLE'       => 'Volunteering',
         'DB_BADGE_TABLE'              => 'Badge',
