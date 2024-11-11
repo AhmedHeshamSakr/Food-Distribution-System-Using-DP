@@ -24,6 +24,7 @@ CREATE TABLE Login (
 CREATE TABLE Reporting (
     userID INT,
     reportID INT,
+    is_deleted BOOLEAN DEFAULT FALSE,
 PRIMARY KEY (userID, reportID),
 FOREIGN KEY (userID) REFERENCES Person(userID),
 FOREIGN KEY (reportID) REFERENCES Report(reportID),
