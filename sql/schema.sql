@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 11, 2024 at 07:34 AM
+-- Generation Time: Nov 11, 2024 at 09:29 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -181,8 +181,10 @@ CREATE TABLE `report` (
   `personINname` varchar(255) DEFAULT NULL,
   `personINaddress` varchar(255) DEFAULT NULL,
   `phoneINno` varchar(20) DEFAULT NULL,
-  `status` varchar(255) DEFAULT 'submitted',
-  `verified` tinyint(1) DEFAULT 0
+  `status` enum('Pending','Acknowledged','In Progress','Completed') DEFAULT 'Pending',
+  `description` text DEFAULT NULL,
+  `is_deleted` tinyint(1) DEFAULT 0,
+  `recognized` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

@@ -32,14 +32,15 @@ updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Create the ReportingData table
-CREATE TABLE Report (
+CCREATE TABLE Report (
     reportID INT PRIMARY KEY,
     personInName VARCHAR(255),
     personInAddress VARCHAR(255),
     personInPhone VARCHAR(20),
-    status VARCHAR(255) DEFAULT 'submitted',
-    verified BOOLEAN DEFAULT FALSE,
-    
+    status ENUM('Pending', 'Acknowledged', 'In Progress', 'Completed') DEFAULT 'Pending',
+    recognized BOOLEAN DEFAULT FALSE,
+    description TEXT,
+    is_deleted BOOLEAN DEFAULT FALSE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
