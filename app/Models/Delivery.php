@@ -1,6 +1,6 @@
 <?php
 
-require_once 'Database.php';
+require_once '../../config/DB.php';
 
 class Delivery
 {
@@ -8,17 +8,22 @@ class Delivery
     private string $deliveryDate;
     private string $startLocation;
     private string $endLocation;
-    private int $deliveryGuy;
+    private int $deliveryGuyID;
+    private string $status;
+    private ?string $deliveryDetails;
 
-    public function __construct(int $deliveryID, string $deliveryDate, string $startLocation, string $endLocation, int $deliveryGuy)
+    public function __construct(string $deliveryDate, string $startLocation, string $endLocation, int $deliveryGuyID, string $status = 'pending', ?string $deliveryDetails = null)
     {
-        $this->deliveryID = $deliveryID;
+       
         $this->deliveryDate = $deliveryDate;
         $this->startLocation = $startLocation;
         $this->endLocation = $endLocation;
-        $this->deliveryGuy = $deliveryGuy;
-        $this->insertDelivery($deliveryDate, $startLocation, $endLocation, $deliveryGuy);
+        $this->deliveryGuyID = $deliveryGuyID;
+        $this->status = $status;
+        $this->deliveryDetails = $deliveryDetails; // Initialize deliveryDetails
+        $this -> insertDelivery($deliveryDate, $startLocation, $endLocation, $deliveryGuyID, $status, $deliveryDetails);
     }
+    
 
     // Getter and Setter Methods
     public function getDeliveryID(): int
@@ -63,27 +68,54 @@ class Delivery
 
     public function getDeliveryGuy(): int
     {
-        return $this->deliveryGuy;
+        return $this->deliveryGuyID;
     }
 
-    public function setDeliveryGuy(int $deliveryGuy): void
+    // public function setDeliveryGuy(DeliveryGuy $deliveryGuy): void
+    // {
+    //     $this->deliveryGuy = $deliveryGuy;
+    //     $this->updateDelivery(['deliveryGuy' => $deliveryGuy]); // Automatically update
+    // }
+
+    public function getStatus(): string
     {
-        $this->deliveryGuy = $deliveryGuy;
-        $this->updateDelivery(['deliveryGuy' => $deliveryGuy]); // Automatically update
+        return $this->status;
+    }
+
+    public function setStatus(string $status): void
+    {
+        $validStatuses = ['pending', 'delivering', 'delivered'];
+        if (in_array($status, $validStatuses)) {
+            $this->status = $status;
+            $this->updateDelivery(['status' => $status]); // Automatically update status
+        }
+    }
+
+    public function getDeliveryDetails(): ?string
+    {
+        return $this->deliveryDetails;
+    }
+
+    public function setDeliveryDetails(?string $deliveryDetails): void
+    {
+        $this->deliveryDetails = $deliveryDetails;
+        $this->updateDelivery(['deliveryDetails' => $deliveryDetails]); // Automatically update
     }
 
     // Insert a new delivery
-    public function insertDelivery(string $deliveryDate, string $startLocation, string $endLocation, int $deliveryGuy): bool
+    public function insertDelivery(string $deliveryDate, string $startLocation, string $endLocation, int $deliveryGuyID, string $status = 'pending', ?string $deliveryDetails = null): bool
     {
         // Sanitize inputs to prevent SQL injection
         $deliveryDate = mysqli_real_escape_string(Database::getInstance()->getConnection(), $deliveryDate);
         $startLocation = mysqli_real_escape_string(Database::getInstance()->getConnection(), $startLocation);
         $endLocation = mysqli_real_escape_string(Database::getInstance()->getConnection(), $endLocation);
-        $deliveryGuy = mysqli_real_escape_string(Database::getInstance()->getConnection(), $deliveryGuy);
+        $deliveryGuy = mysqli_real_escape_string(Database::getInstance()->getConnection(), $deliveryGuyID);
+        $status = mysqli_real_escape_string(Database::getInstance()->getConnection(), $status);
+        $deliveryDetails = mysqli_real_escape_string(Database::getInstance()->getConnection(), $deliveryDetails);
 
         // SQL query to insert the delivery into the database
-        $query = "INSERT INTO Delivery (deliveryDate, startLocation, endLocation, deliveryGuy) 
-                  VALUES ('{$deliveryDate}', '{$startLocation}', '{$endLocation}', '{$deliveryGuy}')";
+        $query = "INSERT INTO Delivery (deliveryDate, startLocation, endLocation, deliveryGuy, status, deliveryDetails) 
+                  VALUES ('{$deliveryDate}', '{$startLocation}', '{$endLocation}', '{$deliveryGuy}', '{$status}', '{$deliveryDetails}')";
 
         // Run the query and return whether it was successful
         $result = run_query($query);

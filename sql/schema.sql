@@ -91,7 +91,9 @@ CREATE TABLE `delivery` (
   `deliveryDate` date DEFAULT NULL,
   `startLocation` int(11) DEFAULT NULL,
   `endLocation` int(11) DEFAULT NULL,
-  `deliveryGuy` int(11) DEFAULT NULL
+  `deliveryGuy` int(11) DEFAULT NULL,
+  `status` ENUM('pending', 'delivering', 'delivered') DEFAULT 'pending',
+  `deliveryDetails` TEXT DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

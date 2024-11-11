@@ -54,17 +54,17 @@ class Delivering
     // Insert a new delivery record into the Delivering table
     public function insertDelivering(): bool
     {
-        $query = "INSERT INTO Delivering (deliveryGuyID, deliveryID, deliveryTime) 
-                  VALUES ('{$this->deliveryGuy->getUserID()}', '{$this->delivery->getDeliveryID()}', '{$this->deliveryTime}')";
+        $query = "INSERT INTO Delivering (deliveryGuyID, deliveryID) 
+                  VALUES ('{$this->deliveryGuy->getUserID()}', '{$this->delivery->getDeliveryID()}')";
         
         return run_query($query); // Assumes run_query() handles the query execution
     }
 
     // Update an existing delivery record in the Delivering table
-    public function updateDelivering(): bool
+    public function updateDelivering(int $newDeliveryId): bool
     {
         $query = "UPDATE Delivering 
-                  SET deliveryTime = '{$this->deliveryTime}' 
+                  SET deliveryID = '{$newDeliveryId}'
                   WHERE deliveryGuyID = '{$this->deliveryGuy->getUserID()}' AND deliveryID = '{$this->delivery->getDeliveryID()}'";
         
         return run_query($query); // Assumes run_query() handles the query execution
