@@ -1,19 +1,19 @@
 <?php
 
-// Include your class files and database connection
+require_once __DIR__ . '/ReportData.php';
+
 require_once __DIR__ . '/../../config/DB.php';
-require_once 'ReportData.php';
 
 // Instantiate the ReportingData class
 $reportingData = new ReportingData();
 
-// Step 2: Create a New Report
+// Step 1: Create a New Report
 echo "Creating a new report...\n";
 $created = $reportingData->createReport(
-    'John Doe',
-    '123 Main St',
-    '5551234567',
-    'This is a description of the report.'
+    'Jane Doe',
+    '456 Another St',
+    '5559876543',
+    'This is a test description for the report.'
 );
 
 if ($created) {
@@ -23,28 +23,28 @@ if ($created) {
     exit();
 }
 
-// Store the generated reportID
+// Store the generated reportID for further testing
 $reportID = $reportingData->getReportID();
 
-// Step 3: Retrieve and Display Report Details
-echo "Retrieving report details...\n";
+// Step 2: Retrieve and Display Report Details
+echo "\nRetrieving report details...\n";
 $reportDetails = $reportingData->getReportDetails($reportID);
 
 if ($reportDetails) {
-    echo "Report details:\n";
+    echo "Report details retrieved:\n";
     print_r($reportDetails);
 } else {
     echo "Failed to retrieve report details.\n";
 }
 
-// Step 4: Update Report Details
-echo "Updating report status to 'Acknowledged'...\n";
-$updateData = ['status' => 'Acknowledged'];
-$updated = $reportingData->updateReport($updateData);
+// Step 3: Update Report Details (Change status and recognized fields)
+echo "\nUpdating report status to 'Acknowledged' and setting recognized to true...\n";
+$updateData = ['status' => 'Acknowledged', 'recognized' => 1];
+$updated = $reportingData->updateReport($updateData, $reportID);
 
 if ($updated) {
-    echo "Report status updated successfully.\n";
-    // Retrieve the updated details to verify
+    echo "Report updated successfully.\n";
+    // Retrieve the updated details to verify the changes
     $updatedDetails = $reportingData->getReportDetails($reportID);
     echo "Updated report details:\n";
     print_r($updatedDetails);
@@ -52,9 +52,9 @@ if ($updated) {
     echo "Failed to update report.\n";
 }
 
-// Step 5: Soft Delete the Report
-echo "Soft deleting the report...\n";
-$deleted = $reportingData->deleteReport();
+// Step 4: Soft Delete the Report
+echo "\nSoft deleting the report...\n";
+$deleted = $reportingData->deleteReport($reportID);
 
 if ($deleted) {
     echo "Report marked as deleted successfully.\n";
@@ -68,6 +68,16 @@ if ($deleted) {
     }
 } else {
     echo "Failed to delete report.\n";
+}
+
+// Step 5: Retrieve All Active Reports
+echo "\nRetrieving all active reports (non-deleted)...\n";
+$activeReports = $reportingData->getAllActiveReports();
+if (!empty($activeReports)) {
+    echo "Active reports:\n";
+    print_r($activeReports);
+} else {
+    echo "No active reports found.\n";
 }
 
 ?>
