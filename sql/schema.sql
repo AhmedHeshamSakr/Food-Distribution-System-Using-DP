@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Nov 05, 2024 at 11:04 AM
+-- Host: 127.0.0.1
+-- Generation Time: Nov 11, 2024 at 07:34 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -18,149 +18,149 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `FDS`
+-- Database: `fds`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Address`
+-- Table structure for table `address`
 --
 
-CREATE TABLE `Address` (
+CREATE TABLE `address` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `parent_id` int(11) DEFAULT NULL,
   `level` enum('Country','State','City','Neighborhood') NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Badge`
+-- Table structure for table `badge`
 --
 
-CREATE TABLE `Badge` (
+CREATE TABLE `badge` (
   `badgeID` int(11) NOT NULL,
   `badgeName` varchar(255) DEFAULT NULL,
   `badgeLvl` int(11) DEFAULT NULL,
   `expiryDate` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Cooking`
+-- Table structure for table `cooking`
 --
 
-CREATE TABLE `Cooking` (
+CREATE TABLE `cooking` (
   `cookID` int(11) NOT NULL,
   `mealID` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Coordinating`
+-- Table structure for table `coordinating`
 --
 
-CREATE TABLE `Coordinating` (
+CREATE TABLE `coordinating` (
   `userID` int(11) NOT NULL,
   `eventID` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Delivering`
+-- Table structure for table `delivering`
 --
 
-CREATE TABLE `Delivering` (
+CREATE TABLE `delivering` (
   `deliveryGuyID` int(11) NOT NULL,
   `deliveryID` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Delivery`
+-- Table structure for table `delivery`
 --
 
-CREATE TABLE `Delivery` (
+CREATE TABLE `delivery` (
   `deliveryID` int(11) NOT NULL,
   `deliveryDate` date DEFAULT NULL,
   `startLocation` int(11) DEFAULT NULL,
   `endLocation` int(11) DEFAULT NULL,
   `deliveryGuy` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `DeliveryGuy`
+-- Table structure for table `deliveryguy`
 --
 
-CREATE TABLE `DeliveryGuy` (
+CREATE TABLE `deliveryguy` (
   `userID` int(11) NOT NULL,
-  `vehicleID` int(11) DEFAULT NULL 
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `vehicleID` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Donor`
+-- Table structure for table `donor`
 --
 
-CREATE TABLE `Donor` (
+CREATE TABLE `donor` (
   `userID` int(11) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
   `paymentMethod` int(11) DEFAULT NULL,
   `donationAmount` decimal(10,2) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Event`
+-- Table structure for table `event`
 --
 
-CREATE TABLE `Event` (
+CREATE TABLE `event` (
   `eventID` int(11) NOT NULL,
   `eventDate` date DEFAULT NULL,
   `eventLocation` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Login`
+-- Table structure for table `login`
 --
 
-CREATE TABLE `Login` (
+CREATE TABLE `login` (
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Meal`
+-- Table structure for table `meal`
 --
 
-CREATE TABLE `Meal` (
+CREATE TABLE `meal` (
   `mealID` int(11) NOT NULL,
   `needOfDelevery` tinyint(1) DEFAULT NULL,
   `nOFMeals` int(11) DEFAULT NULL,
   `mealDescription` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Person`
+-- Table structure for table `person`
 --
 
-CREATE TABLE `Person` (
+CREATE TABLE `person` (
   `userID` int(11) NOT NULL,
   `userTypeID` int(11) NOT NULL,
   `firstName` varchar(255) NOT NULL,
@@ -168,200 +168,202 @@ CREATE TABLE `Person` (
   `email` varchar(255) NOT NULL,
   `phoneNo` varchar(20) DEFAULT NULL,
   `address` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Report`
+-- Table structure for table `report`
 --
 
-CREATE TABLE `Report` (
+CREATE TABLE `report` (
   `reportID` int(11) NOT NULL,
-  `personName` varchar(255) DEFAULT NULL,
-  `personAddress` varchar(255) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `phoneNo` varchar(20) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `personINname` varchar(255) DEFAULT NULL,
+  `personINaddress` varchar(255) DEFAULT NULL,
+  `phoneINno` varchar(20) DEFAULT NULL,
+  `status` varchar(255) DEFAULT 'submitted',
+  `verified` tinyint(1) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Reporting`
+-- Table structure for table `reporting`
 --
 
-CREATE TABLE `Reporting` (
+CREATE TABLE `reporting` (
   `userID` int(11) NOT NULL,
-  `reportID` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `reportID` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `UserBadge`
+-- Table structure for table `userbadge`
 --
 
-CREATE TABLE `UserBadge` (
+CREATE TABLE `userbadge` (
   `userID` int(11) NOT NULL,
   `badgeID` int(11) NOT NULL,
   `dateAwarded` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Vehicle`
+-- Table structure for table `vehicle`
 --
 
-CREATE TABLE `Vehicle` (
-  `vehicleID` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `vehicle` (
+  `vehicleID` int(11) NOT NULL,
   `licensePlateNo` varchar(20) DEFAULT NULL
-
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Volunteer`
+-- Table structure for table `volunteer`
 --
 
-CREATE TABLE `Volunteer` (
+CREATE TABLE `volunteer` (
   `userID` int(11) NOT NULL,
   `address` varchar(255) DEFAULT NULL,
-  `badge` int(11) DEFAULT NULL,
-  `nationalID` varchar(255) not null
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `phone` varchar(20) DEFAULT NULL,
+  `badge` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Volunteering`
+-- Table structure for table `volunteering`
 --
 
-CREATE TABLE `Volunteering` (
+CREATE TABLE `volunteering` (
   `userID` int(11) NOT NULL,
   `eventID` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `Address`
+-- Indexes for table `address`
 --
-ALTER TABLE `Address`
+ALTER TABLE `address`
   ADD PRIMARY KEY (`id`),
   ADD KEY `parent_id` (`parent_id`);
 
 --
--- Indexes for table `Badge`
+-- Indexes for table `badge`
 --
-ALTER TABLE `Badge`
+ALTER TABLE `badge`
   ADD PRIMARY KEY (`badgeID`);
 
 --
--- Indexes for table `Cooking`
+-- Indexes for table `cooking`
 --
-ALTER TABLE `Cooking`
+ALTER TABLE `cooking`
   ADD PRIMARY KEY (`cookID`,`mealID`),
   ADD KEY `mealID` (`mealID`);
 
 --
--- Indexes for table `Coordinating`
+-- Indexes for table `coordinating`
 --
-ALTER TABLE `Coordinating`
+ALTER TABLE `coordinating`
   ADD PRIMARY KEY (`eventID`,`userID`),
   ADD KEY `userID` (`userID`);
 
 --
--- Indexes for table `Delivering`
+-- Indexes for table `delivering`
 --
-ALTER TABLE `Delivering`
+ALTER TABLE `delivering`
   ADD PRIMARY KEY (`deliveryGuyID`,`deliveryID`),
   ADD KEY `deliveryID` (`deliveryID`);
 
 --
--- Indexes for table `Delivery`
+-- Indexes for table `delivery`
 --
-ALTER TABLE `Delivery`
+ALTER TABLE `delivery`
   ADD PRIMARY KEY (`deliveryID`);
 
 --
--- Indexes for table `DeliveryGuy`
+-- Indexes for table `deliveryguy`
 --
-ALTER TABLE `DeliveryGuy`
+ALTER TABLE `deliveryguy`
   ADD PRIMARY KEY (`userID`),
   ADD KEY `vehicleID` (`vehicleID`);
 
 --
--- Indexes for table `Donor`
+-- Indexes for table `donor`
 --
-ALTER TABLE `Donor`
+ALTER TABLE `donor`
   ADD PRIMARY KEY (`userID`);
 
 --
--- Indexes for table `Event`
+-- Indexes for table `event`
 --
-ALTER TABLE `Event`
+ALTER TABLE `event`
   ADD PRIMARY KEY (`eventID`);
 
 --
--- Indexes for table `Login`
+-- Indexes for table `login`
 --
-ALTER TABLE `Login`
+ALTER TABLE `login`
   ADD PRIMARY KEY (`email`);
 
 --
--- Indexes for table `Meal`
+-- Indexes for table `meal`
 --
-ALTER TABLE `Meal`
+ALTER TABLE `meal`
   ADD PRIMARY KEY (`mealID`);
 
 --
--- Indexes for table `Person`
+-- Indexes for table `person`
 --
-ALTER TABLE `Person`
+ALTER TABLE `person`
   ADD PRIMARY KEY (`userID`),
   ADD UNIQUE KEY `email` (`email`);
 
 --
--- Indexes for table `Report`
+-- Indexes for table `report`
 --
-ALTER TABLE `Report`
+ALTER TABLE `report`
   ADD PRIMARY KEY (`reportID`);
 
 --
--- Indexes for table `Reporting`
+-- Indexes for table `reporting`
 --
-ALTER TABLE `Reporting`
+ALTER TABLE `reporting`
   ADD PRIMARY KEY (`userID`,`reportID`),
   ADD KEY `reportID` (`reportID`);
 
 --
--- Indexes for table `UserBadge`
+-- Indexes for table `userbadge`
 --
-ALTER TABLE `UserBadge`
+ALTER TABLE `userbadge`
   ADD PRIMARY KEY (`userID`,`badgeID`),
   ADD KEY `badgeID` (`badgeID`);
 
 --
--- Indexes for table `Vehicle`
+-- Indexes for table `vehicle`
 --
-ALTER TABLE `Vehicle`
+ALTER TABLE `vehicle`
   ADD PRIMARY KEY (`vehicleID`),
   ADD UNIQUE KEY `licensePlateNo` (`licensePlateNo`);
 
 --
--- Indexes for table `Volunteer`
+-- Indexes for table `volunteer`
 --
-ALTER TABLE `Volunteer`
+ALTER TABLE `volunteer`
   ADD PRIMARY KEY (`userID`);
 
 --
--- Indexes for table `Volunteering`
+-- Indexes for table `volunteering`
 --
-ALTER TABLE `Volunteering`
+ALTER TABLE `volunteering`
   ADD PRIMARY KEY (`eventID`,`userID`),
   ADD KEY `userID` (`userID`);
 
@@ -370,45 +372,45 @@ ALTER TABLE `Volunteering`
 --
 
 --
--- AUTO_INCREMENT for table `Address`
+-- AUTO_INCREMENT for table `address`
 --
-ALTER TABLE `Address`
+ALTER TABLE `address`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `Badge`
+-- AUTO_INCREMENT for table `badge`
 --
-ALTER TABLE `Badge`
+ALTER TABLE `badge`
   MODIFY `badgeID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `Delivery`
+-- AUTO_INCREMENT for table `delivery`
 --
-ALTER TABLE `Delivery`
+ALTER TABLE `delivery`
   MODIFY `deliveryID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `Event`
+-- AUTO_INCREMENT for table `event`
 --
-ALTER TABLE `Event`
+ALTER TABLE `event`
   MODIFY `eventID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `Meal`
+-- AUTO_INCREMENT for table `meal`
 --
-ALTER TABLE `Meal`
+ALTER TABLE `meal`
   MODIFY `mealID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `Person`
+-- AUTO_INCREMENT for table `person`
 --
-ALTER TABLE `Person`
+ALTER TABLE `person`
   MODIFY `userID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `Vehicle`
+-- AUTO_INCREMENT for table `vehicle`
 --
-ALTER TABLE `Vehicle`
+ALTER TABLE `vehicle`
   MODIFY `vehicleID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -416,77 +418,77 @@ ALTER TABLE `Vehicle`
 --
 
 --
--- Constraints for table `Address`
+-- Constraints for table `address`
 --
-ALTER TABLE `Address`
-  ADD CONSTRAINT `address_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `Address` (`id`);
+ALTER TABLE `address`
+  ADD CONSTRAINT `address_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `address` (`id`);
 
 --
--- Constraints for table `Cooking`
+-- Constraints for table `cooking`
 --
-ALTER TABLE `Cooking`
-  ADD CONSTRAINT `cooking_ibfk_1` FOREIGN KEY (`cookID`) REFERENCES `Volunteer` (`userID`),
-  ADD CONSTRAINT `cooking_ibfk_2` FOREIGN KEY (`mealID`) REFERENCES `Meal` (`mealID`);
+ALTER TABLE `cooking`
+  ADD CONSTRAINT `cooking_ibfk_1` FOREIGN KEY (`cookID`) REFERENCES `volunteer` (`userID`),
+  ADD CONSTRAINT `cooking_ibfk_2` FOREIGN KEY (`mealID`) REFERENCES `meal` (`mealID`);
 
 --
--- Constraints for table `Coordinating`
+-- Constraints for table `coordinating`
 --
-ALTER TABLE `Coordinating`
-  ADD CONSTRAINT `coordinating_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `Person` (`userID`),
-  ADD CONSTRAINT `coordinating_ibfk_2` FOREIGN KEY (`eventID`) REFERENCES `Event` (`eventID`);
+ALTER TABLE `coordinating`
+  ADD CONSTRAINT `coordinating_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `person` (`userID`),
+  ADD CONSTRAINT `coordinating_ibfk_2` FOREIGN KEY (`eventID`) REFERENCES `event` (`eventID`);
 
 --
--- Constraints for table `Delivering`
+-- Constraints for table `delivering`
 --
-ALTER TABLE `Delivering`
-  ADD CONSTRAINT `delivering_ibfk_1` FOREIGN KEY (`deliveryGuyID`) REFERENCES `Volunteer` (`userID`),
-  ADD CONSTRAINT `delivering_ibfk_2` FOREIGN KEY (`deliveryID`) REFERENCES `Delivery` (`deliveryID`);
+ALTER TABLE `delivering`
+  ADD CONSTRAINT `delivering_ibfk_1` FOREIGN KEY (`deliveryGuyID`) REFERENCES `volunteer` (`userID`),
+  ADD CONSTRAINT `delivering_ibfk_2` FOREIGN KEY (`deliveryID`) REFERENCES `delivery` (`deliveryID`);
 
 --
--- Constraints for table `DeliveryGuy`
+-- Constraints for table `deliveryguy`
 --
-ALTER TABLE `DeliveryGuy`
-  ADD CONSTRAINT `deliveryguy_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `Volunteer` (`userID`),
-  ADD CONSTRAINT `deliveryguy_ibfk_2` FOREIGN KEY (`vehicleID`) REFERENCES `Vehicle` (`vehicleID`);
+ALTER TABLE `deliveryguy`
+  ADD CONSTRAINT `deliveryguy_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `volunteer` (`userID`),
+  ADD CONSTRAINT `deliveryguy_ibfk_2` FOREIGN KEY (`vehicleID`) REFERENCES `vehicle` (`vehicleID`);
 
 --
--- Constraints for table `Donor`
+-- Constraints for table `donor`
 --
-ALTER TABLE `Donor`
-  ADD CONSTRAINT `donor_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `Person` (`userID`);
+ALTER TABLE `donor`
+  ADD CONSTRAINT `donor_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `person` (`userID`);
 
 --
--- Constraints for table `Login`
+-- Constraints for table `login`
 --
-ALTER TABLE `Login`
-  ADD CONSTRAINT `login_ibfk_1` FOREIGN KEY (`email`) REFERENCES `Person` (`email`);
+ALTER TABLE `login`
+  ADD CONSTRAINT `login_ibfk_1` FOREIGN KEY (`email`) REFERENCES `person` (`email`);
 
 --
--- Constraints for table `Reporting`
+-- Constraints for table `reporting`
 --
-ALTER TABLE `Reporting`
-  ADD CONSTRAINT `reporting_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `Person` (`userID`),
-  ADD CONSTRAINT `reporting_ibfk_2` FOREIGN KEY (`reportID`) REFERENCES `Report` (`reportID`);
+ALTER TABLE `reporting`
+  ADD CONSTRAINT `reporting_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `person` (`userID`),
+  ADD CONSTRAINT `reporting_ibfk_2` FOREIGN KEY (`reportID`) REFERENCES `report` (`reportID`);
 
 --
--- Constraints for table `UserBadge`
+-- Constraints for table `userbadge`
 --
-ALTER TABLE `UserBadge`
-  ADD CONSTRAINT `userbadge_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `Person` (`userID`) ON DELETE CASCADE,
-  ADD CONSTRAINT `userbadge_ibfk_2` FOREIGN KEY (`badgeID`) REFERENCES `Badge` (`badgeID`) ON DELETE CASCADE;
+ALTER TABLE `userbadge`
+  ADD CONSTRAINT `userbadge_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `person` (`userID`) ON DELETE CASCADE,
+  ADD CONSTRAINT `userbadge_ibfk_2` FOREIGN KEY (`badgeID`) REFERENCES `badge` (`badgeID`) ON DELETE CASCADE;
 
 --
--- Constraints for table `Volunteer`
+-- Constraints for table `volunteer`
 --
-ALTER TABLE `Volunteer`
-  ADD CONSTRAINT `volunteer_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `Person` (`userID`);
+ALTER TABLE `volunteer`
+  ADD CONSTRAINT `volunteer_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `person` (`userID`);
 
 --
--- Constraints for table `Volunteering`
+-- Constraints for table `volunteering`
 --
-ALTER TABLE `Volunteering`
-  ADD CONSTRAINT `volunteering_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `Volunteer` (`userID`),
-  ADD CONSTRAINT `volunteering_ibfk_2` FOREIGN KEY (`eventID`) REFERENCES `Event` (`eventID`);
+ALTER TABLE `volunteering`
+  ADD CONSTRAINT `volunteering_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `volunteer` (`userID`),
+  ADD CONSTRAINT `volunteering_ibfk_2` FOREIGN KEY (`eventID`) REFERENCES `event` (`eventID`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

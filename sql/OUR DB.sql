@@ -26,17 +26,22 @@ CREATE TABLE Reporting (
     reportID INT,
 PRIMARY KEY (userID, reportID),
 FOREIGN KEY (userID) REFERENCES Person(userID),
-FOREIGN KEY (reportID) REFERENCES Report(reportID)
+FOREIGN KEY (reportID) REFERENCES Report(reportID),
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Create the ReportingData table
 CREATE TABLE Report (
     reportID INT PRIMARY KEY,
-    personName VARCHAR(255),
-    personAddress VARCHAR(255),
-    email VARCHAR(255),
-    phoneNo VARCHAR(20),
-);
+    personInName VARCHAR(255),
+    personInAddress VARCHAR(255),
+    personInPhone VARCHAR(20),
+    status VARCHAR(255) DEFAULT 'submitted',
+    verified BOOLEAN DEFAULT FALSE,
+    
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 -- Create the Donor table
 CREATE TABLE Donor (
