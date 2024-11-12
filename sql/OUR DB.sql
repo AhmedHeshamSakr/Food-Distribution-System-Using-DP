@@ -125,6 +125,49 @@ CREATE TABLE DeliveryGuy (
 );
 
 
+
+    CREATE TABLE Meal (
+    mealID INT PRIMARY KEY AUTO_INCREMENT,
+    needOfDelevery BOOLEAN,
+    nOFMeals INT,
+    mealDescription TEXT
+);
+
+    CREATE TABLE Cooking (
+    cookID INT PRIMARY KEY,
+    mealID INT,
+    PRIMARY KEY (cookID ,mealID),
+    FOREIGN KEY (cookID) REFERENCES Volunteer(userID),
+    FOREIGN KEY (mealID) REFERENCES Meal(mealID)
+);
+
+
+
+-- Create the Donation table with paymentMethod as ENUM
+CREATE TABLE Donation (
+    donationID INT PRIMARY KEY AUTO_INCREMENT,
+    donationDate DATE,
+    donationAmount DECIMAL(10, 2),
+    paymentMethod ENUM('Cash', 'Credit Card', 'Bank Transfer', 'Online Payment'),
+);
+
+-- Create the Donating table (Many-to-Many relationship)
+CREATE TABLE Donating (
+    donorID INT,
+    donationID INT,
+    PRIMARY KEY (donorID, donationID),
+    FOREIGN KEY (donationID) REFERENCES Donation(donationID)
+);
+
+-- Create the DeliveryGuy table
+CREATE TABLE DeliveryGuy (
+    userID INT PRIMARY KEY,
+    vehicleID INT,
+    FOREIGN KEY (userID) REFERENCES Volunteer (userID),
+    FOREIGN KEY (vehicleID) REFERENCES Vehicle(vehicleID)
+);
+
+
 -- Create the Delivery table
 CREATE TABLE Delivery (
     deliveryID INT PRIMARY KEY AUTO_INCREMENT,

@@ -224,14 +224,6 @@ CREATE TABLE `report` (
   `recognized` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `report`
---
-
-INSERT INTO `report` (`reportID`, `personINname`, `personINaddress`, `phoneINno`, `status`, `description`, `is_deleted`, `recognized`) VALUES
-(1, 'John Doe', '123 Main St', '5551234567', 'Acknowledged', 'This is a description of the report.', 1, 0),
-(2, 'John Doe', '123 Main St', '5551234567', 'Acknowledged', 'This is a description of the report.', 1, 0);
-
 -- --------------------------------------------------------
 
 --
@@ -242,8 +234,7 @@ CREATE TABLE `reporting` (
   `userID` int(11) NOT NULL,
   `reportID` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `is_deleted` tinyint(1) DEFAULT 0
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -472,7 +463,7 @@ ALTER TABLE `person`
 -- AUTO_INCREMENT for table `report`
 --
 ALTER TABLE `report`
-  MODIFY `reportID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `reportID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `vehicle`
