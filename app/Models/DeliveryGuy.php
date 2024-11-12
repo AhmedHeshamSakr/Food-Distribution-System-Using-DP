@@ -20,6 +20,7 @@ class DeliveryGuy extends VolunteerRoles
         $this->vehicleType = $vehicleType;
         $this->deliveryList = [];
         $this->insertDeliveryGuy();
+        $this->chooseRole();
     }
 
     
