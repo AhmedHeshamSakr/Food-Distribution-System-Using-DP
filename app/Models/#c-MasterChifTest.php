@@ -48,10 +48,10 @@ class TestUser extends User {
 }
 // ** Test 1: Creating a Meal **
 echo "Test 1: Creating a Meal\n";
-$meal = new Meal(true, 20, "Healthy Veggie Meals");
+$meal = new Meal(needOfDelivery: true, nOFMeals: 20, mealDescription: "Healthy Veggie Meals");
 $createResult = $meal->CreateMeal();
 
-assert($createResult === true, "Failed to create meal");
+assert(assertion: $createResult === true, description: "Failed to create meal");
 // Use the getter method to get the mealID
 $mealID = $meal->getMealID(); // Use the getter method instead of accessing directly
 assert(!empty($mealID), "Meal ID should not be empty after creation");
@@ -100,23 +100,23 @@ assert($cookAssignedMeals[0]['mealsCompleted'] === 3, "Cook should have complete
 // ** Test 5: Cook Over-Completion Edge Case **
 echo "Test 5: Cook Over-Completion Edge Case\n";
 $overCompleteResult = $cook->completeMeals($mealID, 10);
-assert($overCompleteResult === false, "Cook should not complete more than taken meals");
+assert($overCompleteResult === false, description: "Cook should not complete more than taken meals");
 
 $currentCompleted = Cooking::getMealsByCook($cookUser->getUserID())[0]['mealsCompleted'];
-assert($currentCompleted === 3, "Cook should still have completed only 3 meals");
+assert($currentCompleted === 3, description: "Cook should still have completed only 3 meals");
 
 // ** Test 6: Cook Taking Additional Meals **
 echo "Test 6: Cook Taking Additional Meals\n";
 $takeMoreMeals = $cook->takeMeals($mealID, 10);
-assert($takeMoreMeals === true, "Cook failed to take additional meals");
+assert($takeMoreMeals === true, description: "Cook failed to take additional meals");
 
 $updatedRemainingMeals = Meal::ReadMeal($mealID)->getRemainingMeals();
-assert($updatedRemainingMeals === 5, "Remaining meals should be 5 after taking additional meals");
+assert($updatedRemainingMeals === 5, description: "Remaining meals should be 5 after taking additional meals");
 
 // ** Test 7: Meal Availability Check **
 echo "Test 7: Meal Availability Check\n";
 $mealsNeeded = Cooking::getMealsNeeded($mealID);
-assert($mealsNeeded === 5, "5 meals should be left to prepare");
+assert($mealsNeeded === 5, description: "5 meals should be left to prepare");
 
 // Cleanup after tests
 cleanup();
