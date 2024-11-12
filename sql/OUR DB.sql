@@ -4,13 +4,18 @@
 
 
 
-CREATE TABLE Person (
-    userID VARCHAR(255) PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    phoneNo VARCHAR(20),
-    address VARCHAR(255)
-);
+CREATE TABLE `person` (
+  `userID` int(11) NOT NULL AUTO_INCREMENT,  -- Ensure auto-increment
+  `userTypeID` int(11) NOT NULL,
+  `firstName` varchar(255) NOT NULL,
+  `lastName` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phoneNo` varchar(20) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`userID`),
+  UNIQUE KEY `email` (`email`)  -- Unique email for each user
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 --  Create the Login table
 CREATE TABLE Login (
@@ -46,14 +51,14 @@ CCREATE TABLE Report (
 
 
 
--- Create the Volunteer table
-CREATE TABLE Volunteer (
-    userID INT PRIMARY KEY ,
-    address VARCHAR(255) ,
-    phone VARCHAR(20),
-    badge INT,
-    FOREIGN KEY (userID) REFERENCES Person(userID)
-);
+CREATE TABLE `volunteer` (
+  `userID` int(11) NOT NULL,  -- References person table
+  `badge` int(11) DEFAULT NULL,
+  PRIMARY KEY (`userID`),  -- Makes userID the primary key here as well
+  CONSTRAINT `volunteer_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `person` (`userID`)  -- Foreign Key constraint
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
 
 -- Create the Badge table
 CREATE TABLE Badge (

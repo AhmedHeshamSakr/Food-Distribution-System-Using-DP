@@ -1,9 +1,9 @@
 <?php
-require_once __DIR__ . '/User.php';
 require_once __DIR__ . '/../../config/DB.php';
-require_once __DIR__ . '/ReportData.php';
-require_once __DIR__ . '/Login.php';
-require_once __DIR__ . '/Reporter.php';
+require_once 'User.php';
+require_once 'ReportData.php';
+require_once 'Login.php';
+require_once 'Reporter.php';
 
 // Ensure that the email is unique for testing
 $email = "testuser" . time() . "@example.com";  // Unique email for each run
