@@ -80,18 +80,20 @@ CREATE TABLE Address (
     street VARCHAR(255)
 );
 
-
-    CREATE TABLE Meal (
+CREATE TABLE Meal (
     mealID INT PRIMARY KEY AUTO_INCREMENT,
-    needOfDelevery BOOLEAN,
-    nOFMeals INT,
+    needOfDelivery BOOLEAN,
+    nOFMeals INT, -- Total meals needed
+    remainingMeals INT, -- Remaining meals to be completed
     mealDescription TEXT
 );
 
-    CREATE TABLE Cooking (
-    cookID INT PRIMARY KEY,
+CREATE TABLE Cooking (
+    cookID INT,
     mealID INT,
-    PRIMARY KEY (cookID ,mealID),
+    mealsTaken INT,
+    mealsCompleted INT,
+    PRIMARY KEY (cookID, mealID),
     FOREIGN KEY (cookID) REFERENCES Volunteer(userID),
     FOREIGN KEY (mealID) REFERENCES Meal(mealID)
 );

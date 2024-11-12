@@ -1,9 +1,9 @@
 <?php
 
-//HANIA : TO BE REVISED AND WELL RESTRUCTUREEDDDD // MADE TO TEST REPORTER
-
 interface iLogin {
     public function login($credentials): bool;
+    public function authenticate(string $username, string $password): bool;
+    public function logout(): bool;
 }
 
 class withGoogle implements iLogin {
@@ -18,15 +18,19 @@ class withGoogle implements iLogin {
 
     public function login($credentials): bool {
         // Implement Google authentication logic here
-        // Set $isAuthenticated based on success
-        $this->isAuthenticated = true; // Placeholder for successful login
+        $this->isAuthenticated = $this->authenticate($credentials['email'], $credentials['password']);
         return $this->isAuthenticated;
     }
 
-    public function isAuthenticated(): bool {
-        return $this->isAuthenticated;
-    } 
+    public function authenticate(string $username, string $password): bool {
+        // Placeholder for Google-specific authentication
+        return true; // Assume success for this example
+    }
 
+    public function logout(): bool {
+        $this->isAuthenticated = false;
+        return !$this->isAuthenticated;
+    }
 }
 
 class withFacebook implements iLogin {
@@ -41,13 +45,18 @@ class withFacebook implements iLogin {
 
     public function login($credentials): bool {
         // Implement Facebook authentication logic here
-        // Set $isAuthenticated based on success
-        $this->isAuthenticated = true; // Placeholder for successful login
+        $this->isAuthenticated = $this->authenticate($credentials['email'], $credentials['password']);
         return $this->isAuthenticated;
     }
 
-    public function isAuthenticated(): bool {
-        return $this->isAuthenticated;
+    public function authenticate(string $username, string $password): bool {
+        // Placeholder for Facebook-specific authentication
+        return true; // Assume success for this example
+    }
+
+    public function logout(): bool {
+        $this->isAuthenticated = false;
+        return !$this->isAuthenticated;
     }
 }
 
@@ -63,16 +72,17 @@ class withEmail implements iLogin {
 
     public function login($credentials): bool {
         // Implement email-based authentication logic here
-        // Set $isAuthenticated based on success
-        $this->isAuthenticated = true; // Placeholder for successful login
+        $this->isAuthenticated = $this->authenticate($credentials['email'], $credentials['password']);
         return $this->isAuthenticated;
     }
 
-    public function isAuthenticated(): bool {
-        return $this->isAuthenticated;
+    public function authenticate(string $username, string $password): bool {
+        // Placeholder for email-specific authentication
+        return true; // Assume success for this example
+    }
+
+    public function logout(): bool {
+        $this->isAuthenticated = false;
+        return !$this->isAuthenticated;
     }
 }
-
-
-
-?>

@@ -1,6 +1,6 @@
 <?php
 require_once 'User.php';
-require_once 'Address.php';
+// require_once 'Address.php';
 require_once 'Badges.php';
 
 
@@ -240,5 +240,3 @@ abstract class VolunteerRoles extends User
 
  
 }
-
-?>

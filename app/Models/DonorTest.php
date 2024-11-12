@@ -6,36 +6,7 @@ error_reporting(E_ALL);
 require_once 'Donor.php'; // Make sure the path is correct
 require_once __DIR__ . "/../../config/DB.php"; // Assuming this file has the database connection and utility functions
 require_once 'Person.php';
-// Create a mock implementation of iLogin for testing
-
-class MockLogin implements iLogin {
-    // Implement the authenticate method
-    public function authenticate(string $username, string $password): bool {
-        // Mock implementation always returns true
-        return true;
-    }
-
-    // Implement the login method
-    public function login(): bool {
-        // Mock login method always returns true
-        return true;
-    }
-
-    // Implement the logout method with correct return type
-    public function logout(): bool {
-        // Mock logout method always returns true
-        return true;
-    }
-
-    // Implement the isLoggedIn method
-    public function isLoggedIn(): bool {
-        // Mock method for checking if logged in
-        return true;
-    }
-}
-function printResult($message, $result) {
-    echo "<p>{$message}: " . ($result ? '<strong>Success</strong>' : '<strong>Failed</strong>') . "</p>";
-}
+require_once 'Login.php';
 
 try {
     echo "<h1>Testing Donor Class</h1>";
@@ -47,8 +18,15 @@ try {
     $email = 'john.doe@example.com';
     $phoneNo = '1234567890';
 
-    // Instantiate the MockLogin object
-    $login = new MockLogin();
+    // Instantiate the real login object (replace withGoogle with withFacebook or withEmail as needed)
+    $login = new withGoogle($email, $password);
+
+    // Attempt to log in with the actual credentials
+    if (!$login->login(['email' => $email, 'password' => $password])) {
+        throw new Exception("Login failed for Google authentication.");
+    }
+
+    echo "<p>Successfully authenticated with Google for user: {$email}</p>";
 
     // Instantiate the Donor object with the MockLogin instance
     $donor = new Donor($userID, $firstName, $lastName, $email, $phoneNo, $login);
@@ -59,7 +37,7 @@ try {
     $donationAmount = 100.50;
     $paymentMethod = 'Credit Card';
     $donationResult = $donor->addDonation($donationAmount, $paymentMethod);
-    printResult('Adding Donation', $donationResult);
+//printResult('Adding Donation', $donationResult);
 
     // Fetch donation history
     $donationHistory = $donor->fetchDonationHistory();
@@ -80,7 +58,7 @@ try {
     $newEmail = 'johnny.doe@example.com';
     $newPhoneNo = '0987654321';
     $updateInfoResult = $donor->updatePersonalInfo($newFirstName, $newLastName, $newEmail, $newPhoneNo);
-    printResult('Updating Personal Information', $updateInfoResult);
+//printResult('Updating Personal Information', $updateInfoResult);
 
     // Update an existing donation
     if (!empty($donationHistory)) {
@@ -88,7 +66,7 @@ try {
         $newDonationAmount = 150.75;
         $newPaymentMethod = 'Online Payment';
         $updateDonationResult = $donor->updateDonation($firstDonationID, $newDonationAmount, $newPaymentMethod);
-        printResult('Updating Donation', $updateDonationResult);
+       // printResult('Updating Donation', $updateDonationResult);
     }
 
 } catch (Exception $e) {
