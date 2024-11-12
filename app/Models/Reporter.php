@@ -1,8 +1,11 @@
 <?php 
-require_once __DIR__ . '/User.php';
+
+// require_once __DIR__ . '/../../config/DB.php';
+// use __DIR__ . when they are not in the same file only pleas()
 require_once __DIR__ . '/../../config/DB.php';
-require_once __DIR__ . '/ReportData.php'; 
-require_once __DIR__ . '/Login.php'; 
+require_once 'User.php';
+require_once 'ReportData.php'; 
+require_once 'Login.php'; 
 
 class Reporter extends User {
     //private $reporting;

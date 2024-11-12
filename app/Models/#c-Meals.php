@@ -16,6 +16,7 @@ class Meal
         $this->nOFMeals = $nOFMeals;
         $this->remainingMeals = $nOFMeals; // Initially, remaining meals equals total meals
         $this->mealDescription = $mealDescription;
+        $this->CreateMeal();
     }
 
     // Getters
