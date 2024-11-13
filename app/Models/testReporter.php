@@ -1,4 +1,5 @@
 <?php
+
 require_once __DIR__ . '/../../config/DB.php';
 require_once 'User.php';
 require_once 'ReportData.php';
@@ -35,7 +36,7 @@ if ($emailLogin->login(["email" => "testuser@example.com", "password" => "secure
     print_r($reports);
 
     // Test updating report status
-    $reportID = 42; // Assuming the report ID we want to update
+    $reportID = $reports[0]['reportID']; // Using the first report ID retrieved
     echo "Updating report status to 'Acknowledged'...\n";
     $updated = $reporter->updateReportStatus($reportID, "Acknowledged");
     if ($updated) {
@@ -68,6 +69,22 @@ if ($emailLogin->login(["email" => "testuser@example.com", "password" => "secure
     echo "<hr/>";
     echo "Active reports after deletion:\n";
     print_r($activeReports);
+
+    // Testing failed report recognition when report doesn't exist
+    echo "Attempting to recognize a non-existent report...\n";
+    $nonExistentReportID = 9999; // Assuming this report ID doesn't exist
+    $failedRecognition = $reporter->recognizeReport($nonExistentReportID);
+    if (!$failedRecognition) {
+        echo "Correctly failed to recognize non-existent report.\n";
+    }
+
+    // Testing failed report deletion when report doesn't exist
+    echo "Attempting to delete a non-existent report...\n";
+    $failedDelete = $reporter->deleteReport($nonExistentReportID);
+    if (!$failedDelete) {
+        echo "Correctly failed to delete non-existent report.\n";
+    }
+
 } else {
     echo "Login failed. Cannot proceed with tests.\n";
 }
