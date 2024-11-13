@@ -63,8 +63,8 @@ CREATE TABLE `volunteer` (
 -- Create the Badge table
 CREATE TABLE Badge (
     badgeID INT PRIMARY KEY AUTO_INCREMENT,
-    badgeName VARCHAR(255),
-    expiryDate DATE
+    expiryDate DATE,
+    badgeLvl ENUM('Bronze Tier', 'Silver Tier', 'Gold Tier', 'Platinum Tier') NOT NULL;
 );
 
 -- Create the Vehicle table

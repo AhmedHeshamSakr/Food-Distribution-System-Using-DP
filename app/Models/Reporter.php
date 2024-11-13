@@ -164,7 +164,7 @@ class Reporting {
 
     // Getters for attributes
     public function getUserID() {
-        return $this->userID;
+        return $this->reporterID;
     }
 
     public function getReportID() {

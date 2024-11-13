@@ -9,9 +9,9 @@ class Database
     private function __construct()
     {
         $configs = require "config.php";
-        $this->connection = new mysqli($configs->DB_SERVER, $configs->DB_USERNAME, $configs->DB_PASSWORD, $configs->DB_DATABASE );
+        $this->connection = new mysqli($configs->DB_SERVER, $configs->DB_USERNAME, $configs->DB_PASSWORD, $configs->DB_DATABASE);
         //!!!!!!!!!!!!!!!1!!!IF YOU ARE NOT JUMANA COMMENT THE LINE BELOW AND USE THE LINE ABOVE!!!!!!!!!!!!!!!!!!!!!!!!
-        // $this->connection = new mysqli($configs->DB_SERVER, $configs->DB_USERNAME, $configs->DB_PASSWORD, $configs->DB_DATABASE, $configs->DB_PORT ); 
+        // $this->connection = new mysqli($configs->DB_SERVER, $configs->DB_USERNAME, $configs->DB_PASSWORD, $configs->DB_DATABASE, $configs->DB_PORT); 
         if ($this->connection->connect_error) {
             die("Connection failed: " . $this->connection->connect_error);
         }
@@ -56,8 +56,8 @@ function run_queries(array $queries, bool $echo = false): array
 // Executes a single SQL query and returns TRUE on success or FALSE on failure
 function run_query(string $query, bool $echo = false): bool
 {
-    $result = run_queries([$query], $echo);
-    return $result[0] === true;
+    $results = run_queries([$query], $echo);
+    return $results[0] === true;
 }
 
 // Executes a SELECT SQL query and fetches results
@@ -66,7 +66,7 @@ function run_select_query(string $query, bool $echo = false): array|bool
     $conn = Database::getInstance()->getConnection();
     $result = execute_select_query($conn, $query, $echo);
 
-    return $result ?: false;
+    return $result !== false ? $result : false;
 }
 
 // Helper function to execute a query and return TRUE on success or FALSE on failure
@@ -114,4 +114,3 @@ function close_connection()
 {
     Database::getInstance()->closeConnection();
 }
-?>

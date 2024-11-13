@@ -153,7 +153,7 @@ CREATE TABLE `report` (
   `recognized` tinyint(1) DEFAULT 0
 );
 
--- --------------------------------------------------------
+----------------------------------------------------------
 
 -- Table structure for table `reporting`
 CREATE TABLE `reporting` (
@@ -170,6 +170,7 @@ CREATE TABLE `userbadge` (
   `userID` int(11) NOT NULL,
   `badgeID` int(11) NOT NULL,
   `dateAwarded` date DEFAULT NULL
+  `expiaryDate` date DEFAULT NULL
 );
 
 -- --------------------------------------------------------
