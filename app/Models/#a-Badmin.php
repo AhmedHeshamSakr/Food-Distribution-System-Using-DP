@@ -1,0 +1,69 @@
+<?php
+
+require_once 'Person.php';
+require_once 'Badges.php';
+require_once 'UserBadge.php';
+
+class BadgeAdmin extends Person
+{
+    // Constructor to initialize BadgeAdmin with required details
+    public function __construct(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, iLogin $login)
+    {
+        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
+    }
+
+    // Badge Management Methods
+    public function createBadge(string $badgeLvl): bool
+    {
+        $badge = new Badges(0, $badgeLvl); // Badge ID is 0 for new badges
+        return $badge->insertBadge();
+    }
+
+    public function updateBadge(int $badgeID, string $newBadgeLvl): bool
+    {
+        $badge = new Badges($badgeID, $newBadgeLvl);
+        return $badge->updateBadge();
+    }
+
+    public function deleteBadge(int $badgeID): bool
+    {
+        $badge = new Badges($badgeID);
+        return $badge->deleteBadge();
+    }
+
+    public function getBadge(int $badgeID): ?array
+    {
+        $badge = new Badges();
+        return $badge->getBadgeByID($badgeID);
+    }
+
+    public function getAllBadges(): array
+    {
+        $badge = new Badges();
+        return $badge->getAllBadges();
+    }
+
+    // User-Badge Assignment Methods
+    public function assignBadgeToUser(int $userID, int $badgeID, string $dateAwarded, string $expiryDate): bool
+    {
+        $userBadge = new UserBadge($userID, $badgeID, $dateAwarded, $expiryDate);
+        return $userBadge->create();
+    }
+
+    public function updateBadgeAssignment(int $userID, int $badgeID, string $newDateAwarded, string $newExpiryDate): bool
+    {
+        $userBadge = new UserBadge($userID, $badgeID, $newDateAwarded, $newExpiryDate);
+        return $userBadge->update();
+    }
+
+    public function revokeBadgeFromUser(int $userID, int $badgeID): bool
+    {
+        $userBadge = new UserBadge($userID, $badgeID, '', ''); // Empty dates as placeholders
+        return $userBadge->delete();
+    }
+
+    public function getUserBadge(int $userID, int $badgeID): ?UserBadge
+    {
+        return UserBadge::read($userID, $badgeID);
+    }
+}
