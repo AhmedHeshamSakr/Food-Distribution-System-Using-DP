@@ -4,7 +4,7 @@ return(object)array(
 
         // Database configuration
         'DB_SERVER'=>'localhost',
-        //'DB_PORT' => 3307, //!!!!!!!!!!!!!!COMMENT THIS OUT IF YOU ARE NOT JUMANA!!!!!!!!!!!!!!!!!!!!!!
+        'DB_PORT' => 3307, //!!!!!!!!!!!!!!COMMENT THIS OUT IF YOU ARE NOT JUMANA!!!!!!!!!!!!!!!!!!!!!!
         'DB_USERNAME'=>'root', 
         'DB_PASSWORD'=>'',     
         'DB_DATABASE'=> 'FDS',  
@@ -14,7 +14,6 @@ return(object)array(
         'DB_LOGIN_TABLE'              => 'Login',
         'DB_REPORTING_TABLE'          => 'Reporting',
         'DB_REPORTI_DATA_TABLE'       => 'Report',
-        'DB_DONOR_TABLE'              => 'Donor',
         'DB_VOLUNTEER_TABLE'          => 'Volunteer',
         'DB_VOLUNTEERING_TABLE'       => 'Volunteering',
         'DB_BADGE_TABLE'              => 'Badge',

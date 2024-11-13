@@ -151,6 +151,3 @@ class ReportingData {
     }
  
 }
-
-
-?>

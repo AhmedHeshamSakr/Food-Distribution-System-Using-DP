@@ -5,10 +5,10 @@ require_once 'Person.php';
 abstract class User extends Person
 {
     protected const USER_TYPE_ID_MAP = [
-        'admin' => 1,
-        'volunteer' => 2,
-        'donor' => 3,
-        'reporter' => 4,
+        'volunteer' => 0,
+        'donor' => 5,
+        'reporter' => 6,
+        '' => 7, // Placeholder for dynamic role assignment
     ];
 
     // Constructor that calls the parent constructor
@@ -18,9 +18,8 @@ abstract class User extends Person
         parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
     }
 
-    public function chooseRole(string $role): bool
+    public function chooseRole(): bool
     {
-        return $this->setUserTypeID(self::USER_TYPE_ID_MAP[$role]);
+        return $this->setUserTypeID(self::USER_TYPE_ID_MAP['']);  // This can be dynamically changed by decorators
     }
 }
-?>

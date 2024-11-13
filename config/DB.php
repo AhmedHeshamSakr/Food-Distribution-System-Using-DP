@@ -11,7 +11,7 @@ class Database
         $configs = require "config.php";
         $this->connection = new mysqli($configs->DB_SERVER, $configs->DB_USERNAME, $configs->DB_PASSWORD, $configs->DB_DATABASE );
         //!!!!!!!!!!!!!!!1!!!IF YOU ARE NOT JUMANA COMMENT THE LINE BELOW AND USE THE LINE ABOVE!!!!!!!!!!!!!!!!!!!!!!!!
-        //$this->connection = new mysqli($configs->DB_SERVER, $configs->DB_USERNAME, $configs->DB_PASSWORD, $configs->DB_DATABASE, $configs->DB_PORT ); 
+        // $this->connection = new mysqli($configs->DB_SERVER, $configs->DB_USERNAME, $configs->DB_PASSWORD, $configs->DB_DATABASE, $configs->DB_PORT ); 
         if ($this->connection->connect_error) {
             die("Connection failed: " . $this->connection->connect_error);
         }

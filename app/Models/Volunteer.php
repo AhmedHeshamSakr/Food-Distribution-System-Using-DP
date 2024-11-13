@@ -1,6 +1,6 @@
 <?php
 require_once 'User.php';
-require_once 'Address.php';
+// require_once 'Address.php';
 require_once 'Badges.php';
 
 
@@ -189,9 +189,6 @@ class Volunteer extends User
         return $this->updateVolunteer($fieldsToUpdate);
     }
     
-
-
-
     
 }
 
@@ -200,22 +197,46 @@ class Volunteer extends User
 abstract class VolunteerRoles extends User
 {
     protected User $ref;  // Decorated User object
+    protected int $roleType = 0;
+    protected const COOK_FLAG = 1 << 0;       // Binary 001
+    protected const DELIVERY_FLAG = 1 << 1;   // Binary 010
+    protected const COORDINATOR_FLAG = 1 << 2; // Binary 100
+
+
 
     // Constructor that also initializes the parent User class
     public function __construct(User $ref)
     {
-
         $this->ref = $ref;
     }
 
+    
     // Override chooseRole and decorate with additional functionality
-    public function chooseRole(string $role): bool
-    {
-        
-        return $this->ref->chooseRole($role);  
+    public function hasRole(int $roleFlag): bool {
+        return ($this->roleType & $roleFlag) === $roleFlag;
     }
+
+    public function getAllRoles(): array {
+        $roles = [];
+
+        if ($this->hasRole(self::COOK_FLAG)) {
+            $roles[] = 'Cook';
+        }
+        if ($this->hasRole(self::DELIVERY_FLAG)) {
+            $roles[] = 'DeliveryGuy';
+        }
+        if ($this->hasRole(self::COORDINATOR_FLAG)) {
+            $roles[] = 'Coordinator';
+        }
+
+        return $roles;
+    }
+
+    public function chooseRole(): bool{
+         $this->roleType = 0;
+         return true;
+    }
+    
 
  
 }
-
-?>

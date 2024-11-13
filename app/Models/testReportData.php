@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/ReportData.php';
+require_once  'ReportData.php';
 
 require_once __DIR__ . '/../../config/DB.php';
 

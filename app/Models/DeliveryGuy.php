@@ -3,6 +3,7 @@
 require_once 'Volunteer.php';
 require_once 'Vehicle.php';
 require_once 'Delivery.php';
+require_once 'Delivering.php';
 
 class DeliveryGuy extends VolunteerRoles
 {
@@ -19,6 +20,7 @@ class DeliveryGuy extends VolunteerRoles
         $this->vehicleType = $vehicleType;
         $this->deliveryList = [];
         $this->insertDeliveryGuy();
+        $this->chooseRole();
     }
 
     
@@ -36,8 +38,24 @@ class DeliveryGuy extends VolunteerRoles
     }
 
     public function updateDeliveryGuy(array $fieldsToUpdate): bool {
+        // Assuming we pass the correct vehicleID, but let's ensure it exists in the vehicle table
+        if (isset($fieldsToUpdate['vehicleID'])) {
+            $vehicleID = $fieldsToUpdate['vehicleID'];
+            $vehicleCheckQuery = "SELECT 1 FROM vehicle WHERE vehicleID = '$vehicleID'";
+            $result = mysqli_query(Database::getInstance()->getConnection(), $vehicleCheckQuery);
+            
+            if (mysqli_num_rows($result) == 0) {
+                // Handle error if vehicleID does not exist in the vehicle table
+                throw new Exception("Invalid vehicleID: $vehicleID does not exist.");
+            }
+        }
+    
+        // Continue with the update logic
         $setQuery = [];
         foreach ($fieldsToUpdate as $field => $value) {
+            if ($field === 'vehicleType') {
+                $field = 'vehicleID'; // Correct column name
+            }
             $escapedValue = mysqli_real_escape_string(Database::getInstance()->getConnection(), $value);
             $setQuery[] = "$field = '$escapedValue'";
         }
@@ -45,6 +63,7 @@ class DeliveryGuy extends VolunteerRoles
         $query = "UPDATE deliveryguy SET $setQueryStr WHERE userID = '{$this->getUserID()}'";
         return run_query($query);
     }
+    
 
     public function deleteDeliveryGuy(): bool {
         $query = "DELETE FROM deliveryguy WHERE userID = '{$this->getUserID()}'";
@@ -78,15 +97,69 @@ class DeliveryGuy extends VolunteerRoles
     }
 
     public function getDeliveryList(): array {
-        $query = "SELECT * FROM Delivery INNER JOIN Delivering ON Delivery.deliveryID = Delivering.deliveryID WHERE Delivering.deliveryGuyID = '{$this->getUserID()}'";
+        // Query to select delivery details joined with Delivering to get the correct delivery guy
+        $query = "SELECT * FROM Delivery 
+                  INNER JOIN Delivering ON Delivery.deliveryID = Delivering.deliveryID 
+                  WHERE Delivering.deliveryGuyID = '{$this->getUserID()}'";
+        
         $result = run_select_query($query);
+    
         if ($result === false) {
             return [];
         }
+    
         $deliveries = [];
         foreach ($result as $row) {
-            $deliveries[] = new Delivery($row['deliveryID'], $row['deliveryDate'], $row['startLocation'], $row['endLocation'], $row['deliveryGuy']);
+            // Wrap the existing delivery data into Delivery objects
+            $deliveries[] = new Delivery(
+                $row['deliveryDate'],
+                $row['startLocation'],
+                $row['endLocation'],
+                $row['deliveryGuyID'],  // Passing the ID or DeliveryGuy object depending on your design
+                $row['status'],
+                $row['deliveryDetails']
+            );
         }
+    
         return $deliveries;
     }
+    
+
+
+
+
+
+    //function to retrieve history
+
+
+    public function assignDelivery(Delivery $delivery, string $deliveryTime): bool {
+        // Create a new Delivering instance and insert the record in the database
+        $delivering = new Delivering($this, $delivery, $deliveryTime);
+        if ($delivering->insertDelivering()) {
+            $this->deliveryList[] = $delivery;
+            return true;
+        }
+        return false;
+    }
+
+    public function unassignDelivery(Delivery $delivery): bool {
+        // Create a new Delivering instance for deletion purposes
+        $delivering = new Delivering($this, $delivery, ""); // Time is irrelevant for deletion
+        if ($delivering->deleteDelivering()) {
+            foreach ($this->deliveryList as $key => $del) {
+                if ($del->getDeliveryID() === $delivery->getDeliveryID()) {
+                    unset($this->deliveryList[$key]);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public function chooseRole(): bool
+    {
+        $this->roleType |= self::DELIVERY_FLAG;  // Set DeliveryGuy role flag
+        return true;
+    }
+
 }
