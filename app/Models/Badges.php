@@ -4,14 +4,14 @@ class Badges
 {
     private int $badgeID;
     private string $badgeName;
-    private string $badgeType;
+    private string $badgeLvl;
     private string $expiryDate;
 
-    public function __construct(int $badgeID, string $badgeName, string $badgeType, string $expiryDate)
+    public function __construct(int $badgeID, string $badgeName, string $badgeLvl, string $expiryDate)
     {
         $this->badgeID = $badgeID;
         $this->badgeName = $badgeName;
-        $this->badgeType = $badgeType;
+        $this->badgeLvl = $badgeLvl;
         $this->expiryDate = $expiryDate;
     }
 
@@ -26,9 +26,9 @@ class Badges
         return $this->badgeName;
     }
 
-    public function getBadgeType(): string
+    public function getBadgeLvl(): string
     {
-        return $this->badgeType;
+        return $this->badgeLvl;
     }
 
     public function getExpiryDate(): string
@@ -43,9 +43,9 @@ class Badges
         $this->badgeName = $badgeName;
     }
 
-    public function setBadgeType(string $badgeType): void
+    public function setBadgeLvl(string $badgeLvl): void
     {
-        $this->badgeType = $badgeType;
+        $this->badgeLvl = $badgeLvl;
     }
 
     public function setExpiryDate(string $expiryDate): void
