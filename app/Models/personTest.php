@@ -26,7 +26,7 @@ $phoneNo = '0987654321';
 
 
 // Test Select Query (get person by email for example)
-$query = "SELECT * FROM person WHERE email = 'jane.smith@example.com'";
+$query = "SELECT * FROM person WHERE email = 'john.ddoe@example.com'";
 $selectResult = run_select_query($query, true);  // Output the result to check if it's correct
 echo $selectResult ? "Select Query Success\n" : "Select Query Failed\n";
 

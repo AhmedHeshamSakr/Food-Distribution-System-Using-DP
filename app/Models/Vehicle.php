@@ -54,7 +54,8 @@ public function getVehicleID():int
 {
     return $this->vehicleID;
 }
-public function getVehiclePlateNo(): int
+
+public function getVehiclePlateNo(): string
 {
     return $this->licensePlateNo;
 }
