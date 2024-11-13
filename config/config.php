@@ -7,6 +7,6 @@ return(object)array(
         // 'DB_PORT' => 3307, //!!!!!!!!!!!!!!COMMENT THIS OUT IF YOU ARE NOT JUMANA!!!!!!!!!!!!!!!!!!!!!!
         'DB_USERNAME'=>'root', 
         'DB_PASSWORD'=>'',     
-        'DB_DATABASE'=> 'FDS',  
+        'DB_DATABASE'=> 'fds',  
 
 );

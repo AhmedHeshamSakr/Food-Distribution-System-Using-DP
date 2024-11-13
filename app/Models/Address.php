@@ -24,36 +24,61 @@ class Address
         $query = "INSERT INTO address (id, name, parent_id, level) VALUES ('{$this->id}', '{$this->name}', '{$this->parent_id}', '{$this->level}')";
         return run_query($query);
     }
-
-    // Delete an address record from the database
     public function delete(): bool
     {
-    // Recursively delete all descendants of the current address
-    $this->deleteDescendants($this->id);
-
-    // Now delete the parent address (current id)
-    $queryDeleteParent = "DELETE FROM address WHERE id = '{$this->id}'";
-    return run_query($queryDeleteParent);
+        // Start a database transaction
+        run_query("START TRANSACTION");
+    
+        try {
+            // Recursively delete all descendants first
+            $this->deleteDescendants($this->id);
+    
+            // Delete the current address (parent) after all descendants are deleted
+            $queryDeleteParent = "DELETE FROM address WHERE id = '{$this->id}'";
+            $deleteSuccess = run_query($queryDeleteParent);
+    
+            if (!$deleteSuccess) {
+                throw new Exception("Failed to delete parent address with ID {$this->id}");
+            }
+    
+            // Commit the transaction
+            run_query("COMMIT");
+            echo "Address deleted successfully.<br>";
+            return true;
+    
+        } catch (Exception $e) {
+            // Rollback transaction if any error occurs
+            run_query("ROLLBACK");
+            echo "Error during deletion: " . $e->getMessage() . "<br>";
+            return false;
+        }
     }
-
-   //delete anything releted to this parent (aka anto l3yaly wla a3rfko )
+    
     private function deleteDescendants(int $parentId): void
     {
-        // Find all direct children of the given parentId
+        echo "Checking for children of parent ID: {$parentId}<br>";
         $querySelectChildren = "SELECT id FROM address WHERE parent_id = '{$parentId}'";
         $children = run_select_query($querySelectChildren);
-
+    
         if ($children) {
             foreach ($children as $child) {
                 // Recursively delete descendants of each child
                 $this->deleteDescendants($child['id']);
-
+    
                 // Delete the child itself
                 $queryDeleteChild = "DELETE FROM address WHERE id = '{$child['id']}'";
                 run_query($queryDeleteChild);
+                echo "Deleted child ID: {$child['id']}<br>";
             }
+        } else {
+            echo "No children found for parent ID: {$parentId}<br>";
         }
     }
+    
+
+
+    
+
 
     // Update an address record in the database
     public function update(): bool

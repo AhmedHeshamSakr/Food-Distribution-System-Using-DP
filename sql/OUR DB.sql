@@ -29,24 +29,24 @@ CREATE TABLE Login (
 CREATE TABLE Reporting (
     userID INT,
     reportID INT,
-    is_deleted BOOLEAN DEFAULT FALSE,
-PRIMARY KEY (userID, reportID),
-FOREIGN KEY (userID) REFERENCES Person(userID),
-FOREIGN KEY (reportID) REFERENCES Report(reportID),
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    is_deleted TINYINT(1) DEFAULT 0,  -- Change BOOLEAN to TINYINT(1)
+    PRIMARY KEY (userID, reportID),
+    FOREIGN KEY (userID) REFERENCES Person(userID),
+    FOREIGN KEY (reportID) REFERENCES Report(reportID),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Create the ReportingData table
-CCREATE TABLE Report (
-    reportID INT PRIMARY KEY,
+CREATE TABLE Report (
+    reportID INT PRIMARY KEY AUTO_INCREMENT,  -- Add AUTO_INCREMENT to reportID
     personInName VARCHAR(255),
     personInAddress VARCHAR(255),
     personInPhone VARCHAR(20),
     status ENUM('Pending', 'Acknowledged', 'In Progress', 'Completed') DEFAULT 'Pending',
-    recognized BOOLEAN DEFAULT FALSE,
+    recognized TINYINT(1) DEFAULT 0,  -- Change BOOLEAN to TINYINT(1)
     description TEXT,
-    is_deleted BOOLEAN DEFAULT FALSE
+    is_deleted TINYINT(1) DEFAULT 0  -- Change BOOLEAN to TINYINT(1)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
@@ -218,6 +218,5 @@ CREATE TABLE Volunteering (
     FOREIGN KEY (eventID) REFERENCES Events(eventID)
 
 );
-
 
 
