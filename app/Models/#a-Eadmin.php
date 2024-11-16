@@ -3,13 +3,19 @@ require_once 'Person.php';
 require_once 'Event.php';
 require_once 'Address.php';
 
-class EventAdmin extends Person
+class EventAdmin extends Person implements Observer
 {
     // Constructor to initialize EventAdmin with required details
     public function __construct(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, iLogin $login)
     {
         parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
     }
+
+      // Implementing Observer's update method
+      public function update(string $message): void
+      {
+          echo "Admin Notification: $message\n";
+      }
 
     // Method to create a new event
     public function createEvent(int $eventID, string $eventDate, Address $eventLocation, string $eventName, string $eventDescription, int $reqCooks, int $reqForDelivery, int $reqCoordinators): bool
@@ -40,3 +46,6 @@ class EventAdmin extends Person
     }
 
 }
+
+
+

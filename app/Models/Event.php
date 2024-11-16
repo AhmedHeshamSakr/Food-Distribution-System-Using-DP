@@ -4,7 +4,23 @@
 require_once __DIR__ . "/../../config/DB.php";
 require_once 'Address.php';
 
-class Event
+interface Observer
+{
+    // Method that gets called when a notification is sent
+    public function update(string $message): void;
+}
+interface Subject 
+{
+    // Method to add an observer
+    public function addObserver(Observer $observer): void;
+
+    // Method to remove an observer
+    public function removeObserver(Observer $observer): void;
+
+    // Method to notify all observers
+    public function notifyObservers(string $message): void;
+}
+class Event implements Subject
 {
     // Properties
     private int $eventID;
@@ -15,6 +31,9 @@ class Event
     private int $reqCooks;
     private int $reqForDelivery;
     private int $reqCoordinators;
+
+     // Array of observers
+     private array $observers = [];
 
     // Constructor to initialize the Event object
     public function __construct(int $eventID = 0, string $eventDate = '', Address $eventLocation = null, string $eventName = '', string $eventDescription = '', int $reqCooks = 0, int $reqForDelivery = 0, int $reqCoordinators = 0)
@@ -53,6 +72,61 @@ class Event
 
     public function getReqCoordinators(): int { return $this->reqCoordinators; }
     public function setReqCoordinators(int $reqCoordinators): void { $this->reqCoordinators = $reqCoordinators; }
+
+
+
+     // Implementing Subject methods
+     public function addObserver(Observer $observer): void
+     {
+         $this->observers[] = $observer;
+     }
+ 
+     public function removeObserver(Observer $observer): void
+     {
+         $this->observers = array_filter($this->observers, fn($obs) => $obs !== $observer);
+     }
+ 
+     public function notifyObservers(string $message): void
+     {
+         foreach ($this->observers as $observer) {
+             $observer->update($message);
+         }
+     }
+ 
+     // Check if event requirements are fulfilled
+     public function checkRequirements(): void
+     {
+         if ($this->reqCooks <= 0 && $this->reqForDelivery <= 0 && $this->reqCoordinators <= 0) {
+             $this->notifyObservers("All requirements for event '{$this->eventName}' are fulfilled.");
+         }
+     }
+ 
+     // Method to assign a cook
+     public function assignCook(): void
+     {
+         if ($this->reqCooks > 0) {
+             $this->reqCooks--;
+         }
+         $this->checkRequirements();
+     }
+ 
+     // Method to assign a delivery person
+     public function assignDelivery(): void
+     {
+         if ($this->reqForDelivery > 0) {
+             $this->reqForDelivery--;
+         }
+         $this->checkRequirements();
+     }
+ 
+     // Method to assign a coordinator
+     public function assignCoordinator(): void
+     {
+         if ($this->reqCoordinators > 0) {
+             $this->reqCoordinators--;
+         }
+         $this->checkRequirements();
+     }
 
     // Method to create a new event
     public function create(): bool

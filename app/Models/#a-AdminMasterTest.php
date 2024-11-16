@@ -1,4 +1,9 @@
 <?php
+
+// Enable error reporting for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 require_once __DIR__ . "/../../config/DB.php";
 require_once '#a-Badmin.php';
 require_once '#a-Eadmin.php';
@@ -6,8 +11,8 @@ require_once 'Address.php';
 require_once 'Login.php';
 require_once 'Event.php';
 
-$email = "mohamed16@gmail.com";
 
+$email = "mohamed16@gmail.com";
  // Instantiate the login object (replace with actual strategy: withGoogle, withFacebook, or withEmail)
  $login = new withGoogle($email, 'password'); // Replace 'password' with the actual password for testing
 
