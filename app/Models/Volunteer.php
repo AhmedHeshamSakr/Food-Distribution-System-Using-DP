@@ -8,27 +8,6 @@ require_once 'Badges.php';
 
 
 
-class Badge
-{
-    private int $badgeID;
-    private string $badgeName;
-
-    public function __construct(int $badgeID, string $badgeName)
-    {
-        $this->badgeID = $badgeID;
-        $this->badgeName = $badgeName;
-    }
-
-    public function getBadgeID(): int
-    {
-        return $this->badgeID;
-    }
-
-    public function getBadgeName(): string
-    {
-        return $this->badgeName;
-    }
-}
 
 
 
@@ -79,9 +58,10 @@ class Volunteer extends User
         string $nationalID,
         Badge $badge
     ) {
+        
         // Call the parent constructor to initialize the User (and Person) properties
-        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login );
-
+        parent::__construct($userTypeID=0, $firstName, $lastName, $email, $phoneNo, $login );
+        $this->chooseRole();
         // Initialize the Volunteer-specific properties
         $this->address = $address;
         $this->nationalID = $nationalID;
@@ -197,10 +177,8 @@ class Volunteer extends User
 abstract class VolunteerRoles extends User
 {
     protected User $ref;  // Decorated User object
-    protected int $roleType = 0;
-    protected const COOK_FLAG = 1 << 0;       // Binary 001
-    protected const DELIVERY_FLAG = 1 << 1;   // Binary 010
-    protected const COORDINATOR_FLAG = 1 << 2; // Binary 100
+
+
 
 
 
@@ -210,32 +188,11 @@ abstract class VolunteerRoles extends User
         $this->ref = $ref;
     }
 
-    
-    // Override chooseRole and decorate with additional functionality
-    public function hasRole(int $roleFlag): bool {
-        return ($this->roleType & $roleFlag) === $roleFlag;
-    }
-
-    public function getAllRoles(): array {
-        $roles = [];
-
-        if ($this->hasRole(self::COOK_FLAG)) {
-            $roles[] = 'Cook';
-        }
-        if ($this->hasRole(self::DELIVERY_FLAG)) {
-            $roles[] = 'DeliveryGuy';
-        }
-        if ($this->hasRole(self::COORDINATOR_FLAG)) {
-            $roles[] = 'Coordinator';
-        }
-
-        return $roles;
-    }
-
     public function chooseRole(): bool{
-         $this->roleType = 0;
+         $this->setUserTypeID(0);
          return true;
     }
+    
     
 
  

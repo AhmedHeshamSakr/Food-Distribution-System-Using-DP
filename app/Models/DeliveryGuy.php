@@ -21,6 +21,7 @@ class DeliveryGuy extends VolunteerRoles
         $this->deliveryList = [];
         $this->insertDeliveryGuy();
         $this->chooseRole();
+
     }
 
     
@@ -124,14 +125,7 @@ class DeliveryGuy extends VolunteerRoles
         return $deliveries;
     }
     
-
-
-
-
-
     //function to retrieve history
-
-
     public function assignDelivery(Delivery $delivery, string $deliveryTime): bool {
         // Create a new Delivering instance and insert the record in the database
         $delivering = new Delivering($this, $delivery, $deliveryTime);
@@ -156,10 +150,12 @@ class DeliveryGuy extends VolunteerRoles
         return false;
     }
 
-    public function chooseRole(): bool
-    {
-        $this->roleType |= self::DELIVERY_FLAG;  // Set DeliveryGuy role flag
+    public function chooseRole(): bool {
+        // Get the current userTypeID, then apply the Cook flag using the setter
+        $currentType = $this->ref->getUserTypeID();
+        $this->ref->setUserTypeID($currentType | User::DELIVERY_FLAG); // Access the constant in User
         return true;
     }
+    
 
 }

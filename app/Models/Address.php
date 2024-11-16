@@ -1,9 +1,2 @@
 <?php 
 
-
-class Address
-{
-
-
-    
-}
