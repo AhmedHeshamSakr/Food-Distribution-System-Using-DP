@@ -5,18 +5,28 @@ require_once '#c-Cooking.php';
 
 class Cook extends VolunteerRoles
 {
+
+    private int $userTypeID=1;
     public function __construct(User $user)
     {
         // Initialize the VolunteerRoles with a User reference
         parent::__construct($user);
         // Assign the cook role by default
-        $this->chooseRole();
+        //$this->chooseRole();
     }
 
     // Override chooseRole to assign the Cook flag
-    public function chooseRole(): bool
-    {
-        $this->roleType |= self::COOK_FLAG; // Set Cook role flag
+    // public function chooseRole(): bool
+    // {
+    //     $this->roleType |= self::COOK_FLAG; // Set Cook role flag
+    //     return true;
+    // }
+    public function chooseRole(): bool {
+        
+        // Get the current userTypeID, then apply the Cook flag using the setter
+        $currentType = $this->ref->getUserTypeID();
+        $this->ref->setUserTypeID($currentType | User::COOK_FLAG); // Access the constant in User
+        echo 'current cook type is'. $this->ref->getUserTypeID() . '</br>';
         return true;
     }
 
@@ -75,5 +85,21 @@ class Cook extends VolunteerRoles
     public function getRoles(): array
     {
         return $this->getAllRoles();
+    }
+    public function getUserTypeID(): int
+    {
+        return $this->userTypeID;
+    }
+    public function setUserTypeID(int $userTypeID): bool
+    {
+        $this->userTypeID = $userTypeID;
+        $fieldsToUpdate = [
+            'userTypeID' => $this->userTypeID
+        ];
+        echo 'the new user type id is '.$this->userTypeID;
+
+        $gottenvalue = $this->getUserTypeID();
+        echo 'the gotten value (COOOOOOOOOOOOK) is '.$gottenvalue;
+        return $this->updatePerson($fieldsToUpdate); 
     }
 }

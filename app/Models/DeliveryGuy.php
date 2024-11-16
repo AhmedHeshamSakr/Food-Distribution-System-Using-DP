@@ -10,6 +10,7 @@ class DeliveryGuy extends VolunteerRoles
     //private User $user; //howa howa el ref fo2 khalas
 
     private Vehicle $vehicleType;
+    private int $userTypeID=2;
     private array $deliveryList = [];
     
     public function __construct(
@@ -19,8 +20,9 @@ class DeliveryGuy extends VolunteerRoles
         parent::__construct($user);   
         $this->vehicleType = $vehicleType;
         $this->deliveryList = [];
+        //$this->chooseRole();
         $this->insertDeliveryGuy();
-        $this->chooseRole();
+        
 
     }
 
@@ -149,12 +151,33 @@ class DeliveryGuy extends VolunteerRoles
         }
         return false;
     }
+    public function getUserTypeID(): int
+    {
+        return $this->userTypeID;
+    }
 
     public function chooseRole(): bool {
+        
         // Get the current userTypeID, then apply the Cook flag using the setter
         $currentType = $this->ref->getUserTypeID();
+        echo 'the following is the current type'. $currentType . '</br>';
         $this->ref->setUserTypeID($currentType | User::DELIVERY_FLAG); // Access the constant in User
+        echo 'the following the the current delivery type'. $this->ref->getUserTypeID() . '</br>';
         return true;
+    }
+
+
+    public function setUserTypeID(int $userTypeID): bool
+    {
+        $this->userTypeID = $userTypeID;
+        $fieldsToUpdate = [
+            'userTypeID' => $this->userTypeID
+        ];
+        echo 'the new user type id is '.$this->userTypeID;
+
+        $gottenvalue = $this->getUserTypeID();
+        echo 'the gotten value is '.$gottenvalue;
+        return $this->updatePerson($fieldsToUpdate); 
     }
     
 

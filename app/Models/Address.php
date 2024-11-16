@@ -76,10 +76,6 @@ class Address
     }
     
 
-
-    
-
-
     // Update an address record in the database
     public function update(): bool
     {

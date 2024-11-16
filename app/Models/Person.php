@@ -1,50 +1,18 @@
 <?php
-//////////////////////////////////// DUMMY LOGIN
 
-
-
-
-// interface iLogin
-// {
-//     public function authenticate(string $username, string $password): bool;
-//     public function logout(): bool;
-//     public function login($credentials): bool;
-// }
-
-// class DummyLogin implements iLogin
-// {
-//     public $isAuthenticated = false;
-
-//     public function login($credentials): bool
-//     {
-//         // Simulate successful login
-//         $this->isAuthenticated = true;
-//         return $this->isAuthenticated;
-//     }
-
-//     public function authenticate(string $username, string $password): bool
-//     {
-//         // Simulate successful authentication
-//         $this->isAuthenticated = true;
-//         return $this->isAuthenticated;
-//     }
-
-//     public function logout(): bool
-//     {
-//         $this->isAuthenticated = false;
-//         return !$this->isAuthenticated;
-//     }
-// }
-
-
-
-
-///////////////////////////////////
 
 require_once __DIR__ . "/../../config/DB.php";
 
-abstract class Person
+abstract class User
 {
+
+    public const COOK_FLAG = 1 << 0;       // Binary 00001
+    public const DELIVERY_FLAG = 1 << 1;   // Binary 00010
+    public const COORDINATOR_FLAG = 1 << 2; // Binary 00100
+    public const REPORTER_FLAG = 1 << 3;   // Binary 01000
+    public const DONOR_FLAG = 1 << 4;  // Binary 10000 
+
+
     private int $userTypeID = 0;
     private int $userID;
     private string $firstName;
@@ -53,7 +21,7 @@ abstract class Person
     private string $phoneNo;
     private iLogin $login;
 
-    public function __construct(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, iLogin $login)
+    public function __construct(int $userTypeID=0, string $firstName, string $lastName, string $email, string $phoneNo, iLogin $login)
     {
         $this->userTypeID = $userTypeID;
         $this->firstName = $firstName;
@@ -61,7 +29,29 @@ abstract class Person
         $this->email = $email;
         $this->phoneNo = $phoneNo;
         $this->login = $login;
-        $this->insertPerson($userTypeID,$firstName, $lastName, $email, $phoneNo);
+
+        if (!$this->emailExists($email)) {
+            $this->insertPerson($userTypeID, $firstName, $lastName, $email, $phoneNo);
+        } else {
+            $query = "SELECT userID FROM person WHERE email = '{$email}' LIMIT 1";
+            $result = mysqli_query(Database::getInstance()->getConnection(), $query);
+            if ($result && mysqli_num_rows($result) > 0) {
+            $row = mysqli_fetch_assoc($result);
+            $this->userID = $row['userID'];
+            }
+        }
+
+
+    }
+
+    private function emailExists(string $email): bool
+    {
+        // Query to check if the email exists in the person table (assuming it's in the 'person' table)
+        $query = "SELECT 1 FROM person WHERE email = '{$email}'";
+        $result = mysqli_query(Database::getInstance()->getConnection(), $query);
+        
+        // Return true if email exists, false otherwise
+        return mysqli_num_rows($result) > 0;
     }
 
     public function insertPerson(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo): bool
@@ -95,6 +85,8 @@ abstract class Person
     }
         return false;
     }
+
+
 
 
     public function updatePerson(array $fieldsToUpdate): bool
@@ -174,6 +166,10 @@ abstract class Person
         $fieldsToUpdate = [
             'userTypeID' => $this->userTypeID
         ];
+        echo 'the new user type id is '.$this->userTypeID;
+
+        $gottenvalue = $this->getUserTypeID();
+        echo 'the gotten value is '.$gottenvalue;
         return $this->updatePerson($fieldsToUpdate); 
     }
 
@@ -226,7 +222,15 @@ abstract class Person
         $this->login->isAuthenticated = false;
         return !$this->login->isAuthenticated;
     }
+
+
+    public function chooseRole(): bool {
+        $this->setUserTypeID(0);
+        return true;
+    }
 }
+
+
 
 
 ?>

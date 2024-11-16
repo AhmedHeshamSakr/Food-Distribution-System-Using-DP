@@ -49,9 +49,9 @@ if ($updatedAddressDetails) {
 }
 
 // Test deleting the address from the database
-echo "<br>Testing Address Deletion:<br>";
-$addressDeleted = $address->delete();
-echo $addressDeleted ? "Address deleted successfully.<br>" : "Failed to delete address.<br>";
+// echo "<br>Testing Address Deletion:<br>";
+// $addressDeleted = $address->delete();
+// echo $addressDeleted ? "Address deleted successfully.<br>" : "Failed to delete address.<br>";
 
 
 // Attempt to read the address again to confirm deletion
