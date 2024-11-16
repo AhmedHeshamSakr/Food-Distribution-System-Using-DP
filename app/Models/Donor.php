@@ -1,60 +1,75 @@
 <?php
 
-
-require_once __DIR__ . "/../../config/DB.php";
 require_once 'User.php';
+require_once 'Payment.php'; // Ensure this includes IPayment and strategy classes
 
 class Donor extends User
 {
-    // Enum constants for payment methods
-    private const PAYMENT_METHODS = [
-        'Cash' => 'Cash',
-        'CreditCard' => 'Credit Card',
-        'BankTransfer' => 'Bank Transfer',
-        'OnlinePayment' => 'Online Payment',
-    ];
+    private const PAYMENT_METHODS = ['Fawry', 'Credit Card', 'Visa'];
 
     public function __construct(int $userID, string $firstName, string $lastName, string $email, string $phoneNo, iLogin $login)
     {
-        // Initialize the User class with userTypeID for 'donor'
         parent::__construct(self::USER_TYPE_ID_MAP['donor'], $firstName, $lastName, $email, $phoneNo, $login);
     }
 
-    // Method to add a donation record
-    public function addDonation(float $amount, string $paymentMethod): bool
+    public function addDonation(float $amount, string $paymentMethod, array $paymentDetails): bool
     {
-        // Validate payment method
         if (!in_array($paymentMethod, self::PAYMENT_METHODS)) {
             throw new InvalidArgumentException("Invalid payment method.");
         }
 
-        // Insert the donation into the Donation table
-        $query = "INSERT INTO Donation (donationDate, donationAmount, paymentMethod)
-                  VALUES (CURDATE(), {$amount}, '{$paymentMethod}')";
-        
-        // Run the insert query and get the new donation ID
-        $donationID = run_query($query, true); // Assuming run_query returns the new donation ID
+        $paymentContext = new PaymentContext($this->getPaymentMethod($paymentMethod, $paymentDetails));
+        $paymentResponse = $paymentContext->executePayment($amount);
 
-        if ($donationID) {
-            // Insert into the Donating table to record the many-to-many relationship
-            $donatingQuery = "INSERT INTO Donating (userID, donationID) VALUES ({$this->getuserID()}, {$donationID})";
-            return run_query($donatingQuery, true);
+        if (!$paymentResponse) {
+            return false;
         }
 
-        return false;
+        try {
+            $conn = Database::getInstance()->getConnection();
+            $amount = $conn->real_escape_string($amount);
+            $paymentMethod = $conn->real_escape_string($paymentMethod);
+
+            $query = "INSERT INTO Donation (donationDate, donationAmount, paymentMethod) VALUES (CURDATE(), '$amount', '$paymentMethod')";
+            if ($conn->query($query) === true) {
+                $donationID = $conn->insert_id;
+                
+                $userID = $this->getUserID();
+                $donatingQuery = "INSERT INTO Donating (userID, donationID) VALUES ('$userID', '$donationID')";
+                
+                return $conn->query($donatingQuery) === true;
+            } else {
+                throw new Exception("Failed to execute query: " . $conn->error);
+            }
+        } catch (Exception $e) {
+            error_log("Error adding donation: " . $e->getMessage());
+            return false;
+        }
     }
 
-    // Method to fetch donation history for the donor
     public function fetchDonationHistory(): array
     {
-        $query = "SELECT d.donationID, d.donationDate, d.donationAmount, d.paymentMethod 
-                  FROM Donation d
-                  JOIN Donating don ON d.donationID = don.donationID
-                  WHERE don.userID = {$this->getuserID()}";
-        return run_select_query($query) ?: [];
+        try {
+            $conn = Database::getInstance()->getConnection();
+            $userID = $this->getUserID();
+            $userID = $conn->real_escape_string($userID);
+
+            $query = "SELECT d.donationID, d.donationDate, d.donationAmount, d.paymentMethod 
+                      FROM Donation d
+                      JOIN Donating don ON d.donationID = don.donationID
+                      WHERE don.userID = '$userID'";
+
+            $result = $conn->query($query);
+            if ($result) {
+                return $result->fetch_all(MYSQLI_ASSOC);
+            }
+            return [];
+        } catch (Exception $e) {
+            error_log("Error fetching donation history: " . $e->getMessage());
+            return [];
+        }
     }
 
-    // Method to update the donor's personal information
     public function updatePersonalInfo(string $firstName, string $lastName, string $email, string $phoneNo): bool
     {
         $this->setFirstName($firstName);
@@ -62,29 +77,55 @@ class Donor extends User
         $this->setEmail($email);
         $this->setPhoneNo($phoneNo);
 
-        // Update the Person table
-        $query = "UPDATE Person 
-                  SET firstName = '{$this->getFirstName()}', 
-                      lastName = '{$this->getLastName()}', 
-                      email = '{$this->getEmail()}', 
-                      phoneNo = '{$this->getPhoneNo()}' 
-                  WHERE userID = {$this->getuserID()}";
-        return run_query($query, true);
+        try {
+            $conn = Database::getInstance()->getConnection();
+            $userID = $this->getUserID();
+
+            $firstName = $conn->real_escape_string($firstName);
+            $lastName = $conn->real_escape_string($lastName);
+            $email = $conn->real_escape_string($email);
+            $phoneNo = $conn->real_escape_string($phoneNo);
+
+            $query = "UPDATE Person SET firstName = '$firstName', lastName = '$lastName', email = '$email', phoneNo = '$phoneNo' 
+                      WHERE userID = '$userID'";
+            return $conn->query($query) === true;
+        } catch (Exception $e) {
+            error_log("Error updating personal info: " . $e->getMessage());
+            return false;
+        }
     }
 
-    // Method to update donation amount and payment method for a specific donation
     public function updateDonation(int $donationID, float $amount, string $paymentMethod): bool
     {
-        // Validate payment method
         if (!in_array($paymentMethod, self::PAYMENT_METHODS)) {
             throw new InvalidArgumentException("Invalid payment method.");
         }
 
-        // Update the donation record
-        $query = "UPDATE Donation 
-                  SET donationAmount = {$amount}, paymentMethod = '{$paymentMethod}' 
-                  WHERE donationID = {$donationID}";
-        return run_query($query, true);
+        try {
+            $conn = Database::getInstance()->getConnection();
+            $donationID = $conn->real_escape_string($donationID);
+            $amount = $conn->real_escape_string($amount);
+            $paymentMethod = $conn->real_escape_string($paymentMethod);
+
+            $query = "UPDATE Donation SET donationAmount = '$amount', paymentMethod = '$paymentMethod' WHERE donationID = '$donationID'";
+            return $conn->query($query) === true;
+        } catch (Exception $e) {
+            error_log("Error updating donation: " . $e->getMessage());
+            return false;
+        }
     }
 
+    private function getPaymentMethod(string $paymentMethod, array $paymentDetails): IPayment
+    {
+        switch ($paymentMethod) {
+            case 'Credit Card':
+                return new PayCreditCard($paymentDetails['cardNumber'], new DateTime($paymentDetails['expiryDate']), $paymentDetails['cvv']);
+            case 'Visa':
+                return new PayVisa($paymentDetails['cardNumber'], new DateTime($paymentDetails['expiryDate']));
+            case 'Fawry':
+                return new PayFawry($paymentDetails['fawryNumber'], $paymentDetails['referenceID']);
+            default:
+                throw new InvalidArgumentException("Unsupported payment method.");
+        }
+    }
 }

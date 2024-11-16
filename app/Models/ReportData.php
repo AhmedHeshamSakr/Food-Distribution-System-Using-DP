@@ -1,6 +1,6 @@
 <?php 
 
-require_once("User.php");
+require_once 'User.php';
 require_once __DIR__ . '/../../config/DB.php';
 
 class ReportingData {
@@ -15,18 +15,21 @@ class ReportingData {
 
     private $db;
 
-    public function __construct() {
+    public function __construct($personInName,$personInAddress,$personInPhone,$description ) {
         $this->db = Database::getInstance()->getConnection();
+        $this->status = 'Pending'; // Default to "Pending"
+        $this->recognized = 0; // Default to not recognized (false)
+        $this->isDeleted = 0; // Default to not deleted (false)
+        $this->description = $description;
+        $this->createReport($personInName, $personInAddress, $personInPhone, $description);
+    
     }
 
     public function createReport($personInName, $personInAddress, $personInPhone, $description) {
-        $status = 'Pending'; // Default to "Pending"
-        $recognized = 0; // Default to not recognized (false)
-        $isDeleted = 0; // Default to not deleted (false)
-    
+        
         // Construct the query with clear placeholders and values
         $query = "INSERT INTO report (personINname, personINaddress, phoneINno, status, recognized, description, is_deleted) 
-                  VALUES ('$personInName', '$personInAddress', '$personInPhone', '$status', $recognized, '$description', $isDeleted)";
+                  VALUES ('$personInName', '$personInAddress', '$personInPhone', '{$this->status}', {$this->recognized}, '$description', {$this->isDeleted})";
     
         if (run_query($query)) {
             $this->reportID = mysqli_insert_id($this->db);
@@ -151,5 +154,3 @@ class ReportingData {
     }
  
 }
-
-

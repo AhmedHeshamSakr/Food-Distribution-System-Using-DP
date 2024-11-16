@@ -2,82 +2,68 @@
 
 require_once __DIR__ . '/ReportData.php';
 
-require_once __DIR__ . '/../../config/DB.php';
-
-// Instantiate the ReportingData class
-$reportingData = new ReportingData();
-
-// Step 1: Create a New Report
+// Initialize the ReportingData object with sample data
 echo "Creating a new report...\n";
-$created = $reportingData->createReport(
-    'Jane Doe',
-    '456 Another St',
-    '5559876543',
-    'This is a test description for the report.'
-);
+$reportData = new ReportingData('John Doe', '123 Main St', '5551234567', 'This is a test report');
 
-if ($created) {
-    echo "Report created successfully with report ID: " . $reportingData->getReportID() . "\n";
-} else {
-    echo "Failed to create report.\n";
-    exit();
-}
+// Retrieve the report ID
+$reportID = $reportData->getReportID();
+echo "Report created successfully with ID: " . $reportID . "\n";
 
-// Store the generated reportID for further testing
-$reportID = $reportingData->getReportID();
+// Retrieve the report ID
+$reportID = $reportData->getReportID();
+echo "Report created successfully with ID: " . $reportID . "\n";
 
-// Step 2: Retrieve and Display Report Details
-echo "\nRetrieving report details...\n";
-$reportDetails = $reportingData->getReportDetails($reportID);
-
-if ($reportDetails) {
-    echo "Report details retrieved:\n";
-    print_r($reportDetails);
+// Fetch report details
+echo "Fetching report details...\n";
+$details = $reportData->getReportDetails($reportID);
+if ($details) {
+    echo "Report Details:\n";
+    print_r($details);
 } else {
     echo "Failed to retrieve report details.\n";
 }
 
-// Step 3: Update Report Details (Change status and recognized fields)
-echo "\nUpdating report status to 'Acknowledged' and setting recognized to true...\n";
-$updateData = ['status' => 'Acknowledged', 'recognized' => 1];
-$updated = $reportingData->updateReport($updateData, $reportID);
-
-if ($updated) {
+// Update report status
+echo "Updating report status...\n";
+$updateFields = ['status' => 'Reviewed'];
+$updateResult = $reportData->updateReport($updateFields, $reportID);
+if ($updateResult) {
     echo "Report updated successfully.\n";
-    // Retrieve the updated details to verify the changes
-    $updatedDetails = $reportingData->getReportDetails($reportID);
-    echo "Updated report details:\n";
+    // Fetch the updated details to confirm
+    $updatedDetails = $reportData->getReportDetails($reportID);
+    echo "Updated Report Details:\n";
     print_r($updatedDetails);
 } else {
     echo "Failed to update report.\n";
 }
 
-// Step 4: Soft Delete the Report
-echo "\nSoft deleting the report...\n";
-$deleted = $reportingData->deleteReport($reportID);
-
-if ($deleted) {
-    echo "Report marked as deleted successfully.\n";
-    // Attempt to retrieve the deleted report (should not return results)
-    $deletedReport = $reportingData->getReportDetails($reportID);
-    if ($deletedReport) {
-        echo "Report still retrievable (something went wrong with delete):\n";
-        print_r($deletedReport);
-    } else {
-        echo "Report is deleted and cannot be retrieved.\n";
-    }
+// Soft delete the report
+echo "Deleting the report...\n";
+$deleteResult = $reportData->deleteReport($reportID);
+if ($deleteResult) {
+    echo "Report deleted successfully.\n";
 } else {
     echo "Failed to delete report.\n";
 }
 
-// Step 5: Retrieve All Active Reports
-echo "\nRetrieving all active reports (non-deleted)...\n";
-$activeReports = $reportingData->getAllActiveReports();
+// Try to fetch the deleted report details
+echo "Fetching report details after deletion...\n";
+$deletedDetails = $reportData->getReportDetails($reportID);
+if ($deletedDetails) {
+    echo "Report still exists (should be marked as deleted):\n";
+    print_r($deletedDetails);
+} else {
+    echo "Report is marked as deleted and not accessible.\n";
+}
+
+// Fetch all active reports to confirm only active reports are retrieved
+echo "Fetching all active reports...\n";
+$activeReports = $reportData->getAllActiveReports();
 if (!empty($activeReports)) {
-    echo "Active reports:\n";
+    echo "Active Reports:\n";
     print_r($activeReports);
 } else {
     echo "No active reports found.\n";
 }
 
-?>

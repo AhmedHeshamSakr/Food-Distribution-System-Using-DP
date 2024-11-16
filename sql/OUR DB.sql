@@ -4,13 +4,18 @@
 
 
 
-CREATE TABLE Person (
-    userID VARCHAR(255) PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    phoneNo VARCHAR(20),
-    address VARCHAR(255)
-);
+CREATE TABLE `person` (
+  `userID` int(11) NOT NULL AUTO_INCREMENT,  -- Ensure auto-increment
+  `userTypeID` int(11) NOT NULL,
+  `firstName` varchar(255) NOT NULL,
+  `lastName` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phoneNo` varchar(20) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`userID`),
+  UNIQUE KEY `email` (`email`)  -- Unique email for each user
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 --  Create the Login table
 CREATE TABLE Login (
@@ -24,42 +29,42 @@ CREATE TABLE Login (
 CREATE TABLE Reporting (
     userID INT,
     reportID INT,
-    is_deleted BOOLEAN DEFAULT FALSE,
-PRIMARY KEY (userID, reportID),
-FOREIGN KEY (userID) REFERENCES Person(userID),
-FOREIGN KEY (reportID) REFERENCES Report(reportID),
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    is_deleted TINYINT(1) DEFAULT 0,  -- Change BOOLEAN to TINYINT(1)
+    PRIMARY KEY (userID, reportID),
+    FOREIGN KEY (userID) REFERENCES Person(userID),
+    FOREIGN KEY (reportID) REFERENCES Report(reportID),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Create the ReportingData table
-CCREATE TABLE Report (
-    reportID INT PRIMARY KEY,
+CREATE TABLE Report (
+    reportID INT PRIMARY KEY AUTO_INCREMENT,  -- Add AUTO_INCREMENT to reportID
     personInName VARCHAR(255),
     personInAddress VARCHAR(255),
     personInPhone VARCHAR(20),
     status ENUM('Pending', 'Acknowledged', 'In Progress', 'Completed') DEFAULT 'Pending',
-    recognized BOOLEAN DEFAULT FALSE,
+    recognized TINYINT(1) DEFAULT 0,  -- Change BOOLEAN to TINYINT(1)
     description TEXT,
-    is_deleted BOOLEAN DEFAULT FALSE
+    is_deleted TINYINT(1) DEFAULT 0  -- Change BOOLEAN to TINYINT(1)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
 
--- Create the Volunteer table
-CREATE TABLE Volunteer (
-    userID INT PRIMARY KEY ,
-    address VARCHAR(255) ,
-    phone VARCHAR(20),
-    badge INT,
-    FOREIGN KEY (userID) REFERENCES Person(userID)
-);
+CREATE TABLE `volunteer` (
+  `userID` int(11) NOT NULL,  -- References person table
+  `badge` int(11) DEFAULT NULL,
+  PRIMARY KEY (`userID`),  -- Makes userID the primary key here as well
+  CONSTRAINT `volunteer_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `person` (`userID`)  -- Foreign Key constraint
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
 
 -- Create the Badge table
 CREATE TABLE Badge (
     badgeID INT PRIMARY KEY AUTO_INCREMENT,
-    badgeName VARCHAR(255),
-    expiryDate DATE
+    expiryDate DATE,
+    badgeLvl ENUM('Bronze Tier', 'Silver Tier', 'Gold Tier', 'Platinum Tier') NOT NULL;
 );
 
 -- Create the Vehicle table

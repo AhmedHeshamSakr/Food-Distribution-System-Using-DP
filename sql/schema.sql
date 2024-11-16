@@ -2,15 +2,23 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Nov 12, 2024 at 10:54 AM
+-- Host: 127.0.0.1
+-- Generation Time: Nov 13, 2024 at 04:43 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
 START TRANSACTION;
 SET time_zone = "+00:00";
 
--- Database: `FDS`
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `fds`
+--
 
 -- --------------------------------------------------------
 
@@ -40,7 +48,7 @@ CREATE TABLE `Cooking` (
   `mealID` int(11) NOT NULL,
   `mealsTaken` int(11) DEFAULT NULL,
   `mealsCompleted` int(11) DEFAULT NULL
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -69,7 +77,7 @@ CREATE TABLE `delivery` (
   `deliveryGuy` int(11) DEFAULT NULL,
   `status` enum('pending','delivering','delivered') DEFAULT 'pending',
   `deliveryDetails` text DEFAULT NULL
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -81,21 +89,27 @@ CREATE TABLE `deliveryguy` (
 
 -- --------------------------------------------------------
 
--- Table structure for table `Donating`
-CREATE TABLE `Donating` (
+--
+-- Table structure for table `donating`
+--
+
+CREATE TABLE `donating` (
   `userID` int(11) NOT NULL,
   `donationID` int(11) NOT NULL
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
--- Table structure for table `Donation`
-CREATE TABLE `Donation` (
+--
+-- Table structure for table `donation`
+--
+
+CREATE TABLE `donation` (
   `donationID` int(11) NOT NULL,
   `donationDate` date NOT NULL,
   `donationAmount` decimal(10,2) NOT NULL,
   `paymentMethod` enum('Cash','Credit Card','Bank Transfer','Online Payment') NOT NULL
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -139,6 +153,14 @@ CREATE TABLE `person` (
   `phoneNo` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `person`
+--
+
+INSERT INTO `person` (`userID`, `userTypeID`, `firstName`, `lastName`, `email`, `phoneNo`) VALUES
+(1, 1, 'Test', 'User', 'testuser1731511602@example.com', '123456789'),
+(2, 1, 'Test', 'User', 'testuser1731512422@example.com', '123456789');
+
 -- --------------------------------------------------------
 
 -- Table structure for table `report`
@@ -151,7 +173,16 @@ CREATE TABLE `report` (
   `description` text DEFAULT NULL,
   `is_deleted` tinyint(1) DEFAULT 0,
   `recognized` tinyint(1) DEFAULT 0
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `report`
+--
+
+INSERT INTO `report` (`reportID`, `personINname`, `personINaddress`, `phoneINno`, `status`, `description`, `is_deleted`, `recognized`) VALUES
+(1, 'John Doe', '123 Main St', '5551234567', '', 'This is a test report', 1, 0),
+(2, 'John Doe', '123 Main St', '5551234567', '', 'This is a test report', 1, 0),
+(3, 'Jane Doe', '456 Another St', '5559876543', 'Pending', 'Description for a test report', 0, 0);
 
 -- --------------------------------------------------------
 
@@ -160,8 +191,9 @@ CREATE TABLE `reporting` (
   `userID` int(11) NOT NULL,
   `reportID` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
-);
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `is_deleted` tinyint(1) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -227,15 +259,22 @@ ALTER TABLE `deliveryguy`
   ADD PRIMARY KEY (`userID`),
   ADD KEY `vehicleID` (`vehicleID`);
 
-ALTER TABLE `Donating`
+--
+-- Indexes for table `donating`
+--
+ALTER TABLE `donating`
   ADD PRIMARY KEY (`userID`,`donationID`),
   ADD KEY `donationID` (`donationID`);
 
-ALTER TABLE `Donation`
+--
+-- Indexes for table `donation`
+--
+ALTER TABLE `donation`
   ADD PRIMARY KEY (`donationID`);
 
 ALTER TABLE `event`
-  ADD PRIMARY KEY (`eventID`);
+  ADD PRIMARY KEY (`eventID`),
+  ADD KEY `event_ibfk_1` (`eventLocation`);
 
 ALTER TABLE `login`
   ADD PRIMARY KEY (`email`);
@@ -243,6 +282,15 @@ ALTER TABLE `login`
 ALTER TABLE `Meal`
   ADD PRIMARY KEY (`mealID`);
 
+--
+-- Indexes for table `person`
+--
+ALTER TABLE `person`
+  ADD PRIMARY KEY (`userID`);
+
+--
+-- Indexes for table `report`
+--
 ALTER TABLE `report`
   ADD PRIMARY KEY (`reportID`);
 
@@ -259,7 +307,8 @@ ALTER TABLE `vehicle`
   ADD UNIQUE KEY `licensePlateNo` (`licensePlateNo`);
 
 ALTER TABLE `volunteer`
-  ADD PRIMARY KEY (`userID`);
+  ADD PRIMARY KEY (`userID`),
+  ADD KEY `volunteer_ibfk_1` (`badge`);
 
 ALTER TABLE `volunteering`
   ADD PRIMARY KEY (`eventID`,`userID`),
@@ -275,7 +324,10 @@ ALTER TABLE `badge`
 ALTER TABLE `delivery`
   MODIFY `deliveryID` int(11) NOT NULL AUTO_INCREMENT;
 
-ALTER TABLE `Donation`
+--
+-- AUTO_INCREMENT for table `donation`
+--
+ALTER TABLE `donation`
   MODIFY `donationID` int(11) NOT NULL AUTO_INCREMENT;
 
 ALTER TABLE `event`
@@ -285,12 +337,10 @@ ALTER TABLE `Meal`
   MODIFY `mealID` int(11) NOT NULL AUTO_INCREMENT;
 
 ALTER TABLE `person`
-  MODIFY `userID` int(11) NOT NULL AUTO_INCREMENT,
-  ADD PRIMARY KEY (`userID`);
-
+  MODIFY `userID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 ALTER TABLE `report`
-  MODIFY `reportID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `reportID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 ALTER TABLE `vehicle`
   MODIFY `vehicleID` int(11) NOT NULL AUTO_INCREMENT;
@@ -311,21 +361,26 @@ ALTER TABLE `delivering`
   ADD CONSTRAINT `delivering_ibfk_1` FOREIGN KEY (`deliveryID`) REFERENCES `delivery` (`deliveryID`),
   ADD CONSTRAINT `delivering_ibfk_2` FOREIGN KEY (`deliveryGuyID`) REFERENCES `deliveryguy` (`userID`);
 
-ALTER TABLE `Donating`
+--
+-- Constraints for table `donating`
+--
+ALTER TABLE `donating`
   ADD CONSTRAINT `donating_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `person` (`userID`),
-  ADD CONSTRAINT `donating_ibfk_2` FOREIGN KEY (`donationID`) REFERENCES `Donation` (`donationID`);
+  ADD CONSTRAINT `donating_ibfk_2` FOREIGN KEY (`donationID`) REFERENCES `donation` (`donationID`);
 
+--
+-- Constraints for table `event`
+--
 ALTER TABLE `event`
   ADD CONSTRAINT `event_ibfk_1` FOREIGN KEY (`eventLocation`) REFERENCES `address` (`id`);
 
-ALTER TABLE `report`
-  ADD CONSTRAINT `report_ibfk_1` FOREIGN KEY (`reportID`) REFERENCES `reporting` (`reportID`);
-
+--
+-- Constraints for table `volunteer`
+--
 ALTER TABLE `volunteer`
   ADD CONSTRAINT `volunteer_ibfk_1` FOREIGN KEY (`badge`) REFERENCES `badge` (`badgeID`);
 
 ALTER TABLE `volunteering`
   ADD CONSTRAINT `volunteering_ibfk_1` FOREIGN KEY (`eventID`) REFERENCES `event` (`eventID`),
   ADD CONSTRAINT `volunteering_ibfk_2` FOREIGN KEY (`userID`) REFERENCES `volunteer` (`userID`);
-
 COMMIT;
