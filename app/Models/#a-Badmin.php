@@ -67,3 +67,5 @@ class BadgeAdmin extends Person
         return UserBadge::read($userID, $badgeID);
     }
 }
+
+
