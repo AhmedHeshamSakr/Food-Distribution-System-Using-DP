@@ -83,22 +83,31 @@ class LoginController
      * Handle the login action.
      */
     private function handleLogin()
-    {
-        $email = $_POST['email'] ?? '';
-        $password = $_POST['password'] ?? '';
-    
-        if ($this->loginHandler->login(['email' => $email, 'password' => $password])) {
-            // Store email in session
-            session_start();
-            $_SESSION['email'] = $email;
-    
-            // Redirect to the next page
-            header("Location:../app/Views/HomePageView.php");
-            exit();
-        } else {
-            $this->errorMessage = 'Invalid email or password. Please try again.';
-        }
+{
+    $email = $_POST['email'] ?? '';
+    $password = $_POST['password'] ?? '';
+
+    // Check if the email contains @admin
+    if (strpos($email, '@admin') !== false) {
+        // Redirect to the admin dashboard page if email contains @admin
+        session_start();
+        $_SESSION['email'] = $email; // Store email in session
+        header("Location: ../app/Views/AdminPageView.php"); // Admin dashboard
+        exit();
     }
+    // Normal login handling
+    if ($this->loginHandler->login(['email' => $email, 'password' => $password])) {
+        // Store email in session
+        session_start();
+        $_SESSION['email'] = $email;
+
+        // Redirect to the regular home page
+        header("Location: ../app/Views/HomePageView.php");
+        exit();
+    } else {
+        $this->errorMessage = 'Invalid email or password. Please try again.';
+    }
+}
     
 
     /**

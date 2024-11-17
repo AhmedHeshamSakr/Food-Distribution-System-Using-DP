@@ -14,7 +14,7 @@ class DonorController
     private Donor $donor;
 
     public function __construct(DonorView $view)
-{
+    {
     // session_start(); // Start the session to access the email
     $email = $_SESSION['email'] ?? null;
 
@@ -43,7 +43,7 @@ class DonorController
     }
 
     $this->view = $view;
-}
+    }
 
     /**
      * Handle the request and render the appropriate view.

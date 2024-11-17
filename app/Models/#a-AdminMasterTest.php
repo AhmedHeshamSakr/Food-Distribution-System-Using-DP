@@ -1,102 +1,114 @@
 <?php
-
 // Enable error reporting for debugging
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-require_once __DIR__ . "/../../config/DB.php";
-require_once '#a-Badmin.php';
+
 require_once '#a-Eadmin.php';
-require_once 'Address.php';
-require_once 'Login.php';
 require_once 'Event.php';
+require_once 'Address.php';
 
 
-$email = "mohamed16@gmail.com";
- // Instantiate the login object (replace with actual strategy: withGoogle, withFacebook, or withEmail)
- $login = new withEmail($email, 'password'); // Replace 'password' with the actual password for testing
-
- // Attempt to log in with the provided credentials
- if (!$login->login(['email' => $email, 'password' => 'password'])) {
-     throw new Exception("Login failed for Google authentication.");
- }
-
- echo "<p>Successfully authenticated with Google for user: {$email}</p>";
-
-$eventLocation = new Address(1, '123 Test Street', 5, '12345');
-
-// ---------------------- Testing EventAdmin ----------------------
-
-// Initialize EventAdmin
-$eventAdmin = new EventAdmin(1, 'John', 'Doe', 'johndoe@example.com', '1234567890');
-
-// 1. Test creating an event
-echo "Testing Event Creation:\n";
-$createEventResult = $eventAdmin->createEvent(1, '2024-12-31', $eventLocation, 'New Year Event', 'Celebrating New Year', 5, 3, 2);
-echo $createEventResult ? "Event created successfully.\n" : "Event creation failed.\n";
-
-// 2. Test reading the event
-echo "Testing Event Retrieval:\n";
-$event = $eventAdmin->readEvent(1);
-if ($event) {
-    echo "Event Retrieved: " . $event->getEventName() . "\n";
-} else {
-    echo "Event retrieval failed.\n";
+// Log utility function
+function logResult($message, $success) {
+    echo $message . ($success ? " Success.<br>" : " Failed.<br>");
 }
 
-// 3. Test updating the event
-echo "Testing Event Update:\n";
-$updateEventResult = $eventAdmin->updateEvent(1, '2024-12-31', $eventLocation, 'Updated New Year Event', 'Updated Description', 6, 4, 3);
-echo $updateEventResult ? "Event updated successfully.\n" : "Event update failed.\n";
-
-// // 4. Test deleting the event
-// echo "Testing Event Deletion:\n";
-// $deleteEventResult = $eventAdmin->deleteEvent(1);
-// echo $deleteEventResult ? "Event deleted successfully.\n" : "Event deletion failed.\n";
+try {
+    // Create an EventAdmin instance
+    $admin = new EventAdmin("John", "Doe", "john.doe@example.com", "1234567890");
 
 
-// ---------------------- Testing BadgeAdmin ----------------------
+    echo "Creating an address...\n";
+    $address = new Address("Cairo", null, "City");
+    $addressCreated = $address->create();
 
-// Initialize BadgeAdmin
-$badgeAdmin = new BadgeAdmin(1, 'Jane', 'Smith', 'janesmith@example.com', '0987654321');
+    if ($addressCreated) {
+        echo "Address created successfully with ID: " . $address->getId() . "<br>";
+        
+        // Assign the newly created address to $eventLocation
+        $eventLocation = $address; // Ensure $eventLocation is assigned
 
-// 1. Test creating a badge
-echo "\nTesting Badge Creation:\n";
-$createBadgeResult = $badgeAdmin->createBadge('Gold');
-echo $createBadgeResult ? "Badge created successfully.\n" : "Badge creation failed.\n";
+        // Step 2: Create an EventAdmin object
+        $admin = new EventAdmin('John', 'Doe', 'john.doe@example.com', '1234567890');
 
-// 2. Test retrieving all badges
-echo "Testing Badge Retrieval:\n";
-$allBadges = $badgeAdmin->getAllBadges();
-if ($allBadges) {
-    echo "Badges Retrieved:\n";
-    foreach ($allBadges as $badge) {
-        echo "- Badge Level: " . $badge['badgeLvl'] . "\n";
+        // Step 3: Create multiple events using the EventAdmin object
+        echo "Creating multiple events...\n";
+
+        // Create Event 1
+        $event1Created = $admin->createEvent(
+            '2024-12-01', 
+            $eventLocation, 
+            'Music Concert', 
+            'A wonderful concert with popular artists.', 
+            2, // Required Cooks
+            1, // Required for Delivery
+            1  // Required Coordinators
+        );
+        echo $event1Created ? "Event 1 created successfully.<br>" : "Event 1 creation failed.<br>";
+
+        // Create Event 2
+        $event2Created = $admin->createEvent(
+            '2024-12-15', 
+            $eventLocation, 
+            'New Year Gala', 
+            'A grand celebration to welcome the New Year.', 
+            3, // Required Cooks
+            2, // Required for Delivery
+            2  // Required Coordinators
+        );
+        echo $event2Created ? "Event 2 created successfully.<br>" : "Event 2 creation failed.<br>";
+
+        
+    } else {
+        echo "Failed to create address.<br>";
     }
-} else {
-    echo "No badges retrieved.\n";
+    // // Step 3: Fetch a single event by ID
+    // echo "\nFetching the first event from the database...\n";
+    // $eventID = 1; // Assuming this is the eventID of the first created event.
+    // $eventFetched = $admin->readEvent($eventID);
+    // if ($eventFetched) {
+    //     echo "Event fetched successfully. Event Name: " . $eventFetched->getEventName() . "<br>";
+    // } else {
+    //     echo "Failed to fetch event.<br>";
+    // }
+
+    // Step 4: Update event details
+    echo "\nUpdating event details for the first event...\n";
+    if ($eventFetched) {
+        $eventFetched->setEventName("Updated Christmas Celebration");
+        $eventFetched->setEventDescription("Updated event details for the Christmas Celebration.");
+        logResult("Event updated", $eventFetched->update());
+    }
+
+    // Step 5: Fetch all events using fetchAll()
+    echo "\nFetching all events from the database...\n";
+    $allEvents = $admin->getAllEvents();
+    if (!empty($allEvents)) {
+        echo "Fetched " . count($allEvents) . " events successfully:<br>";
+        foreach ($allEvents as $event) {
+            echo "Event ID: " . $event->getEventID() . "<br>";
+            echo "Event Name: " . $event->getEventName() . "<br>";
+            echo "Event Date: " . $event->getEventDate() . "<br>";
+            echo "Event Location: " . $event->getEventLocation()->getName() . "<br>";
+            echo "Event Description: " . $event->getEventDescription() . "<br>";
+            echo "-----------------------------------<br>";
+        }
+    } else {
+        echo "No events found.<br>";
+    }
+
+    // // Step 6: Delete all events created for testing
+    // echo "\nDeleting all events...\n";
+    // foreach ($allEvents as $event) {
+    //     logResult("Event ID " . $event->getEventID() . " deleted", $event->delete());
+    // }
+
+    // // Cleanup: Delete the address used in the test
+    // echo "\nDeleting test address...\n";
+    // logResult("Address deleted", $address->delete());
+
+} catch (Exception $e) {
+    echo "An error occurred: " . $e->getMessage();
 }
-
-// 3. Test updating the badge
-echo "Testing Badge Update:\n";
-$updateBadgeResult = $badgeAdmin->updateBadge(1, 'Platinum');
-echo $updateBadgeResult ? "Badge updated successfully.\n" : "Badge update failed.\n";
-
-// 4. Test deleting the badge
-// echo "Testing Badge Deletion:\n";
-// $deleteBadgeResult = $badgeAdmin->deleteBadge(1);
-// echo $deleteBadgeResult ? "Badge deleted successfully.\n" : "Badge deletion failed.\n";
-
-// 5. Test assigning a badge to a user
-echo "Testing Badge Assignment to User:\n";
-$assignBadgeResult = $badgeAdmin->assignBadgeToUser(1, 1, '2024-01-01', '2024-12-31');
-echo $assignBadgeResult ? "Badge assigned to user successfully.\n" : "Badge assignment failed.\n";
-
-// 6. Test revoking a badge from a user
-// echo "Testing Badge Revocation from User:\n";
-// $revokeBadgeResult = $badgeAdmin->revokeBadgeFromUser(1, 1);
-// echo $revokeBadgeResult ? "Badge revoked from user successfully.\n" : "Badge revocation failed.\n";
-
-// Cleanup: Optional logic to clean up test data from the database
-
-echo "\nTesting complete.\n";
+?>

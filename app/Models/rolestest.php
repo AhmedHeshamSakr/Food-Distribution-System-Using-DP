@@ -17,7 +17,7 @@ require_once '#a-Badmin.php';
 
 $emailLogin = new withEmail('hello','hello');
 $loginResult = $emailLogin->login(['email' => 'hello', 'password' => 'hello']);
-$address = new Address(1, 'hello', 2, 3);
+// $address = new Address(1, 'hello', 2, 3);
 $badge = new Badges(2, 'Gold Tier');
 $vehicle = new Vehicle(35057646546664, '12345');
 $user = new Volunteer(0, 'Jumana', 'Yasser', 'juamna2a65144444555464564525556445664456565255744552654476465644355555474446D584245949446654752465955564465679687151a@gmail.com', '01236', $address, '0158655', $badge);

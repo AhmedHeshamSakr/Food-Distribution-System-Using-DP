@@ -4,110 +4,95 @@ require_once __DIR__ . "/../../config/DB.php";
 
 class Address
 {
-    private int $id;
-    private string $name;
-    private int $parent_id;
-    private string $level; // Change level to string
+    private int $id = 0; // Default to 0 to handle uninitialized state
+    private string $name; // Name of the address (e.g., 'Egypt', 'Cairo')
+    private ?int $parent_id; // Parent ID for hierarchical addresses (e.g., 'Cairo' under 'Egypt')
+    private string $level; // Level of the address ('Country', 'State', 'City', 'Neighborhood')
 
     // Constructor to initialize properties
-    public function __construct(int $id, string $name, int $parent_id, string $level)
+    public function __construct(string $name, ?int $parent_id, string $level)
     {
-        $this->id = $id;
+        // Validate the level
+        $validLevels = ['Country', 'State', 'City', 'Neighborhood'];
+        if (!in_array($level, $validLevels)) {
+            throw new Exception("Invalid level: {$level}. Must be one of 'Country', 'State', 'City', 'Neighborhood'.");
+        }
+
         $this->name = $name;
         $this->parent_id = $parent_id;
         $this->level = $level;
     }
-
+    
     // Create a new address record in the database
-    public function create(): bool
-    {
-        $query = "INSERT INTO address (id, name, parent_id, level) VALUES ('{$this->id}', '{$this->name}', '{$this->parent_id}', '{$this->level}')";
-        return run_query($query);
-    }
-    public function delete(): bool
-    {
-        // Start a database transaction
-        run_query("START TRANSACTION");
-    
-        try {
-            // Recursively delete all descendants first
-            $this->deleteDescendants($this->id);
-    
-            // Delete the current address (parent) after all descendants are deleted
-            $queryDeleteParent = "DELETE FROM address WHERE id = '{$this->id}'";
-            $deleteSuccess = run_query($queryDeleteParent);
-    
-            if (!$deleteSuccess) {
-                throw new Exception("Failed to delete parent address with ID {$this->id}");
-            }
-    
-            // Commit the transaction
-            run_query("COMMIT");
-            echo "Address deleted successfully.<br>";
-            return true;
-    
-        } catch (Exception $e) {
-            // Rollback transaction if any error occurs
-            run_query("ROLLBACK");
-            echo "Error during deletion: " . $e->getMessage() . "<br>";
-            return false;
-        }
-    }
-    
-    private function deleteDescendants(int $parentId): void
-    {
-        echo "Checking for children of parent ID: {$parentId}<br>";
-        $querySelectChildren = "SELECT id FROM address WHERE parent_id = '{$parentId}'";
-        $children = run_select_query($querySelectChildren);
-    
-        if ($children) {
-            foreach ($children as $child) {
-                // Recursively delete descendants of each child
-                $this->deleteDescendants($child['id']);
-    
-                // Delete the child itself
-                $queryDeleteChild = "DELETE FROM address WHERE id = '{$child['id']}'";
-                run_query($queryDeleteChild);
-                echo "Deleted child ID: {$child['id']}<br>";
-            }
-        } else {
-            echo "No children found for parent ID: {$parentId}<br>";
-        }
-    }
-    
+   // Create a new address record in the database
+public function create(): bool
+{
+    // Handle null values for parent_id
+    $parentIdValue = is_null($this->parent_id) ? "NULL" : (int)$this->parent_id;
 
-    // Update an address record in the database
-    public function update(): bool
-    {
-        $query = "UPDATE address SET name = '{$this->name}', parent_id = '{$this->parent_id}', level = '{$this->level}' WHERE id = '{$this->id}'";
-        return run_query($query);
+    // Prepare the SQL statement
+    $sql = "INSERT INTO address (name, parent_id, level) VALUES ('{$this->name}', {$parentIdValue}, '{$this->level}')";
+
+    // Execute the query
+    $result = run_query($sql);
+
+    if ($result) {
+        // Fetch and set the last inserted ID
+        $this->id = $this->getLastInsertedID();
+        return true;
     }
+
+    return false;
+}
+
+    private function getLastInsertedID(): int
+    {
+        // Return the ID of the last inserted record in the address table
+        $sql = "SELECT LAST_INSERT_ID() AS id";
+        $result = run_select_query($sql);
+
+        return $result ? (int)$result[0]['id'] : 0;
+    }
+
+    public function getId(): int
+    {
+        // Ensure that the ID is set, if it's not initialized yet, return 0
+        if ($this->id === 0) {
+            throw new Exception("Address ID is not initialized. Ensure the address has been created.");
+        }
+        return $this->id;
+    }
+
 
     // Read an address record from the database
     public static function read(int $id): ?Address
     {
-        $query = "SELECT * FROM address WHERE id = '{$id}'";
+        $query = "SELECT * FROM address WHERE id = {$id}";
         $result = run_select_query($query);
 
         if ($result && count($result) > 0) {
             $data = $result[0];
-            return new Address($data['id'], $data['name'], $data['parent_id'], $data['level']);
+            return new Address($data['name'], $data['parent_id'], $data['level']);
         }
 
         return null;
     }
 
-    // Getters and Setters for each attribute
-    public function getId(): int
+    // In Address class: Add this method to get the ID by name.
+    public static function getIdByName(string $name): ?int
     {
-        return $this->id;
+        $sql = "SELECT id FROM address WHERE name = '{$name}' LIMIT 1";
+        $result = run_select_query($sql);
+
+        if ($result && count($result) > 0) {
+            return (int)$result[0]['id'];
+        }
+
+        return null; // Return null if not found
     }
 
-    public function setId(int $id): void
-    {
-        $this->id = $id;
-    }
 
+    // Getters and Setters
     public function getName(): string
     {
         return $this->name;
@@ -118,12 +103,12 @@ class Address
         $this->name = $name;
     }
 
-    public function getParentId(): int
+    public function getParentId(): ?int
     {
         return $this->parent_id;
     }
 
-    public function setParentId(int $parent_id): void
+    public function setParentId(?int $parent_id): void
     {
         $this->parent_id = $parent_id;
     }
@@ -136,5 +121,17 @@ class Address
     public function setLevel(string $level): void
     {
         $this->level = $level;
+    }
+
+    public function setId(int $id): void
+    {
+        $this->id = $id;
+    }
+
+    // Delete an address (this can be enhanced if needed)
+    public function delete(): bool
+    {
+        $sql = "DELETE FROM address WHERE id = {$this->id}";
+        return run_query($sql);
     }
 }
