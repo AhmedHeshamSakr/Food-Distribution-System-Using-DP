@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . "/../../config/DB.php";
-
+require_once "User.php";
 interface iLogin {
     public function login($credentials): bool;
     public function authenticate(string $username, string $password): bool;
@@ -72,18 +72,21 @@ class withEmail implements iLogin {
     }
 
     // This function should be used to register a user, storing a hashed password in the database
-    public function register($email, $password): bool {
+    public function register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID): bool {
         // Establish the database connection
         $db = Database::getInstance()->getConnection();
     
         // Sanitize inputs
         $email = mysqli_real_escape_string($db, $email);
         $password = mysqli_real_escape_string($db, $password);
+        $firstName = mysqli_real_escape_string($db, $firstName);
+        $lastName = mysqli_real_escape_string($db, $lastName);
+        $phoneNo = mysqli_real_escape_string($db, $phoneNo);
     
         // Check if the email already exists in the database
         $queryCheck = "SELECT * FROM login WHERE email = '$email'";
         $resultCheck = mysqli_query($db, $queryCheck);
-        
+    
         // If email already exists, return false (email is already taken)
         if (mysqli_num_rows($resultCheck) > 0) {
             return false; // Email already exists
@@ -92,12 +95,20 @@ class withEmail implements iLogin {
         // Hash the password before storing it
         $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
     
-        // Insert the new user into the database with the hashed password
+        // Insert the new user into the login table with the hashed password
         $query = "INSERT INTO login (email, password) VALUES ('$email', '$hashedPassword')";
     
-        // Execute the query
+        // Execute the query to insert login details
         if (mysqli_query($db, $query)) {
-            return true; // Registration successful
+            // After successful registration, get the userID
+            $userID = mysqli_insert_id($db); // Get the last inserted ID (userID)
+    
+            // Create an instance of the Person class and insert extra information
+            $login = new iLogin(); // Assuming iLogin is a class or interface
+            $User = new User($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
+    
+            // If person is successfully inserted, return true
+            return true;
         }
     
         return false; // Registration failed

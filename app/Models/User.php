@@ -2,7 +2,7 @@
 
 require_once 'Person.php';
 
-abstract class User extends Person
+class User extends Person
 {
     protected const USER_TYPE_ID_MAP = [
         'volunteer' => 0,

@@ -61,7 +61,6 @@ class ReportingData {
             echo "Error: Report ID not specified.\n";
             return false;
         }
-
         $setQuery = [];
         foreach ($fieldsToUpdate as $field => $value) {
             $setQuery[] = "$field = '$value'";
