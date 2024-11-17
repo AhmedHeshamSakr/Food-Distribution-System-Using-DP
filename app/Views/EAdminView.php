@@ -3,7 +3,6 @@
 class EventAdminView
 {
 
-
     public function renderError($errorMessage)
 {
     echo <<<HTML
@@ -91,6 +90,7 @@ public function renderEventList(array $events)
                         <th>Name</th>
                         <th>Date</th>
                         <th>Location</th>
+                        <th>Description</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -98,17 +98,35 @@ public function renderEventList(array $events)
 HTML;
 
     foreach ($events as $event) {
-        // Access properties using object syntax
+        // Access event properties
+        $eventID = $event->getEventID() ?? 'N/A';
+        $eventName = $event->getEventName() ?? 'N/A';
+        $eventDate = $event->getEventDate() ?? 'N/A';
+        
+        // Access address properties using getters
+        $eventLocation = $event->getEventLocation();
+        if ($eventLocation) {
+            // Display address name and level (or any other property you wish)
+            $addressName = $eventLocation->getName();  // Get the address name (e.g., 'Cairo')
+            $addressLevel = $eventLocation->getLevel();  // Get the level (e.g., 'City')
+            $eventLocationDisplay = "{$addressName} ({$addressLevel})";  // Format the address display
+        } else {
+            $eventLocationDisplay = 'N/A';  // Fallback if no address is set
+        }
+
+        $eventDescription = $event->getEventDescription() ?? 'N/A';
+
         echo <<<HTML
             <tr>
-                <td>{$event->id}</td>
-                <td>{$event->name}</td>
-                <td>{$event->date}</td>
-                <td>{$event->location}</td>
+                <td>{$eventID}</td>
+                <td>{$eventName}</td>
+                <td>{$eventDate}</td>
+                <td>{$eventLocationDisplay}</td>
+                <td>{$eventDescription}</td>
                 <td>
                     <form method="POST" class="d-inline">
                         <input type="hidden" name="action" value="delete_event">
-                        <input type="hidden" name="eventID" value="{$event->id}">
+                        <input type="hidden" name="eventID" value="{$eventID}">
                         <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                     </form>
                 </td>

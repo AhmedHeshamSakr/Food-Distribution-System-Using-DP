@@ -28,10 +28,6 @@ try {
         
         // Assign the newly created address to $eventLocation
         $eventLocation = $address; // Ensure $eventLocation is assigned
-
-        // Step 2: Create an EventAdmin object
-        $admin = new EventAdmin('John', 'Doe', 'john.doe@example.com', '1234567890');
-
         // Step 3: Create multiple events using the EventAdmin object
         echo "Creating multiple events...\n";
 

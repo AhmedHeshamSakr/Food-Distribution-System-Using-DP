@@ -8,7 +8,6 @@ error_reporting(E_ALL);
 require_once __DIR__ . "/../Models/#a-Eadmin.php";
 require_once __DIR__ . "/../Models/Address.php";
 require_once __DIR__ . "/../Views/EAdminView.php";
-
 class EventAdminController
 {
     private EventAdminView $view;
@@ -16,6 +15,9 @@ class EventAdminController
 
     public function __construct(EventAdminView $view)
     {
+
+        // $this->eventAdmin=new EventAdmin();
+
         session_start();
 
         $email = $_SESSION['email'] ?? null;
@@ -55,14 +57,12 @@ class EventAdminController
                     case 'create_event':
                         $this->handleCreateEvent();
                         break;
-                    // case 'update_event':
-                    //     $this->handleUpdateEvent();
-                    //     break;
                     case 'delete_event':
                         $this->handleDeleteEvent();
                         break;
                 }
 
+                // Redirect to prevent form resubmission
                 header("Location: " . $_SERVER['REQUEST_URI']);
                 exit;
             } catch (Exception $e) {
@@ -77,63 +77,53 @@ class EventAdminController
     {
         $eventData = $_POST;
 
+        // Validate required fields
+        if (empty($eventData['eventDate']) || empty($eventData['eventName']) || empty($eventData['eventDescription'])) {
+            throw new Exception("Missing required event fields.");
+        }
+
         $address = new Address(
-            $eventData['locationName'],
+            $eventData['locationName'] ?? '',
             $eventData['locationParentId'] ?? null,
-            $eventData['locationLevel']
+            $eventData['locationLevel'] ?? ''
         );
 
+        // Ensure the address is created in the database
         if ($address->create()) {
-            unset($eventData['eventID']);
             $this->eventAdmin->createEvent(
                 $eventData['eventDate'],
                 $address,
                 $eventData['eventName'],
                 $eventData['eventDescription'],
-                (int) $eventData['reqCooks'],
-                (int) $eventData['reqForDelivery'],
-                (int) $eventData['reqCoordinators']
+                (int) ($eventData['reqCooks'] ?? 0),
+                (int) ($eventData['reqForDelivery'] ?? 0),
+                (int) ($eventData['reqCoordinators'] ?? 0)
             );
+        } else {
+            throw new Exception("Failed to create address for the event.");
         }
     }
 
-    // private function handleUpdateEvent()
-    // {
-    //     $eventData = $_POST;
-
-    //     $address = Address::read($eventData['locationId']);
-    //     if ($address) {
-    //         $address->setName($eventData['locationName']);
-    //         $address->setParentId($eventData['locationParentId'] ?? null);
-    //         $address->setLevel($eventData['locationLevel']);
-
-    //         if ($address->update()) {
-    //             $this->eventAdmin->updateEvent(
-    //                 (int) $eventData['eventID'],
-    //                 $eventData['eventDate'],
-    //                 $address,
-    //                 $eventData['eventName'],
-    //                 $eventData['eventDescription'],
-    //                 (int) $eventData['reqCooks'],
-    //                 (int) $eventData['reqForDelivery'],
-    //                 (int) $eventData['reqCoordinators']
-    //             );
-    //         }
-    //     }
-    // }
-
     private function handleDeleteEvent()
     {
-        $eventID = (int) $_POST['eventID'];
-        $this->eventAdmin->deleteEvent($eventID);
+        $eventID = (int) ($_POST['eventID'] ?? 0);
+
+        if ($eventID <= 0) {
+            throw new Exception("Invalid event ID provided for deletion.");
+        }
+
+        if (!$this->eventAdmin->deleteEvent($eventID)) {
+            throw new Exception("Failed to delete the event.");
+        }
     }
 
     private function renderPage()
     {
         $this->view->renderPageHeader();
-        $events = $this->eventAdmin->getAllEvents();
+        $events =$this->eventAdmin->getAllEvents();
         $this->view->renderEventList($events);
         $this->view->renderCreateEventForm();
         $this->view->renderPageFooter();
+
     }
 }
