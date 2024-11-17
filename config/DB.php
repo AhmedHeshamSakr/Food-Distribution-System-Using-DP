@@ -114,3 +114,5 @@ function close_connection()
 {
     Database::getInstance()->closeConnection();
 }
+
+?>
