@@ -72,27 +72,28 @@ class Reporter extends Person {
 
     // Method to update the status of an existing report, which will be used by ADMIN
     public function updateReportStatus($reportID, $newStatus)
-{
-    // Validate input
-    $validStatuses = ['Pending', 'Acknowledged', 'In Progress', 'Completed'];
-    if (!in_array($newStatus, $validStatuses)) {
-        
-        return false;
+    {
+        // Validate input
+        $validStatuses = ['Pending', 'Acknowledged', 'In Progress', 'Completed'];
+        if (!in_array($newStatus, $validStatuses)) {
+            
+            return false;
+        }
+
+        // Ensure the report ID is provided
+        if (!$reportID) {
+            
+            return false;
+        }
+
+        // Create the database query to update the status
+        $query = "UPDATE report SET status = '$newStatus' WHERE reportID = '$reportID' AND is_deleted = FALSE";
+
+        // Execute the query
+        $result = run_query($query);
+        return $result ? true : false;
+
     }
-
-    // Ensure the report ID is provided
-    if (!$reportID) {
-        
-        return false;
-    }
-
-    // Create the database query to update the status
-    $query = "UPDATE report SET status = '$newStatus' WHERE reportID = '$reportID' AND is_deleted = FALSE";
-
-    // Execute the query
-    $result = run_query($query);
-
-}
 
     // Method to recognize a report, marking it as reviewed or acknowledged, to be used by ADMIN 
     public function recognizeReport($reportID) {
@@ -119,7 +120,7 @@ class Reporter extends Person {
             return $this->reportingData->deleteReport($reportID);
         }
     
-        echo "Report not found or already deleted.\n";
+        //echo "Report not found or already deleted.\n";
         return false;
     }
     
