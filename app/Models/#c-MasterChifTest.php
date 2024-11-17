@@ -34,7 +34,7 @@ echo "Running Tests...\n";
 // Cleanup before starting tests
 cleanup();
 
-class TestUser extends User {
+class TestUser extends Person {
     public function __construct(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo) {
         // Create a mock login instance for testing
         $login = new withEmail($email, 'password');

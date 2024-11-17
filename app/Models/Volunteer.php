@@ -4,7 +4,7 @@ require_once 'Address.php';
 require_once 'Badges.php';
 
 
-class Volunteer extends User
+class Volunteer extends Person
 {
     private Address $address;
     public string $nationalID;
@@ -142,16 +142,16 @@ class Volunteer extends User
 
 
 
-abstract class VolunteerRoles extends User
+abstract class VolunteerRoles extends Person
 {
-    protected User $ref;  // Decorated User object
+    protected Person $ref;  // Decorated User object
 
 
 
 
 
     // Constructor that also initializes the parent User class
-    public function __construct(User $ref)
+    public function __construct(Person $ref)
     {
         parent::__construct(
             $ref->getUserTypeID(), 
@@ -165,9 +165,9 @@ abstract class VolunteerRoles extends User
     }
     public function hasRole(int $roleFlag, ): bool {
 
-        $myuserTypeID = $this->ref->getUserTypeID();
-        echo 'this is the role flag'.$roleFlag . '</br>';
-        echo 'this is the user type id'.$myuserTypeID . '</br>';
+        $myuserTypeID = $this->getUserTypeID();
+        //echo 'this is the role flag'.$roleFlag . '</br>';
+        //echo 'this is the user type id'.$myuserTypeID . '</br>';
         return ($myuserTypeID & $roleFlag) == $roleFlag;
     }
     

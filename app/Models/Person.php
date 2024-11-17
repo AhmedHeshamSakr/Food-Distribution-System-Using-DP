@@ -3,7 +3,7 @@
 
 require_once __DIR__ . "/../../config/DB.php";
 
-abstract class User
+abstract class Person
 {
 
     public const COOK_FLAG = 1 << 0;       // Binary 00001
@@ -11,6 +11,9 @@ abstract class User
     public const COORDINATOR_FLAG = 1 << 2; // Binary 00100
     public const REPORTER_FLAG = 1 << 3;   // Binary 01000
     public const DONOR_FLAG = 1 << 4;  // Binary 10000 
+    public const B_ADMIN_FLAG = 1 << 5;  // Binary 100000
+    public const E_ADMIN_FLAG = 1<< 6;
+    public const V_ADMIN_FLAG = 1<< 7;
 
 
     private int $userTypeID = 0;
@@ -166,10 +169,10 @@ abstract class User
         $fieldsToUpdate = [
             'userTypeID' => $this->userTypeID
         ];
-        echo 'the new user type id is '.$this->userTypeID;
+        //echo 'the new user type id is '.$this->userTypeID;
 
         $gottenvalue = $this->getUserTypeID();
-        echo 'the gotten value is '.$gottenvalue;
+        //echo 'the gotten value is '.$gottenvalue;
         return $this->updatePerson($fieldsToUpdate); 
     }
 
@@ -216,12 +219,6 @@ abstract class User
         $this->login = $login;
     }
 
-
-    public function logout():bool
-    {
-        $this->login->isAuthenticated = false;
-        return !$this->login->isAuthenticated;
-    }
 
 
     public function chooseRole(): bool {
