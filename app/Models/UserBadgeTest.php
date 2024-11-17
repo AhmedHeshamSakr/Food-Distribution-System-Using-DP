@@ -6,7 +6,7 @@ require_once 'Login.php'; // Assuming Login class is defined in this file
 require_once 'User.php';
 require_once 'Badges.php';
 
-class TestUser extends User {
+class TestUser extends Person {
     public function __construct(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo) {
         // Create a mock login instance for testing
         $login = new withEmail($email, 'password');

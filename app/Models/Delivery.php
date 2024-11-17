@@ -14,115 +14,115 @@ class Delivery
 
     public function __construct(string $deliveryDate, string $startLocation, string $endLocation, int $deliveryGuyID, string $status = 'pending', ?string $deliveryDetails = null)
     {
-       
         $this->deliveryDate = $deliveryDate;
         $this->startLocation = $startLocation;
         $this->endLocation = $endLocation;
         $this->deliveryGuyID = $deliveryGuyID;
         $this->status = $status;
-        $this->deliveryDetails = $deliveryDetails; // Initialize deliveryDetails
-        $this -> insertDelivery($deliveryDate, $startLocation, $endLocation, $deliveryGuyID, $status, $deliveryDetails);
+        $this->deliveryDetails = $deliveryDetails;
+        $this->insertDelivery($deliveryDate, $startLocation, $endLocation, $deliveryGuyID, $status, $deliveryDetails);
     }
-    
 
-    // Getter and Setter Methods
+    // Getter for deliveryID
     public function getDeliveryID(): int
     {
         return $this->deliveryID;
     }
 
-
-
+    // Getter for deliveryDate
     public function getDeliveryDate(): string
     {
         return $this->deliveryDate;
     }
 
+    // Setter for deliveryDate with database update
     public function setDeliveryDate(string $deliveryDate): void
     {
         $this->deliveryDate = $deliveryDate;
-        $this->updateDelivery(['deliveryDate' => $deliveryDate]); // Automatically update
+        $this->updateDelivery(['deliveryDate' => $deliveryDate]);
     }
 
+    // Getter for startLocation
     public function getStartLocation(): string
     {
         return $this->startLocation;
     }
 
+    // Setter for startLocation with database update
     public function setStartLocation(string $startLocation): void
     {
         $this->startLocation = $startLocation;
-        $this->updateDelivery(['startLocation' => $startLocation]); // Automatically update
+        $this->updateDelivery(['startLocation' => $startLocation]);
     }
 
+    // Getter for endLocation
     public function getEndLocation(): string
     {
         return $this->endLocation;
     }
 
+    // Setter for endLocation with database update
     public function setEndLocation(string $endLocation): void
     {
         $this->endLocation = $endLocation;
-        $this->updateDelivery(['endLocation' => $endLocation]); // Automatically update
+        $this->updateDelivery(['endLocation' => $endLocation]);
     }
 
+    // Getter for deliveryGuyID
     public function getDeliveryGuy(): int
     {
         return $this->deliveryGuyID;
     }
 
-    // public function setDeliveryGuy(DeliveryGuy $deliveryGuy): void
-    // {
-    //     $this->deliveryGuy = $deliveryGuy;
-    //     $this->updateDelivery(['deliveryGuy' => $deliveryGuy]); // Automatically update
-    // }
-
+    // Getter for status
     public function getStatus(): string
     {
         return $this->status;
     }
 
+    // Setter for status with database update
     public function setStatus(string $status): void
     {
         $validStatuses = ['pending', 'delivering', 'delivered'];
         if (in_array($status, $validStatuses)) {
             $this->status = $status;
-            $this->updateDelivery(['status' => $status]); // Automatically update status
+            $this->updateDelivery(['status' => $status]);
         }
     }
 
+    // Getter for deliveryDetails
     public function getDeliveryDetails(): ?string
     {
         return $this->deliveryDetails;
     }
 
+    // Setter for deliveryDetails with database update
     public function setDeliveryDetails(?string $deliveryDetails): void
     {
         $this->deliveryDetails = $deliveryDetails;
-        $this->updateDelivery(['deliveryDetails' => $deliveryDetails]); // Automatically update
+        $this->updateDelivery(['deliveryDetails' => $deliveryDetails]);
     }
 
     // Insert a new delivery
     public function insertDelivery(string $deliveryDate, string $startLocation, string $endLocation, int $deliveryGuyID, string $status = 'pending', ?string $deliveryDetails = null): bool
     {
-        // Sanitize inputs to prevent SQL injection
-        $deliveryDate = mysqli_real_escape_string(Database::getInstance()->getConnection(), $deliveryDate);
-        $startLocation = mysqli_real_escape_string(Database::getInstance()->getConnection(), $startLocation);
-        $endLocation = mysqli_real_escape_string(Database::getInstance()->getConnection(), $endLocation);
-        $deliveryGuy = mysqli_real_escape_string(Database::getInstance()->getConnection(), $deliveryGuyID);
-        $status = mysqli_real_escape_string(Database::getInstance()->getConnection(), $status);
-        $deliveryDetails = mysqli_real_escape_string(Database::getInstance()->getConnection(), $deliveryDetails);
+        $connection = Database::getInstance()->getConnection();
 
-        // SQL query to insert the delivery into the database
-        $query = "INSERT INTO Delivery (deliveryDate, startLocation, endLocation, deliveryGuy, status, deliveryDetails) 
-                  VALUES ('{$deliveryDate}', '{$startLocation}', '{$endLocation}', '{$deliveryGuy}', '{$status}', '{$deliveryDetails}')";
+        // Sanitize inputs
+        $deliveryDate = mysqli_real_escape_string($connection, $deliveryDate);
+        $startLocation = mysqli_real_escape_string($connection, $startLocation);
+        $endLocation = mysqli_real_escape_string($connection, $endLocation);
+        $deliveryGuyID = mysqli_real_escape_string($connection, $deliveryGuyID);
+        $status = mysqli_real_escape_string($connection, $status);
+        $deliveryDetails = mysqli_real_escape_string($connection, $deliveryDetails);
 
-        // Run the query and return whether it was successful
+        $query = "INSERT INTO delivery (deliveryDate, startLocation, endLocation, deliveryGuy, status, deliveryDetails) 
+                  VALUES ('{$deliveryDate}', '{$startLocation}', '{$endLocation}', '{$deliveryGuyID}', '{$status}', '{$deliveryDetails}')";
+
         $result = run_query($query);
 
         if ($result) {
-            // Set the deliveryID to the last inserted ID
-            $this->deliveryID = mysqli_insert_id(Database::getInstance()->getConnection());
+            $this->deliveryID = mysqli_insert_id($connection);
             return true;
         }
         return false;
@@ -131,33 +131,26 @@ class Delivery
     // Update delivery with dynamic fields
     public function updateDelivery(array $fieldsToUpdate): bool
     {
-        // Create an array to hold the SET part of the SQL query
+        $connection = Database::getInstance()->getConnection();
         $setQuery = [];
 
-        // Loop through the fieldsToUpdate array and create the SET portion of the query
         foreach ($fieldsToUpdate as $field => $value) {
-            // Escape the value to prevent SQL injection
-            $escapedValue = mysqli_real_escape_string(Database::getInstance()->getConnection(), $value);
+            $escapedValue = mysqli_real_escape_string($connection, $value);
             $setQuery[] = "$field = '$escapedValue'";
         }
 
-        // Join the setQuery array into a string with commas
         $setQueryStr = implode(', ', $setQuery);
+        $query = "UPDATE delivery SET $setQueryStr WHERE deliveryID = '{$this->deliveryID}'";
 
-        // Construct the full SQL query
-        $query = "UPDATE Delivery SET $setQueryStr WHERE deliveryID = '{$this->deliveryID}'";
-
-        // Run the query and return the result
         return run_query($query);
     }
 
     // Delete the delivery
     public function deleteDelivery(): bool
     {
-        $query = "DELETE FROM Delivery WHERE deliveryID = '{$this->deliveryID}'";
+        $query = "DELETE FROM delivery WHERE deliveryID = '{$this->deliveryID}'";
         return run_query($query);
     }
-
-    
 }
+
 ?>

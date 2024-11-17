@@ -6,12 +6,15 @@ require_once 'User.php';
 require_once 'ReportData.php'; 
 require_once 'Login.php'; 
 
-class Reporter extends User {
+class Reporter extends Person {
     private Reporting $reporting;
+    private int $userTypeID = Person::REPORTER_FLAG;  
     private ReportingData $reportingData;
     // Constructor
     public function __construct($userTypeID, $firstName, $lastName, $email, $phoneNo, iLogin $login)
     {
+        $userTypeID = Person::REPORTER_FLAG;
+        $this->userTypeID = $userTypeID;
         parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
     }
 
@@ -83,6 +86,11 @@ class Reporter extends User {
         // Use Reporting class to get reports by user ID
        
         return $this->reporting->getReportsByUserID($reporterID);
+    }
+
+    public function getUserTypeID(): int
+    {
+        return $this->userTypeID;
     }
 }
 

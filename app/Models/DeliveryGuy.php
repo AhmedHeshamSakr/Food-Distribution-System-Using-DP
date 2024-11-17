@@ -10,17 +10,20 @@ class DeliveryGuy extends VolunteerRoles
     //private User $user; //howa howa el ref fo2 khalas
 
     private Vehicle $vehicleType;
+    private int $userTypeID= Person::DELIVERY_FLAG; // 2
     private array $deliveryList = [];
     
     public function __construct(
-        User $user,    
+        Person $user,    
         Vehicle $vehicleType
     ) {
         parent::__construct($user);   
         $this->vehicleType = $vehicleType;
         $this->deliveryList = [];
+        //$this->chooseRole();
         $this->insertDeliveryGuy();
-        $this->chooseRole();
+        
+
     }
 
     
@@ -124,14 +127,7 @@ class DeliveryGuy extends VolunteerRoles
         return $deliveries;
     }
     
-
-
-
-
-
     //function to retrieve history
-
-
     public function assignDelivery(Delivery $delivery, string $deliveryTime): bool {
         // Create a new Delivering instance and insert the record in the database
         $delivering = new Delivering($this, $delivery, $deliveryTime);
@@ -155,11 +151,34 @@ class DeliveryGuy extends VolunteerRoles
         }
         return false;
     }
-
-    public function chooseRole(): bool
+    public function getUserTypeID(): int
     {
-        $this->roleType |= self::DELIVERY_FLAG;  // Set DeliveryGuy role flag
+        return $this->userTypeID;
+    }
+
+    public function chooseRole(): bool {
+        
+        // Get the current userTypeID, then apply the Cook flag using the setter
+        $currentType = $this->ref->getUserTypeID(); // 1 from cook
+        //echo 'delivery: the following is the current type'. $currentType . '</br>';
+        $this->setUserTypeID($currentType | Person::DELIVERY_FLAG); // Access the constant in User
+        //echo 'delivery: the following the the current delivery type'. $this->getUserTypeID() . '</br>'; // should be 3
         return true;
     }
+
+
+    public function setUserTypeID(int $userTypeID): bool
+    {
+        $this->userTypeID = $userTypeID;
+        $fieldsToUpdate = [
+            'userTypeID' => $this->userTypeID
+        ];
+        //echo 'delivery: the new user type id is '.$this->userTypeID . '</br>';
+
+        $gottenvalue = $this->getUserTypeID();
+        //echo 'the gotten value is '.$gottenvalue . '</br>';
+        return $this->updatePerson($fieldsToUpdate); 
+    }
+    
 
 }
