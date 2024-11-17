@@ -8,12 +8,11 @@ interface iLogin {
     public function logout(): bool;
 }
 
-class withEmail implements iLogin {
+
 class withEmail implements iLogin {
     private $email;
     private $password;
     private $isAuthenticated = false;
-    private $userData; // to Store user data after login from person table
     private $userData; // to Store user data after login from person table
 
     public function __construct($email, $password) {
@@ -59,7 +58,6 @@ class withEmail implements iLogin {
     public function logout(): bool {
         $this->isAuthenticated = false;
         return true;
-        return true;
     }
     // Getter to check if the user is authenticated
     public function isAuthenticated(): bool {
@@ -76,7 +74,7 @@ class withEmail implements iLogin {
     }
 
     // This function should be used to register a user, storing a hashed password in the database
-    public function register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID): bool {
+    public function register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID=0): bool {
         // Establish the database connection
         $db = Database::getInstance()->getConnection();
     
@@ -106,11 +104,9 @@ class withEmail implements iLogin {
         if (mysqli_query($db, $query)) {
             // After successful registration, get the userID
             $userID = mysqli_insert_id($db); // Get the last inserted ID (userID)
-    
+            $login = new withEmail($email, 'password');
             // Create an instance of the Person class and insert extra information
-            $login = new iLogin(); // Assuming iLogin is a class or interface
-            $User = new User($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
-    
+            $User = new User($userTypeID=0, $firstName, $lastName, $email, $phoneNo, $login);
             // If person is successfully inserted, return true
             return true;
         }

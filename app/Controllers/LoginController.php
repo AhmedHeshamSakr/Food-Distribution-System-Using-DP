@@ -83,17 +83,22 @@ class LoginController
      * Handle the registration action.
      */
     private function handleRegistration()
-    {
-        $email = $_POST['email'] ?? '';
-        $password = $_POST['password'] ?? '';
+{
+    // Retrieve form inputs
+    $email = $_POST['email'] ?? '';
+    $password = $_POST['password'] ?? '';
+    $firstName = $_POST['firstName'] ?? '';
+    $lastName = $_POST['lastName'] ?? '';
+    $phoneNo = $_POST['phoneNo'] ?? '';  // Assuming 1 is the default user type ID
 
-        if ($this->loginHandler->register($email, $password)) {
-            echo "<p>Registration successful! You can now log in.</p>";
-            $this->mode = 'login'; // Redirect to login after registration
-        } else {
-            echo "<p>Registration failed. The email might already be in use.</p>";
-        }
+    // Call the register method with the necessary user information
+    if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo)) {
+        echo "<p>Registration successful! You can now log in.</p>";
+        $this->mode = 'login'; // Redirect to login after successful registration (optional, depending on your flow)
+    } else {
+        echo "<p>Registration failed. The email might already be in use.</p>";
     }
+}
 
     /**
      * Handle the logout action.
