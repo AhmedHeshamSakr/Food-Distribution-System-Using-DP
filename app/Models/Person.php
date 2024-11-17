@@ -22,16 +22,16 @@ abstract class Person
     private string $lastName;
     private string $email;
     private string $phoneNo;
-    private iLogin $login;
+    // private iLogin $login;
 
-    public function __construct(int $userTypeID=0, string $firstName, string $lastName, string $email, string $phoneNo, iLogin $login)
+    public function __construct(int $userTypeID=0, string $firstName, string $lastName, string $email, string $phoneNo)
     {
         $this->userTypeID = $userTypeID;
         $this->firstName = $firstName;
         $this->lastName = $lastName;
         $this->email = $email;
         $this->phoneNo = $phoneNo;
-        $this->login = $login;
+        // $this->login = $login;
 
         if (!$this->emailExists($email)) {
             $this->insertPerson($userTypeID, $firstName, $lastName, $email, $phoneNo);
@@ -157,10 +157,10 @@ abstract class Person
     {
         return $this->phoneNo;
     }
-    public function getLogin(): iLogin
-    {
-        return $this->login;
-    }
+    // public function getLogin(): iLogin
+    // {
+    //     return $this->login;
+    // }
 
 
     public function setUserTypeID(int $userTypeID): bool
@@ -214,10 +214,10 @@ abstract class Person
        return $this->updatePerson($fieldsToUpdate); 
     }
 
-    public function setLogin(iLogin $login): void
-    {
-        $this->login = $login;
-    }
+    // public function setLogin(iLogin $login): void
+    // {
+    //     $this->login = $login;
+    // }
 
 
 

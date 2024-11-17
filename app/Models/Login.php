@@ -106,7 +106,7 @@ class withEmail implements iLogin {
             $userID = mysqli_insert_id($db); // Get the last inserted ID (userID)
             $login = new withEmail($email, 'password');
             // Create an instance of the Person class and insert extra information
-            $User = new User($userTypeID=0, $firstName, $lastName, $email, $phoneNo, $login);
+            $User = new User($userTypeID=0, $firstName, $lastName, $email, $phoneNo);
             // If person is successfully inserted, return true
             return true;
         }

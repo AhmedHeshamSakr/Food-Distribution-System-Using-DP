@@ -63,7 +63,7 @@ function testObserverPattern()
 {
     $email = "mohamed16@gmail.com";
  // Instantiate the login object (replace with actual strategy: withGoogle, withFacebook, or withEmail)
- $login = new withGoogle($email, 'password'); // Replace 'password' with the actual password for testing
+ $login = new withEmail($email, 'password'); // Replace 'password' with the actual password for testing
 
  // Attempt to log in with the provided credentials
  if (!$login->login(['email' => $email, 'password' => 'password'])) {
@@ -73,7 +73,7 @@ function testObserverPattern()
  echo "<p>Successfully authenticated with Google for user: {$email}</p>";
 
     $address = new Address(103, '789 Oak St', 67890, 'TestVille');
-    $admin = new EventAdmin(1, 'John', 'Doe', 'john.doe@example.com', '1234567890',$login);
+    $admin = new EventAdmin(1, 'John', 'Doe', 'john.doe@example.com', '1234567890');
 
     // Creating an event with specific requirements
     $event = new Event(401, '2024-11-20', $address, 'Thanksgiving Event', 'Family and friends gathering', 2, 1, 1);

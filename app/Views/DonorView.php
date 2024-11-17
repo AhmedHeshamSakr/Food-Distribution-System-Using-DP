@@ -1,150 +1,159 @@
 <?php
-// Assuming the Donor class exists and has the required methods
-require_once '/../Models/Donor.php';
-// require_once 'DonorView.php';
-
 class DonorView
 {
-    private $donor;
-
-    public function __construct(Donor $donor)
-    {
-        $this->donor = $donor;
-    }
-
     /**
-     * Render the donor's donation history in a tabular format.
+     * Render the donation history of the donor.
      */
-    
-    public function renderDonationHistory(): void
+    public function renderDonationHistory(array $donationHistory)
     {
-        $donationHistory = $this->donor->fetchDonationHistory();
+        echo '<div class="container mt-5">';
+        echo '<h2>Your Donation History</h2>';
 
         if (empty($donationHistory)) {
-            echo "<p>No donation history available.</p>";
-            return;
+            echo '<p class="alert alert-info">No donations made yet.</p>';
+        } else {
+            echo '<table class="table table-bordered">';
+            echo '<thead class="thead-light">';
+            echo '<tr>';
+            echo '<th scope="col">Donation Date</th>';
+            echo '<th scope="col">Amount $</th>';
+            echo '<th scope="col">Payment Method</th>';
+            echo '</tr>';
+            echo '</thead>';
+            echo '<tbody>';
+            foreach ($donationHistory as $donation) {
+                echo '<tr>';
+                echo '<td>' . htmlspecialchars($donation['donationDate']) . '</td>';
+                echo '<td>' . htmlspecialchars($donation['donationAmount']) . '</td>';
+                echo '<td>' . htmlspecialchars($donation['paymentMethod']) . '</td>';
+                echo '</tr>';
+            }
+            echo '</tbody>';
+            echo '</table>';
         }
 
-        echo "<h2>Donation History</h2>";
-        echo "<table border='1' cellpadding='10'>";
-        echo "<tr>
-                <th>Donation ID</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Payment Method</th>
-              </tr>";
-
-        foreach ($donationHistory as $donation) {
-            echo "<tr>
-                    <td>{$donation['donationID']}</td>
-                    <td>{$donation['donationDate']}</td>
-                    <td>\${$donation['donationAmount']}</td>
-                    <td>{$donation['paymentMethod']}</td>
-                  </tr>";
-        }
-
-        echo "</table>";
+        echo '</div>';
     }
 
     /**
-     * Render a form for adding a donation.
+     * Render the donation form.
      */
-    public function renderAddDonationForm(): void
+    public function renderDonationForm()
     {
-        echo <<<HTML
-        <h2>Add Donation</h2>
-        <form method="post" action="addDonation.php">
-            <label for="amount">Donation Amount:</label>
-            <input type="number" id="amount" name="amount" step="0.01" required>
-            <br>
-            <label for="paymentMethod">Payment Method:</label>
-            <select id="paymentMethod" name="paymentMethod" required>
-                <option value="Fawry">Fawry</option>
-                <option value="Credit Card">Credit Card</option>
-                <option value="Visa">Visa</option>
-            </select>
-            <br>
-            <label for="paymentDetails">Payment Details:</label>
-            <textarea id="paymentDetails" name="paymentDetails" placeholder="Enter payment details here..." required></textarea>
-            <br>
-            <button type="submit">Submit Donation</button>
-        </form>
-        HTML;
+        echo '<div class="container mt-5">';
+        echo '<h2>Make a Donation</h2>';
+        echo '<form method="POST" action="" class="form-group">';
+        
+        // Amount field
+        echo '<div class="mb-3">';
+        echo '<label for="amount" class="form-label">Amount</label>';
+        echo '<input type="number" name="amount" class="form-control" required>';
+        echo '</div>';
+
+        // Payment Method field
+        echo '<div class="mb-3">';
+        echo '<label for="paymentMethod" class="form-label">Payment Method</label>';
+        echo '<select name="paymentMethod" class="form-control" required>';
+        echo '<option value="Credit Card">Credit Card</option>';
+        echo '<option value="Visa">Visa</option>';
+        echo '<option value="Fawry">Fawry</option>';
+        echo '</select>';
+        echo '</div>';
+
+        // Payment Details field
+        echo '<div class="mb-3">';
+        echo '<label for="paymentDetails" class="form-label">Payment Details</label>';
+        echo '<input type="text" name="paymentDetails" class="form-control" required>';
+        echo '</div>';
+
+        echo '<input type="hidden" name="action" value="add_donation">';
+        echo '<button type="submit" class="btn btn-primary">Donate</button>';
+        echo '</form>';
+        echo '</div>';
+
     }
 
     /**
-     * Render a form for updating personal information.
+     * Render the form to update personal information.
      */
-    public function renderUpdatePersonalInfoForm(): void
+    public function renderPersonalInfoForm()
     {
-        $firstName = $this->donor->getFirstName();
-        $lastName = $this->donor->getLastName();
-        $email = $this->donor->getEmail();
-        $phoneNo = $this->donor->getPhoneNo();
+        echo '<div class="container mt-5">';
+        echo '<h2>Update Your Information</h2>';
 
-        echo <<<HTML
-        <h2>Update Personal Information</h2>
-        <form method="post" action="updatePersonalInfo.php">
-            <label for="firstName">First Name:</label>
-            <input type="text" id="firstName" name="firstName" value="$firstName" required>
-            <br>
-            <label for="lastName">Last Name:</label>
-            <input type="text" id="lastName" name="lastName" value="$lastName" required>
-            <br>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" value="$email" required>
-            <br>
-            <label for="phoneNo">Phone Number:</label>
-            <input type="text" id="phoneNo" name="phoneNo" value="$phoneNo" required>
-            <br>
-            <button type="submit">Update Info</button>
-        </form>
-        HTML;
+        // Button to toggle the form
+        echo '<button class="btn btn-secondary" id="toggleUpdateForm" onclick="toggleForm()">Edit Info</button>';
+
+        // Hidden form to update personal information
+        echo '<form method="POST" action="" id="updateForm" class="form-group mt-3" style="display: none;">';
+
+        // First Name field
+        echo '<div class="mb-3">';
+        echo '<label for="firstName" class="form-label">First Name</label>';
+        echo '<input type="text" name="firstName" class="form-control" required>';
+        echo '</div>';
+
+        // Last Name field
+        echo '<div class="mb-3">';
+        echo '<label for="lastName" class="form-label">Last Name</label>';
+        echo '<input type="text" name="lastName" class="form-control" required>';
+        echo '</div>';
+
+        // Email field
+        echo '<div class="mb-3">';
+        echo '<label for="email" class="form-label">Email</label>';
+        echo '<input type="email" name="email" class="form-control" required>';
+        echo '</div>';
+
+        // Phone Number field
+        echo '<div class="mb-3">';
+        echo '<label for="phoneNo" class="form-label">Phone Number</label>';
+        echo '<input type="text" name="phoneNo" class="form-control" required>';
+        echo '</div>';
+
+        echo '<input type="hidden" name="action" value="update_info">';
+        echo '<button type="submit" class="btn btn-primary">Save Changes</button>';
+        echo '</form>';
+        echo '</div>';
+
+        // Add JavaScript to handle form toggling
+        echo '<script>
+            function toggleForm() {
+                const form = document.getElementById("updateForm");
+                if (form.style.display === "none") {
+                    form.style.display = "block";
+                } else {
+                    form.style.display = "none";
+                }
+            }
+        </script>';
+    }
+
+
+    /**
+     * Render the page header and required assets (Bootstrap, etc.).
+     */
+    public function renderPageHeader()
+    {
+        echo '<!DOCTYPE html>';
+        echo '<html lang="en">';
+        echo '<head>';
+        echo '<meta charset="UTF-8">';
+        echo '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
+        echo '<title>Donor Dashboard</title>';
+        echo '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">';
+        echo '</head>';
+        echo '<body>';
     }
 
     /**
-     * Render a form for updating an existing donation.
+     * Render the page footer with JS files.
      */
-    public function renderUpdateDonationForm(): void
+    public function renderPageFooter()
     {
-        echo <<<HTML
-        <h2>Update Donation</h2>
-        <form method="post" action="updateDonation.php">
-            <label for="donationID">Donation ID:</label>
-            <input type="number" id="donationID" name="donationID" required>
-            <br>
-            <label for="amount">Donation Amount:</label>
-            <input type="number" id="amount" name="amount" step="0.01" required>
-            <br>
-            <label for="paymentMethod">Payment Method:</label>
-            <select id="paymentMethod" name="paymentMethod" required>
-                <option value="Fawry">Fawry</option>
-                <option value="Credit Card">Credit Card</option>
-                <option value="Visa">Visa</option>
-            </select>
-            <br>
-            <button type="submit">Update Donation</button>
-        </form>
-        HTML;
+        echo '<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" crossorigin="anonymous"></script>';
+        echo '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>';
+        echo '</body>';
+        echo '</html>';
     }
 }
-
-
-// Create an instance of Donor with some mock data
-$donor = new Donor(1); // Assuming the constructor takes a donor ID or similar identifier
-
-// Create an instance of DonorView
-$donorView = new DonorView($donor);
-
-// Render the donor's donation history
-$donorView->renderDonationHistory();
-
-// Render the form for adding a donation
-$donorView->renderAddDonationForm();
-
-// Render the form for updating personal information
-$donorView->renderUpdatePersonalInfoForm();
-
-// Render the form for updating an existing donation
-$donorView->renderUpdateDonationForm();
-?>

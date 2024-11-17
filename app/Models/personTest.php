@@ -10,9 +10,9 @@ require_once 'Person.php';
 $dummyLogin = new DummyLogin();
 
 // Create a new person instance for testing (using dummy data)
-$person = new class(1, 'Nina', 'Richie', 'john.ddoe@example.com', '1234567890', $dummyLogin) extends Person {
-    public function __construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login) {
-        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
+$person = new class(1, 'Nina', 'Richie', 'john.ddoe@example.com', '1234567890') extends Person {
+    public function __construct($userTypeID, $firstName, $lastName, $email, $phoneNo,) {
+        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo);
     }
 };
 

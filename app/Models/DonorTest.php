@@ -21,8 +21,6 @@ try {
     $email = 'john.doe@example.com';
     $phoneNo = '1234567890';
 
-    // Instantiate the login object (replace with actual strategy: withGoogle, withFacebook, or withEmail)
-    $login = new withGoogle($email, 'password'); // Replace 'password' with the actual password for testing
 
     // Attempt to log in with the provided credentials
     if (!$login->login(['email' => $email, 'password' => 'password'])) {
@@ -33,13 +31,14 @@ try {
 
     try {
         $db = Database::getInstance()->getConnection();
-        $donor = new Donor($userID, $firstName, $lastName, $email, $phoneNo, $login);
+        $donor = new Donor($userID, $firstName, $lastName, $email, $phoneNo);
         
-        $paymentDetails = [
-            'cardNumber' => '1234-5678-9876-5432',
-            'expiryDate' => '2025-12-31',
-            'cvv' => '123'
-        ];
+         $paymentDetails =77777 ;
+         //[
+        //     'cardNumber' => '1234-5678-9876-5432',
+        //     'expiryDate' => '2025-12-31',
+        //     'cvv' => '123'
+        // ];
     
         $donationResult = $donor->addDonation(100.50, 'Credit Card', $paymentDetails);
         echo $donationResult ? "<p>Donation added successfully.</p>" : "<p>Failed to add donation.</p>";

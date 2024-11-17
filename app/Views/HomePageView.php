@@ -11,9 +11,9 @@
     <div class="container text-center center-box">
         <h2>Home Page</h2>
         <div>
-            <a href="ReporterView.php" class="btn btn-primary btn-lg">Reporter</a>
-            <a href="DonorView.php" class="btn btn-success btn-lg">Donor</a>
-            <a href="VolunteerView.php" class="btn btn-warning btn-lg">Volunteer</a>
+            <a href="core-Reporter.php" class="btn btn-primary btn-lg">Report</a>
+            <a href="core-Doner.php" class="btn btn-success btn-lg">Donate</a>
+            <a href="core-Volunteer.php" class="btn btn-warning btn-lg">Volunteer</a>
         </div>
     </div>
 </body>

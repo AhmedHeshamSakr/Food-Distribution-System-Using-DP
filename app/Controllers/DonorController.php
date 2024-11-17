@@ -8,172 +8,109 @@ error_reporting(E_ALL);
 require_once __DIR__ . "/../Models/Donor.php";
 require_once __DIR__ . "/../Views/DonorView.php";
 
-
-
 class DonorController
 {
-    
-    private $donor;
-    private $donorView;
+    private DonorView $view;
+    private Donor $donor;
 
-    public function __construct(Donor $donor, DonorView $donorView)
-    {
-        $this->donor = $donor;
-        $this->donorView = $donorView;
-    }
+    public function __construct(DonorView $view)
+{
+    // session_start(); // Start the session to access the email
+    $email = $_SESSION['email'] ?? null;
 
-    /**
-     * Handle the request to display the donation history.
-     */
-    public function displayDonationHistory(): void
-    {
-        $this->donorView->renderDonationHistory();
-    }
+    if ($email) {
+        // Fetch user data from the database using the email
+        $query = "SELECT * FROM person WHERE email = '$email' LIMIT 1";
+        $result = mysqli_query(Database::getInstance()->getConnection(), $query);
 
-    /**
-     * Handle the request to show the add donation form.
-     */
-    public function showAddDonationForm(): void
-    {
-        $this->donorView->renderAddDonationForm();
-    }
+        if ($result && mysqli_num_rows($result) > 0) {
+            $userData = mysqli_fetch_assoc($result);
 
-    /**
-     * Process the add donation request.
-     */
-    public function processAddDonation(array $postData): void
-    {
-        try {
-            $amount = (float)$postData['amount'];
-            $paymentMethod = $postData['paymentMethod'];
-            $paymentDetails = json_decode($postData['paymentDetails'], true);
+            // Initialize Donor with retrieved data
+            $this->donor = new Donor(
+                $userData['userTypeID'],
+                $userData['firstName'],
+                $userData['lastName'],
+                $userData['email'],
+                $userData['phoneNo']
+            );
 
-            if ($this->donor->addDonation($amount, $paymentMethod, $paymentDetails)) {
-                echo "<p>Donation added successfully!</p>";
-            } else {
-                echo "<p>Failed to add donation. Please try again.</p>";
-            }
-        } catch (Exception $e) {
-            echo "<p>Error: {$e->getMessage()}</p>";
+        } else {
+            throw new Exception("User not found in the database.");
         }
+    } else {
+        throw new Exception("User is not logged in.");
     }
 
-    /**
-     * Handle the request to show the update personal information form.
-     */
-    public function showUpdatePersonalInfoForm(): void
-    {
-        $this->donorView->renderUpdatePersonalInfoForm();
-    }
-
-    /**
-     * Process the update personal information request.
-     */
-    public function processUpdatePersonalInfo(array $postData): void
-    {
-        try {
-            $firstName = $postData['firstName'];
-            $lastName = $postData['lastName'];
-            $email = $postData['email'];
-            $phoneNo = $postData['phoneNo'];
-
-            if ($this->donor->updatePersonalInfo($firstName, $lastName, $email, $phoneNo)) {
-                echo "<p>Personal information updated successfully!</p>";
-            } else {
-                echo "<p>Failed to update personal information. Please try again.</p>";
-            }
-        } catch (Exception $e) {
-            echo "<p>Error: {$e->getMessage()}</p>";
-        }
-    }
-
-    /**
-     * Handle the request to show the update donation form.
-     */
-    public function showUpdateDonationForm(): void
-    {
-        $this->donorView->renderUpdateDonationForm();
-    }
-
-    /**
-     * Process the update donation request.
-     */
-    public function processUpdateDonation(array $postData): void
-    {
-        try {
-            $donationID = (int)$postData['donationID'];
-            $amount = (float)$postData['amount'];
-            $paymentMethod = $postData['paymentMethod'];
-
-            if ($this->donor->updateDonation($donationID, $amount, $paymentMethod)) {
-                echo "<p>Donation updated successfully!</p>";
-            } else {
-                echo "<p>Failed to update donation. Please try again.</p>";
-            }
-        } catch (Exception $e) {
-            echo "<p>Error: {$e->getMessage()}</p>";
-        }
-    }
+    $this->view = $view;
 }
 
-// Example: Fetching user data from session (ensure session_start() is called earlier)
-session_start();
+    /**
+     * Handle the request and render the appropriate view.
+     */
+    public function handleRequest()
+    {
+        $action = $_POST['action'] ?? null;
 
-if (isset($_SESSION['userID'], $_SESSION['firstName'], $_SESSION['lastName'], $_SESSION['email'], $_SESSION['phoneNo'], $_SESSION['login'])) {
-    $userID = $_SESSION['userID'];
-    $firstName = $_SESSION['firstName'];
-    $lastName = $_SESSION['lastName'];
-    $email = $_SESSION['email'];
-    $phoneNo = $_SESSION['phoneNo'];
-    $login = $_SESSION['login'];
-} else {
-    die("User session data is missing. Please log in.");
-}
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if ($action === 'add_donation') {
+                $this->handleAddDonation();
+            } elseif ($action === 'update_info') {
+                $this->handleUpdatePersonalInfo();
+            }
 
-// Instantiate Donor and DonorView
-$donor = new Donor($userID, $firstName, $lastName, $email, $phoneNo, $login);
-$donorView = new DonorView($donor);
+            // Redirect to avoid form resubmission
+            header("Location: " . $_SERVER['REQUEST_URI']);
+            exit;
+        }
 
-// Instantiate the controller
-$controller = new DonorController($donor, $donorView);
-// Example action handling
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
-    $action = $_GET['action'];
-    switch ($action) {
-        case 'donationHistory':
-            $controller->displayDonationHistory();
-            break;
-        case 'addDonationForm':
-            $controller->showAddDonationForm();
-            break;
-        case 'updatePersonalInfoForm':
-            $controller->showUpdatePersonalInfoForm();
-            break;
-        case 'updateDonationForm':
-            $controller->showUpdateDonationForm();
-            break;
-        default:
-            echo "<p>Invalid action specified.</p>";
-            break;
+        $this->renderPage();
     }
-} elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    $action = $_POST['action'];
-    switch ($action) {
-        case 'addDonation':
-            $controller->processAddDonation($_POST);
-            break;
-        case 'updatePersonalInfo':
-            $controller->processUpdatePersonalInfo($_POST);
-            break;
-        case 'updateDonation':
-            $controller->processUpdateDonation($_POST);
-            break;
-        default:
-            echo "<p>Invalid action specified.</p>";
-            break;
+
+
+    /**
+     * Handle adding a donation.
+     */
+    private function handleAddDonation()
+    {
+        $amount = $_POST['amount'];
+        $paymentMethod = $_POST['paymentMethod'];
+        $paymentDetails = $_POST['paymentDetails']; // Handle specific details as necessary
+
+        $this->donor->addDonation($amount, $paymentMethod, $paymentDetails);
     }
-} else {
-    echo "<p>No valid request received.</p>";
+
+    /**
+     * Handle updating personal info.
+     */
+    private function handleUpdatePersonalInfo()
+    {
+        $firstName = $_POST['firstName'];
+        $lastName = $_POST['lastName'];
+        $email = $_POST['email'];
+        $phoneNo = $_POST['phoneNo'];
+
+        $this->donor->updatePersonalInfo($firstName, $lastName, $email, $phoneNo);
+    }
+
+    /**
+     * Render the page with all relevant content.
+     */
+    private function renderPage()
+    {
+        $donationHistory = $this->donor->fetchDonationHistory();
+
+        // Render page header and required assets
+        $this->view->renderPageHeader();
+
+        // Render the view content (donation history, donation form, personal info form)
+
+        $this->view->renderPersonalInfoForm();
+        $this->view->renderDonationForm();
+        $this->view->renderDonationHistory($donationHistory);
+       
+
+        // Render page footer with JS files
+        $this->view->renderPageFooter();
+    }
 }
-
-

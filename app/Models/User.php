@@ -12,10 +12,10 @@ require_once 'Person.php';
 
     private int $roleType =0;
     // Constructor that calls the parent constructor
-    public function __construct(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, iLogin $login)
+    public function __construct(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo)
     {
         // Call the parent constructor to initialize the Person class
-        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
+        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo);
         $this->chooseRole();
     }
 

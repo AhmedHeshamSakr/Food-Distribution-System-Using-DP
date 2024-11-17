@@ -2,12 +2,12 @@
 
 require_once __DIR__ . '/../Models/Login.php';
 require_once __DIR__ . '/../Views/LoginView.php';
-
 class LoginController
 {
     private $loginHandler;
     private $view;
     private $mode; // Tracks whether the view is for login or register
+    private $errorMessage; // Store error messages
 
     public function __construct()
     {
@@ -16,6 +16,7 @@ class LoginController
         // Initialize the view
         $this->view = new EmailLoginView($this->loginHandler);
         $this->mode = 'login'; // Default to login view
+        $this->errorMessage = ''; // Initialize empty error message
     }
 
     /**
@@ -23,6 +24,12 @@ class LoginController
      */
     public function handleRequest()
     {
+        session_start();
+
+        // Restore mode and error message from session if available
+        $this->mode = $_SESSION['mode'] ?? 'login';
+        $this->errorMessage = $_SESSION['errorMessage'] ?? '';
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->processFormSubmission();
         }
@@ -36,31 +43,40 @@ class LoginController
     private function processFormSubmission()
     {
         $action = $_POST['action'] ?? '';
-
+    
         switch ($action) {
             case 'login':
                 $this->handleLogin();
                 break;
-
+    
             case 'register':
                 $this->handleRegistration();
                 break;
-
+    
             case 'logout':
                 $this->handleLogout();
                 break;
-
+    
             case 'show_register':
                 $this->mode = 'register';
                 break;
-
+    
             case 'show_login':
                 $this->mode = 'login';
                 break;
-
+    
             default:
-                echo "<p>Invalid action.</p>";
+                $this->errorMessage = 'Invalid action.';
         }
+    
+        // Store mode and error message in session
+        session_start();
+        $_SESSION['mode'] = $this->mode;
+        $_SESSION['errorMessage'] = $this->errorMessage;
+    
+        // Redirect to avoid form resubmission
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit;
     }
 
     /**
@@ -70,35 +86,41 @@ class LoginController
     {
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
-
+    
         if ($this->loginHandler->login(['email' => $email, 'password' => $password])) {
-            header("Location:../app/Views/HomePageView.php"); // Change 'dashboard.php' to your target page
+            // Store email in session
+            session_start();
+            $_SESSION['email'] = $email;
+    
+            // Redirect to the next page
+            header("Location:../app/Views/HomePageView.php");
             exit();
         } else {
-            echo "<p>Invalid email or password. Please try again.</p>";
+            $this->errorMessage = 'Invalid email or password. Please try again.';
         }
     }
+    
 
     /**
      * Handle the registration action.
      */
     private function handleRegistration()
-{
-    // Retrieve form inputs
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
-    $firstName = $_POST['firstName'] ?? '';
-    $lastName = $_POST['lastName'] ?? '';
-    $phoneNo = $_POST['phoneNo'] ?? '';  // Assuming 1 is the default user type ID
+    {
+        // Retrieve form inputs
+        $email = $_POST['email'] ?? '';
+        $password = $_POST['password'] ?? '';
+        $firstName = $_POST['firstName'] ?? '';
+        $lastName = $_POST['lastName'] ?? '';
+        $phoneNo = $_POST['phoneNo'] ?? '';  // Assuming 1 is the default user type ID
 
-    // Call the register method with the necessary user information
-    if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo)) {
-        echo "<p>Registration successful! You can now log in.</p>";
-        $this->mode = 'login'; // Redirect to login after successful registration (optional, depending on your flow)
-    } else {
-        echo "<p>Registration failed. The email might already be in use.</p>";
+        if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo)) {
+            $this->errorMessage = 'Registration successful! You can now log in.';
+            $this->mode = 'login'; // Switch to login mode on success
+        } else {
+            $this->errorMessage = 'Registration failed. The email might already be in use.';
+            $this->mode = 'register'; // Stay on the register form on failure
+        }
     }
-}
 
     /**
      * Handle the logout action.
@@ -106,7 +128,7 @@ class LoginController
     private function handleLogout()
     {
         if ($this->loginHandler->logout()) {
-            echo "<p>You have been logged out successfully.</p>";
+            $this->errorMessage = 'You have been logged out successfully.';
         }
     }
 
@@ -119,8 +141,8 @@ class LoginController
             $this->view->renderStatus();
             $this->view->renderLogoutButton();
         } else {
-            // Render the login or registration form based on the current mode
-            $this->view->renderForm($this->mode);
+            // Pass the error message to the view
+            $this->view->renderForm($this->mode, $this->errorMessage);
         }
     }
 }

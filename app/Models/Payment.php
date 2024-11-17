@@ -11,10 +11,10 @@ class PayCreditCard implements IPayment {
     private DateTime $expiryDate;
     private int $CVV;
 
-    public function __construct(string $cardNumber, DateTime $expiryDate, int $CVV) {
+    public function __construct(string $cardNumber) {
         $this->cardNumber = $cardNumber;
-        $this->expiryDate = $expiryDate;
-        $this->CVV = $CVV;
+        // $this->expiryDate = $expiryDate;
+        // $this->CVV = $CVV;
     }
 
     public function pay(float $amount): string {
@@ -28,9 +28,9 @@ class PayVisa implements IPayment {
     private string $visaNumber;
     private DateTime $visaExpiry;
 
-    public function __construct(string $visaNumber, DateTime $visaExpiry) {
+    public function __construct(string $visaNumber) {
         $this->visaNumber = $visaNumber;
-        $this->visaExpiry = $visaExpiry;
+        // $this->visaExpiry = $visaExpiry;
     }
 
     public function pay(float $amount): string {
@@ -44,9 +44,9 @@ class PayFawry implements IPayment {
     private string $fawryAccountNumber;
     private string $fawryPin;
 
-    public function __construct(string $fawryAccountNumber, string $fawryPin) {
+    public function __construct(string $fawryAccountNumber) {
         $this->fawryAccountNumber = $fawryAccountNumber;
-        $this->fawryPin = $fawryPin;
+        // $this->fawryPin = $fawryPin;
     }
 
     public function pay(float $amount): string {

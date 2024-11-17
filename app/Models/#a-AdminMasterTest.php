@@ -28,7 +28,7 @@ $eventLocation = new Address(1, '123 Test Street', 5, '12345');
 // ---------------------- Testing EventAdmin ----------------------
 
 // Initialize EventAdmin
-$eventAdmin = new EventAdmin(1, 'John', 'Doe', 'johndoe@example.com', '1234567890', $login);
+$eventAdmin = new EventAdmin(1, 'John', 'Doe', 'johndoe@example.com', '1234567890');
 
 // 1. Test creating an event
 echo "Testing Event Creation:\n";
@@ -58,7 +58,7 @@ echo $updateEventResult ? "Event updated successfully.\n" : "Event update failed
 // ---------------------- Testing BadgeAdmin ----------------------
 
 // Initialize BadgeAdmin
-$badgeAdmin = new BadgeAdmin(1, 'Jane', 'Smith', 'janesmith@example.com', '0987654321', $login);
+$badgeAdmin = new BadgeAdmin(1, 'Jane', 'Smith', 'janesmith@example.com', '0987654321');
 
 // 1. Test creating a badge
 echo "\nTesting Badge Creation:\n";

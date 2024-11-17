@@ -29,7 +29,6 @@ function setupVolunteer()
         lastName: 'Doe',
         email: $uniqueEmail,
         phoneNo: '555-1234',
-        login: $login,
         address: $address,
         nationalID: 'ABC12345',
         badge: $badge

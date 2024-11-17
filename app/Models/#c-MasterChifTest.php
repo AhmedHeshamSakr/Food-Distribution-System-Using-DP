@@ -36,11 +36,9 @@ cleanup();
 
 class TestUser extends Person {
     public function __construct(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo) {
-        // Create a mock login instance for testing
-        $login = new withEmail($email, 'password');
-        
+        // Create a mock login instance for testing        
         // Pass the login instance to the parent constructor
-        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
+        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo);
 
         // Add this user to the `volunteer` table
         $this->addToVolunteer();

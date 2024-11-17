@@ -11,15 +11,15 @@ class EmailLoginView
     /**
      * Render the appropriate form based on the mode (login or register).
      */
-    public function renderForm(string $mode): void
+    public function renderForm(string $mode, string $errorMessage = ''): void
     {
         echo '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">'; // Bootstrap CDN
         echo '<div class="container mt-5">';
 
         if ($mode === 'login') {
-            $this->renderLoginForm();
+            $this->renderLoginForm($errorMessage);
         } elseif ($mode === 'register') {
-            $this->renderRegistrationForm();
+            $this->renderRegistrationForm($errorMessage);
         }
 
         echo '</div>';
@@ -28,10 +28,16 @@ class EmailLoginView
     /**
      * Render the login form with Bootstrap styling.
      */
-    private function renderLoginForm(): void
+    private function renderLoginForm(string $errorMessage): void
     {
+        echo '<h2>Login</h2>';
+
+        // Render error message if any
+        if ($errorMessage) {
+            echo "<div class='alert alert-danger'>{$errorMessage}</div>";
+        }
+
         echo <<<HTML
-        <h2>Login</h2>
         <form method="post" action="" class="form-group">
             <div class="mb-3">
                 <label for="email" class="form-label">Email:</label>
@@ -52,10 +58,16 @@ class EmailLoginView
     /**
      * Render the registration form with Bootstrap styling.
      */
-    private function renderRegistrationForm(): void
+    private function renderRegistrationForm(string $errorMessage): void
     {
+        echo '<h2>Register</h2>';
+
+        // Render error message if any
+        if ($errorMessage) {
+            echo "<div class='alert alert-danger'>{$errorMessage}</div>";
+        }
+
         echo <<<HTML
-        <h2>Register</h2>
         <form method="post" action="" class="form-group">
             <div class="mb-3">
                 <label for="email" class="form-label">Email:</label>
@@ -88,29 +100,5 @@ class EmailLoginView
             <button type="submit" name="action" value="show_login" class="btn btn-link">Already have an account? Login here</button>
         </form>
         HTML;
-    }
-
-    /**
-     * Render the logout button with Bootstrap styling.
-     */
-    public function renderLogoutButton(): void
-    {
-        echo <<<HTML
-        <form method="post" action="">
-            <button type="submit" name="action" value="logout" class="btn btn-danger">Logout</button>
-        </form>
-        HTML;
-    }
-
-    /**
-     * Render the authentication status.
-     */
-    public function renderStatus(): void
-    {
-        if ($this->loginHandler->isAuthenticated()) {
-            echo "<p>You are logged in as {$this->loginHandler->getEmail()}.</p>";
-        } else {
-            echo "<p>You are not logged in.</p>";
-        }
     }
 }

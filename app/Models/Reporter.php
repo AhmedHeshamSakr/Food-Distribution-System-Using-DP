@@ -11,11 +11,11 @@ class Reporter extends Person {
     private int $userTypeID = Person::REPORTER_FLAG;  
     private ReportingData $reportingData;
     // Constructor
-    public function __construct($userTypeID, $firstName, $lastName, $email, $phoneNo, iLogin $login)
+    public function __construct($userTypeID, $firstName, $lastName, $email, $phoneNo)
     {
         $userTypeID = Person::REPORTER_FLAG;
         $this->userTypeID = $userTypeID;
-        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
+        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo);
     }
 
     // Method for submitting a new report

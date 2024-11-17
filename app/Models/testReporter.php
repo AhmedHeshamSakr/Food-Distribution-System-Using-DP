@@ -17,7 +17,7 @@ if ($emailLogin->login(["email" => "testuser@example.com", "password" => "secure
     echo "Login successful.\n";
 
     // Initialize Reporter with login method
-    $reporter = new Reporter(1, "Test", "User", $email, "123456789", $emailLogin);
+    $reporter = new Reporter(1, "Test", "User", $email, "123456789");
 
     // Test submitting a new report
     echo "Submitting a new report...\n";
