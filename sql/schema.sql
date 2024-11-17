@@ -246,6 +246,14 @@ CREATE TABLE `report` (
   `recognized` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `report`
+--
+
+INSERT INTO `report` (`reportID`, `personINname`, `personINaddress`, `phoneINno`, `status`, `description`, `is_deleted`, `recognized`) VALUES
+(24, 'Jane Doe', '456 Another St', '5559876543', 'Acknowledged', 'Description for a test report', 1, 1),
+(25, 'Jane Doe', '456 Another St', '5559876543', 'Pending', 'Description for a test report', 0, 0);
+
 -- --------------------------------------------------------
 
 --
@@ -256,9 +264,19 @@ CREATE TABLE `reporting` (
   `userID` int(11) NOT NULL,
   `reportID` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `is_deleted` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `reporting`
+--
+
+INSERT INTO `reporting` (`userID`, `reportID`, `created_at`, `updated_at`, `is_deleted`) VALUES
+(5, 24, '2024-11-17 12:43:06', '2024-11-17 12:43:06', 0),
+(6, 25, '2024-11-17 12:51:12', '2024-11-17 12:51:12', 0);
+
+-- --------------------------------------------------------
 -- --------------------------------------------------------
 
 --

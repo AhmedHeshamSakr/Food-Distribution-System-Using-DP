@@ -16,6 +16,7 @@ class Reporter extends Person {
         $userTypeID = Person::REPORTER_FLAG;
         $this->userTypeID = $userTypeID;
         parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo);
+        $this->reporting = new Reporting();
     }
 
     // Method for submitting a new report
@@ -33,19 +34,28 @@ class Reporter extends Person {
     }
 
     // Method to update the status of an existing report, which will be used by ADMIN
-    public function updateReportStatus($reportID, $newStatus) {
-        //$reportData = new ReportingData(null, null, null, null); // Create an instance of ReportingData
-        if ($this->reportingData->getReportDetails($reportID)) {  // Make sure the report exists before updating
-            $updated = $this->reportingData->updateReport(['status' => $newStatus], $reportID);
-            if ($updated) {
-                
-                return $this->reporting->updateTimestamp();
-            }
-        } else {
-            echo "Report not found.\n";
-        }
+    public function updateReportStatus($reportID, $newStatus)
+{
+    // Validate input
+    $validStatuses = ['Pending', 'Acknowledged', 'In Progress', 'Completed'];
+    if (!in_array($newStatus, $validStatuses)) {
+        
         return false;
     }
+
+    // Ensure the report ID is provided
+    if (!$reportID) {
+        
+        return false;
+    }
+
+    // Create the database query to update the status
+    $query = "UPDATE report SET status = '$newStatus' WHERE reportID = '$reportID' AND is_deleted = FALSE";
+
+    // Execute the query
+    $result = run_query($query);
+
+}
 
     // Method to recognize a report, marking it as reviewed or acknowledged, to be used by ADMIN 
     public function recognizeReport($reportID) {
@@ -77,8 +87,15 @@ class Reporter extends Person {
     }
     
     // Method to get all active reports
-    public function getAllActiveReports() { 
-        return $this->reportingData->getAllActiveReports();
+    // public function getAllActiveReports() { 
+    //     return $this->reportingData->getAllActiveReports();
+    // }
+    public function getAllActiveReports() {
+        $query = "SELECT * FROM report WHERE is_deleted = FALSE";
+        $result = run_select_query($query);
+    
+        // Ensure the method always returns an array
+        return $result !== false ? $result : [];
     }
 
     // Method to get reports by a specific user's ID

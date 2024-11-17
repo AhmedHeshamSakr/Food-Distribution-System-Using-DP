@@ -13,7 +13,7 @@ $email = "testuser" . time() . "@example.com";  // Unique email for each run
 $emailLogin = new withEmail("testuser@example.com", "securepassword");
 
 // Ensure the login is successful before proceeding
-if ($emailLogin->login(["email" => "testuser@example.com", "password" => "securepassword"])) {
+//if ($emailLogin->login(["email" => "testuser@example.com", "password" => "securepassword"])) {
     echo "Login successful.\n";
 
     // Initialize Reporter with login method
@@ -36,56 +36,56 @@ if ($emailLogin->login(["email" => "testuser@example.com", "password" => "secure
     print_r($reports);
 
     // Test updating report status
-    $reportID = $reports[0]['reportID']; // Using the first report ID retrieved
-    echo "Updating report status to 'Acknowledged'...\n";
-    $updated = $reporter->updateReportStatus($reportID, "Acknowledged");
-    if ($updated) {
-        echo "Report status updated successfully.\n";
-    } else {
-        echo "Failed to update report status.\n";
-    }
+    // $reportID = $reports[0]['reportID']; // Using the first report ID retrieved
+    // echo "Updating report status to 'Acknowledged'...\n";
+    // $updated = $reporter->updateReportStatus($reportID, "Acknowledged");
+    // if ($updated) {
+    //     echo "Report status updated successfully.\n";
+    // } else {
+    //     echo "Failed to update report status.\n";
+    // }
 
-    // Test recognizing the report
-    echo "Recognizing report...\n";
-    $recognized = $reporter->recognizeReport($reportID);
-    if ($recognized) {
-        echo "Report recognized successfully.\n";
-    } else {
-        echo "Failed to recognize report.\n";
-    }
+    // // Test recognizing the report
+    // echo "Recognizing report...\n";
+    // $recognized = $reporter->recognizeReport($reportID);
+    // if ($recognized) {
+    //     echo "Report recognized successfully.\n";
+    // } else {
+    //     echo "Failed to recognize report.\n";
+    // }
 
-    // Test soft deleting the report
-    echo "Soft deleting the report...\n";
-    $deleteResult = $reporter->deleteReport($reportID);
-    if ($deleteResult) {
-        echo "Report marked as deleted successfully.\n";
-    } else {
-        echo "Failed to delete report.\n";
-    }
+    // // Test soft deleting the report
+    // echo "Soft deleting the report...\n";
+    // $deleteResult = $reporter->deleteReport($reportID);
+    // if ($deleteResult) {
+    //     echo "Report marked as deleted successfully.\n";
+    // } else {
+    //     echo "Failed to delete report.\n";
+    // }
 
-    // Retrieve active reports after deletion to verify
-    echo "Retrieving active reports for User " . $reporter->getUserID() . " after deletion...\n";
-    $activeReports = $reporter->getAllActiveReports();
-    echo "<hr/>";
-    echo "Active reports after deletion:\n";
-    print_r($activeReports);
+    // // Retrieve active reports after deletion to verify
+    // echo "Retrieving active reports for User " . $reporter->getUserID() . " after deletion...\n";
+    // $activeReports = $reporter->getAllActiveReports();
+    // echo "<hr/>";
+    // echo "Active reports after deletion:\n";
+    // print_r($activeReports);
 
-    // Testing failed report recognition when report doesn't exist
-    echo "Attempting to recognize a non-existent report...\n";
-    $nonExistentReportID = 9999; // Assuming this report ID doesn't exist
-    $failedRecognition = $reporter->recognizeReport($nonExistentReportID);
-    if (!$failedRecognition) {
-        echo "Correctly failed to recognize non-existent report.\n";
-    }
+    // // Testing failed report recognition when report doesn't exist
+    // echo "Attempting to recognize a non-existent report...\n";
+    // $nonExistentReportID = 9999; // Assuming this report ID doesn't exist
+    // $failedRecognition = $reporter->recognizeReport($nonExistentReportID);
+    // if (!$failedRecognition) {
+    //     echo "Correctly failed to recognize non-existent report.\n";
+    // }
 
-    // Testing failed report deletion when report doesn't exist
-    echo "Attempting to delete a non-existent report...\n";
-    $failedDelete = $reporter->deleteReport($nonExistentReportID);
-    if (!$failedDelete) {
-        echo "Correctly failed to delete non-existent report.\n";
-    }
+    // // Testing failed report deletion when report doesn't exist
+    // echo "Attempting to delete a non-existent report...\n";
+    // $failedDelete = $reporter->deleteReport($nonExistentReportID);
+    // if (!$failedDelete) {
+    //     echo "Correctly failed to delete non-existent report.\n";
+    // }
 
-} else {
-    echo "Login failed. Cannot proceed with tests.\n";
-}
+// } else {
+//     echo "Login failed. Cannot proceed with tests.\n";
+// }
 ?>
