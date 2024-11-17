@@ -1,71 +1,14 @@
 <?php
 require_once 'User.php';
-// require_once 'Address.php';
+require_once 'Address.php';
 require_once 'Badges.php';
 
 
-#################################### THESE ARE JUST  DUMMY CLASSES FOR TESTING #############################################
-
-
-
-class Badge
-{
-    private int $badgeID;
-    private string $badgeName;
-
-    public function __construct(int $badgeID, string $badgeName)
-    {
-        $this->badgeID = $badgeID;
-        $this->badgeName = $badgeName;
-    }
-
-    public function getBadgeID(): int
-    {
-        return $this->badgeID;
-    }
-
-    public function getBadgeName(): string
-    {
-        return $this->badgeName;
-    }
-}
-
-
-
-class Address
-{
-    // Properties corresponding to the table columns
-    private int $id;
-    private string $name;
-    private ?int $parent_id;
-    private string $level;
-
-    // Constructor to initialize the Address object
-    public function __construct(int $id, string $name, ?int $parent_id, string $level)
-    {
-        $this->id = $id;
-        $this->name = $name;
-        $this->parent_id = $parent_id;
-        $this->level = $level;
-    }
-
-    // Function to get the address ID
-    public function getAddressID(): int
-    {
-        return $this->id;
-    }
-}
-
-
-
-
-#################################################################################
-
-class Volunteer extends User
+class Volunteer extends Person
 {
     private Address $address;
     public string $nationalID;
-    public Badge $badge;
+    public Badges $badge;
 
     // Constructor that calls the parent constructor
     public function __construct(
@@ -74,19 +17,20 @@ class Volunteer extends User
         string $lastName, 
         string $email, 
         string $phoneNo, 
-        iLogin $login, 
+        // iLogin $login, 
         Address $address, 
         string $nationalID,
-        Badge $badge
+        Badges $badge
     ) {
+        
         // Call the parent constructor to initialize the User (and Person) properties
-        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login );
-
+        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo );
         // Initialize the Volunteer-specific properties
         $this->address = $address;
         $this->nationalID = $nationalID;
         $this->badge = $badge;
         $this->insertVolunteer($address, $nationalID);
+        $this->chooseRole();
         
     }
 
@@ -94,11 +38,11 @@ class Volunteer extends User
     {
         //$conn = Database::getInstance()->getConnection();
         
-        $address = $this->address->getAddressID();
+        $address = $this->address->getID();
         $address = mysqli_real_escape_string(Database::getInstance()->getConnection(), $address);
         $nationalID = mysqli_real_escape_string(Database::getInstance()->getConnection(), $nationalID);
         $userid = $this->getUserID();
-        $defaultBadge = 0;
+        $defaultBadge = $this->badge->getBadgeID();
         // SQL query to insert the person into the database
         $query = "INSERT INTO volunteer (userID, nationalID, `address`, badge) 
                 VALUES ('{$userid}', '{$nationalID}', '{$address}', '{$defaultBadge}')";
@@ -137,7 +81,7 @@ class Volunteer extends User
 
     public function getAddress(): int
     {
-        return $this->address->getAddressID();
+        return $this->address->getID();
     }
 
     public function getNationalID(): string
@@ -150,10 +94,10 @@ class Volunteer extends User
         return $this->badge->getBadgeID();
     }
 
-    public function setBadge(Badge $badge): bool
+    public function setBadge(Badges $badge): bool
     {
         // Optional validation (e.g., ensure it's a valid Badge object)
-        if (!$badge instanceof Badge) {
+        if (!$badge instanceof Badges) {
             return false;  // Not a valid badge
         }
     
@@ -183,42 +127,55 @@ class Volunteer extends User
         $this->address = $address;
 
         $fieldsToUpdate = [
-            'address' => $this->address->getAddressID()
+            'address' => $this->address->getID()
         ];
 
         return $this->updateVolunteer($fieldsToUpdate);
     }
+    public function chooseRole(): bool{
+        $this->setUserTypeID(0);
+        return true;
+   }
     
     
 }
 
 
 
-abstract class VolunteerRoles extends User
+abstract class VolunteerRoles extends Person
 {
-    protected User $ref;  // Decorated User object
-    protected int $roleType = 0;
-    protected const COOK_FLAG = 1 << 0;       // Binary 001
-    protected const DELIVERY_FLAG = 1 << 1;   // Binary 010
-    protected const COORDINATOR_FLAG = 1 << 2; // Binary 100
+    protected Person $ref;  // Decorated User object
+
+
 
 
 
     // Constructor that also initializes the parent User class
-    public function __construct(User $ref)
+    public function __construct(Person $ref)
     {
+        parent::__construct(
+            $ref->getUserTypeID(), 
+            $ref->getFirstName(), 
+            $ref->getLastName(), 
+            $ref->getEmail(), 
+            $ref->getPhoneNo()
+            // $ref->getLogin()
+        );
         $this->ref = $ref;
     }
+    public function hasRole(int $roleFlag, ): bool {
 
-    
-    // Override chooseRole and decorate with additional functionality
-    public function hasRole(int $roleFlag): bool {
-        return ($this->roleType & $roleFlag) === $roleFlag;
+        $myuserTypeID = $this->getUserTypeID();
+        //echo 'this is the role flag'.$roleFlag . '</br>';
+        //echo 'this is the user type id'.$myuserTypeID . '</br>';
+        return ($myuserTypeID & $roleFlag) == $roleFlag;
     }
-
+    
     public function getAllRoles(): array {
         $roles = [];
 
+    
+        // Check each role flag in userTypeID
         if ($this->hasRole(self::COOK_FLAG)) {
             $roles[] = 'Cook';
         }
@@ -228,14 +185,21 @@ abstract class VolunteerRoles extends User
         if ($this->hasRole(self::COORDINATOR_FLAG)) {
             $roles[] = 'Coordinator';
         }
-
+        if ($this->hasRole(self::REPORTER_FLAG)) {
+            $roles[] = 'Reporter';
+        }
+        if ($this->hasRole(self::DONOR_FLAG)) {
+            $roles[] = 'Donor';
+        }
+    
         return $roles;
     }
 
     public function chooseRole(): bool{
-         $this->roleType = 0;
+         $this->setUserTypeID(0);
          return true;
     }
+    
     
 
  

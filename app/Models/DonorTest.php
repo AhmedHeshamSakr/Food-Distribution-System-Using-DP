@@ -3,13 +3,16 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-require_once 'Donor.php'; // Make sure the path is correct
-require_once __DIR__ . "/../../config/DB.php"; // Assuming this file has the database connection and utility functions
+
+// Required class imports
+require_once 'Donor.php'; 
+require_once __DIR__ . "/../../config/DB.php"; // Ensure this path is correct
 require_once 'Person.php';
 require_once 'Login.php';
+require_once 'Payment.php'; // Include payment strategies and PaymentContext
 
 try {
-    echo "<h1>Testing Donor Class</h1>";
+    echo "<h1>Testing Donor Class with Payment Strategies</h1>";
 
     // Sample data for testing
     $userID = 1;
@@ -18,27 +21,31 @@ try {
     $email = 'john.doe@example.com';
     $phoneNo = '1234567890';
 
-    // Instantiate the real login object (replace withGoogle with withFacebook or withEmail as needed)
-    $login = new withGoogle($email, $password);
 
-    // Attempt to log in with the actual credentials
-    if (!$login->login(['email' => $email, 'password' => $password])) {
+    // Attempt to log in with the provided credentials
+    if (!$login->login(['email' => $email, 'password' => 'password'])) {
         throw new Exception("Login failed for Google authentication.");
     }
 
     echo "<p>Successfully authenticated with Google for user: {$email}</p>";
 
-    // Instantiate the Donor object with the MockLogin instance
-    $donor = new Donor($userID, $firstName, $lastName, $email, $phoneNo, $login);
-
-    echo "<p>Donor Created Successfully with User ID: {$donor->getUserID()}</p>";
-
-    // Add a donation
-    $donationAmount = 100.50;
-    $paymentMethod = 'Credit Card';
-    $donationResult = $donor->addDonation($donationAmount, $paymentMethod);
-//printResult('Adding Donation', $donationResult);
-
+    try {
+        $db = Database::getInstance()->getConnection();
+        $donor = new Donor($userID, $firstName, $lastName, $email, $phoneNo);
+        
+         $paymentDetails =77777 ;
+         //[
+        //     'cardNumber' => '1234-5678-9876-5432',
+        //     'expiryDate' => '2025-12-31',
+        //     'cvv' => '123'
+        // ];
+    
+        $donationResult = $donor->addDonation(100.50, 'Credit Card', $paymentDetails);
+        echo $donationResult ? "<p>Donation added successfully.</p>" : "<p>Failed to add donation.</p>";
+        
+    } catch (Exception $e) {
+        echo '<p style="color:red;">Error: ' . $e->getMessage() . '</p>';
+    }
     // Fetch donation history
     $donationHistory = $donor->fetchDonationHistory();
     echo "<h2>Donation History:</h2>";
@@ -58,21 +65,30 @@ try {
     $newEmail = 'johnny.doe@example.com';
     $newPhoneNo = '0987654321';
     $updateInfoResult = $donor->updatePersonalInfo($newFirstName, $newLastName, $newEmail, $newPhoneNo);
-//printResult('Updating Personal Information', $updateInfoResult);
+    echo $updateInfoResult ? "<p>Personal information updated successfully.</p>" : "<p>Failed to update personal information.</p>";
 
-    // Update an existing donation
+    // Update an existing donation if history exists
     if (!empty($donationHistory)) {
         $firstDonationID = $donationHistory[0]['donationID'];
         $newDonationAmount = 150.75;
-        $newPaymentMethod = 'Online Payment';
-        $updateDonationResult = $donor->updateDonation($firstDonationID, $newDonationAmount, $newPaymentMethod);
-       // printResult('Updating Donation', $updateDonationResult);
+
+        // Example: Dynamic payment details for updating a donation (Fawry payment)
+        $paymentMethod = 'Fawry';
+        $paymentDetails = [
+            'fawryNumber' => 'FAW123456789',
+            'referenceID' => '4567'
+        ];
+
+        // Update the donation in the database
+        $updateDonationResult = $donor->updateDonation($firstDonationID, $newDonationAmount, $paymentMethod);
+        echo $updateDonationResult ? "<p>Donation updated successfully.</p>" : "<p>Failed to update donation.</p>";
     }
 
+} catch (InvalidArgumentException $e) {
+    echo '<p style="color:red;">Invalid Argument: ' . $e->getMessage() . '</p>';
 } catch (Exception $e) {
-    echo '<p style="color:red;">An error occurred: ' . $e->getMessage() . '</p>';
+    echo '<p style="color:red;">An unexpected error occurred: ' . $e->getMessage() . '</p>';
+} finally {
+    echo "<h1>End of Tests</h1>";
+    echo "=== End of Tests ===" . PHP_EOL;
 }
-
-echo "<h1>End of Tests</h1>";
-
-echo "=== End of Tests ===" . PHP_EOL;

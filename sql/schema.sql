@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Nov 13, 2024 at 09:42 PM
+-- Generation Time: Nov 16, 2024 at 08:30 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -118,6 +118,17 @@ CREATE TABLE `Donating` (
   `donationID` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `Donating`
+--
+
+INSERT INTO `Donating` (`userID`, `donationID`) VALUES
+(30, 59),
+(31, 60),
+(33, 61),
+(34, 62),
+(35, 63);
+
 -- --------------------------------------------------------
 
 --
@@ -130,6 +141,17 @@ CREATE TABLE `Donation` (
   `donationAmount` decimal(10,2) NOT NULL,
   `paymentMethod` enum('Fawry','Credit Card','Visa') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `Donation`
+--
+
+INSERT INTO `Donation` (`donationID`, `donationDate`, `donationAmount`, `paymentMethod`) VALUES
+(59, '2024-11-13', 150.75, 'Fawry'),
+(60, '2024-11-13', 150.75, 'Fawry'),
+(61, '2024-11-16', 150.75, 'Fawry'),
+(62, '2024-11-16', 150.75, 'Fawry'),
+(63, '2024-11-16', 150.75, 'Fawry');
 
 -- --------------------------------------------------------
 
@@ -170,6 +192,15 @@ CREATE TABLE `Meal` (
   `mealDescription` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `Meal`
+--
+
+INSERT INTO `Meal` (`mealID`, `needOfDelivery`, `nOFMeals`, `remainingMeals`, `mealDescription`) VALUES
+(501, 1, 20, 20, 'Healthy Veggie Meals'),
+(502, 1, 20, 20, 'Healthy Veggie Meals'),
+(503, 1, 20, 20, 'Healthy Veggie Meals');
+
 -- --------------------------------------------------------
 
 --
@@ -184,6 +215,19 @@ CREATE TABLE `person` (
   `email` varchar(255) NOT NULL,
   `phoneNo` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `person`
+--
+
+INSERT INTO `person` (`userID`, `userTypeID`, `firstName`, `lastName`, `email`, `phoneNo`) VALUES
+(30, 5, 'Johnny', 'DoeUpdated', 'johnny.doe@example.com', '0987654321'),
+(31, 5, 'Johnny', 'DoeUpdated', 'johnny.doe@example.com', '0987654321'),
+(32, 1, 'John', 'Doe', 'johndoe@example.com', '1234567890'),
+(33, 0, 'Johnny', 'DoeUpdated', 'johnny.doe@example.com', '0987654321'),
+(34, 5, 'Johnny', 'DoeUpdated', 'johnny.doe@example.com', '0987654321'),
+(35, 5, 'Johnny', 'DoeUpdated', 'johnny.doe@example.com', '0987654321'),
+(36, 1, 'John', 'Doe', 'john.doe@example.com', '1234567890');
 
 -- --------------------------------------------------------
 
@@ -401,7 +445,7 @@ ALTER TABLE `volunteering`
 -- AUTO_INCREMENT for table `address`
 --
 ALTER TABLE `address`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=102;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=124;
 
 --
 -- AUTO_INCREMENT for table `Badge`
@@ -419,25 +463,25 @@ ALTER TABLE `delivery`
 -- AUTO_INCREMENT for table `Donation`
 --
 ALTER TABLE `Donation`
-  MODIFY `donationID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
+  MODIFY `donationID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT for table `event`
 --
 ALTER TABLE `event`
-  MODIFY `eventID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `eventID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=302;
 
 --
 -- AUTO_INCREMENT for table `Meal`
 --
 ALTER TABLE `Meal`
-  MODIFY `mealID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=501;
+  MODIFY `mealID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=504;
 
 --
 -- AUTO_INCREMENT for table `person`
 --
 ALTER TABLE `person`
-  MODIFY `userID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `userID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT for table `report`

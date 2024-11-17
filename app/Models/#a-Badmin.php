@@ -6,10 +6,13 @@ require_once 'UserBadge.php';
 
 class BadgeAdmin extends Person
 {
+    private int $userTypeID = Person::B_ADMIN_FLAG;
     // Constructor to initialize BadgeAdmin with required details
-    public function __construct(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, iLogin $login)
-    {
-        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
+    public function __construct(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo)
+    {   
+        $userTypeID = Person::B_ADMIN_FLAG;
+        $this->userTypeID = $userTypeID;
+        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo);
     }
 
     // Badge Management Methods
@@ -66,4 +69,11 @@ class BadgeAdmin extends Person
     {
         return UserBadge::read($userID, $badgeID);
     }
+
+    public function getUserTypeID(): int
+    {
+        return $this->userTypeID;
+    }
 }
+
+

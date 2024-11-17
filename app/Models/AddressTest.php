@@ -9,7 +9,7 @@ require_once __DIR__ . "/../../config/DB.php";
 require_once 'Address.php';
 
 // Create a new Address object with valid ENUM level value ('City')
-$address = new Address(2,'Cairo', 1, 'City');
+$address = new Address(3,'Cairo', 1, 'City');
 
 // Test creating a new address in the database
 echo "Testing Address Creation:<br>";
@@ -49,9 +49,9 @@ if ($updatedAddressDetails) {
 }
 
 // Test deleting the address from the database
-echo "<br>Testing Address Deletion:<br>";
-$addressDeleted = $address->delete();
-echo $addressDeleted ? "Address deleted successfully.<br>" : "Failed to delete address.<br>";
+// echo "<br>Testing Address Deletion:<br>";
+// $addressDeleted = $address->delete();
+// echo $addressDeleted ? "Address deleted successfully.<br>" : "Failed to delete address.<br>";
 
 
 // Attempt to read the address again to confirm deletion

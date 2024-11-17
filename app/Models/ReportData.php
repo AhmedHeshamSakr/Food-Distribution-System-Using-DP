@@ -1,6 +1,6 @@
 <?php 
 
-require_once("User.php");
+require_once 'User.php';
 require_once __DIR__ . '/../../config/DB.php';
 
 class ReportingData {
@@ -61,7 +61,6 @@ class ReportingData {
             echo "Error: Report ID not specified.\n";
             return false;
         }
-
         $setQuery = [];
         foreach ($fieldsToUpdate as $field => $value) {
             $setQuery[] = "$field = '$value'";

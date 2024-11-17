@@ -1,67 +1,121 @@
 <?php
 
-require_once 'Login.php';
+
 require_once __DIR__ . "/../../config/DB.php";
 
 abstract class Person
 {
-    private int $userTypeID;
+
+    public const COOK_FLAG = 1 << 0;       // Binary 00001
+    public const DELIVERY_FLAG = 1 << 1;   // Binary 00010
+    public const COORDINATOR_FLAG = 1 << 2; // Binary 00100
+    public const REPORTER_FLAG = 1 << 3;   // Binary 01000
+    public const DONOR_FLAG = 1 << 4;  // Binary 10000 
+    public const B_ADMIN_FLAG = 1 << 5;  // Binary 100000
+    public const E_ADMIN_FLAG = 1<< 6;
+    public const V_ADMIN_FLAG = 1<< 7;
+
+
+    private int $userTypeID = 0;
     private int $userID;
     private string $firstName;
     private string $lastName;
     private string $email;
     private string $phoneNo;
-    private iLogin $login;
+    // private iLogin $login;
 
-    public function __construct(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, iLogin $login)
+    public function __construct(int $userTypeID=0, string $firstName, string $lastName, string $email, string $phoneNo)
     {
         $this->userTypeID = $userTypeID;
         $this->firstName = $firstName;
         $this->lastName = $lastName;
         $this->email = $email;
         $this->phoneNo = $phoneNo;
-        $this->login = $login;
-        $this->insertPerson($userTypeID, $firstName, $lastName, $email, $phoneNo);
+        // $this->login = $login;
+
+        if (!$this->emailExists($email)) {
+            $this->insertPerson($userTypeID, $firstName, $lastName, $email, $phoneNo);
+        } else {
+            $query = "SELECT userID FROM person WHERE email = '{$email}' LIMIT 1";
+            $result = mysqli_query(Database::getInstance()->getConnection(), $query);
+            if ($result && mysqli_num_rows($result) > 0) {
+            $row = mysqli_fetch_assoc($result);
+            $this->userID = $row['userID'];
+            }
+        }
+
+
+    }
+
+    private function emailExists(string $email): bool
+    {
+        // Query to check if the email exists in the person table (assuming it's in the 'person' table)
+        $query = "SELECT 1 FROM person WHERE email = '{$email}'";
+        $result = mysqli_query(Database::getInstance()->getConnection(), $query);
+        
+        // Return true if email exists, false otherwise
+        return mysqli_num_rows($result) > 0;
     }
 
     public function insertPerson(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo): bool
     {
+        // Sanitize inputs to prevent SQL injection (if not already done)
         $firstName = mysqli_real_escape_string(Database::getInstance()->getConnection(), $firstName);
         $lastName = mysqli_real_escape_string(Database::getInstance()->getConnection(), $lastName);
         $email = mysqli_real_escape_string(Database::getInstance()->getConnection(), $email);
         $phoneNo = mysqli_real_escape_string(Database::getInstance()->getConnection(), $phoneNo);
 
+        // SQL query to insert the person into the database
+        $query = "INSERT INTO person (userTypeID, firstName, lastName, email, phoneNo) 
+                VALUES ('{$userTypeID}', '{$firstName}', '{$lastName}', '{$email}', '{$phoneNo}')";
+
         $checkEmailQuery = "SELECT userID FROM person WHERE email = '{$email}' LIMIT 1";
         $checkEmailResult = run_select_query($checkEmailQuery);
 
+        // If the result is not empty, email is already taken
         if ($checkEmailResult) {
-            $this->userID = $checkEmailResult[0]['userID'];
+            // Email is duplicated, return false
+            $this->userID = $checkEmailResult[0]['userID']; 
             return false;
         }
 
-        $query = "INSERT INTO person (userTypeID, firstName, lastName, email, phoneNo) 
-                  VALUES ('{$userTypeID}', '{$firstName}', '{$lastName}', '{$email}', '{$phoneNo}')";
-
+        // Run the query and return whether it was successful
         $result = run_query($query);
-
+        
         if ($result) {
             $this->userID = mysqli_insert_id(Database::getInstance()->getConnection());
             return true;
-        }
+    }
         return false;
     }
 
+
+
+
     public function updatePerson(array $fieldsToUpdate): bool
     {
+        // Create an array to hold the SET part of the SQL query
         $setQuery = [];
+        
+        // Loop through the fieldsToUpdate array and create the SET portion of the query
         foreach ($fieldsToUpdate as $field => $value) {
+            // Escape the value to prevent SQL injection
             $escapedValue = mysqli_real_escape_string(Database::getInstance()->getConnection(), $value);
             $setQuery[] = "$field = '$escapedValue'";
         }
+
+        // Join the setQuery array into a string with commas
         $setQueryStr = implode(', ', $setQuery);
+
+        // Construct the full SQL query
         $query = "UPDATE person SET $setQueryStr WHERE userID = '{$this->userID}'";
+
+        // Run the query and return the result
         return run_query($query);
     }
+
+
+
 
     public function deletePerson(): bool
     {
@@ -69,17 +123,8 @@ abstract class Person
         return run_query($query);
     }
 
-    public function login(array $credentials): bool
-    {
-        // Attempt to log in using the provided iLogin instance
-        return $this->login->login($credentials);
-    }
 
-    public function logout(): bool
-    {
-        // Use the iLogin interface's logout method
-        return $this->login->logout();
-    }
+
 
     public function getUserTypeID(): int
     {
@@ -90,6 +135,8 @@ abstract class Person
     {
         return $this->userID;
     }
+
+
 
     public function getFirstName(): string
     {
@@ -110,44 +157,77 @@ abstract class Person
     {
         return $this->phoneNo;
     }
+    // public function getLogin(): iLogin
+    // {
+    //     return $this->login;
+    // }
 
-    public function getLogin(): iLogin
-    {
-        return $this->login;
-    }
 
     public function setUserTypeID(int $userTypeID): bool
     {
         $this->userTypeID = $userTypeID;
-        return $this->updatePerson(['userTypeID' => $userTypeID]);
+        $fieldsToUpdate = [
+            'userTypeID' => $this->userTypeID
+        ];
+        //echo 'the new user type id is '.$this->userTypeID;
+
+        $gottenvalue = $this->getUserTypeID();
+        //echo 'the gotten value is '.$gottenvalue;
+        return $this->updatePerson($fieldsToUpdate); 
     }
+
 
     public function setFirstName(string $firstName): bool
     {
         $this->firstName = $firstName;
-        return $this->updatePerson(['firstName' => $firstName]);
+        $fieldsToUpdate = [
+                'firstName' => $this->firstName
+            ];
+        return $this->updatePerson($fieldsToUpdate); 
     }
+
 
     public function setLastName(string $lastName): bool
     {
         $this->lastName = $lastName;
-        return $this->updatePerson(['lastName' => $lastName]);
+        $fieldsToUpdate = [
+            'lastName' => $this->lastName
+        ];
+        return $this->updatePerson($fieldsToUpdate); 
     }
 
     public function setEmail(string $email): bool
     {
         $this->email = $email;
-        return $this->updatePerson(['email' => $email]);
+        $fieldsToUpdate = [
+            'email' => $this->email
+        ];
+        return $this->updatePerson($fieldsToUpdate); 
     }
 
     public function setPhoneNo(string $phoneNo): bool
     {
         $this->phoneNo = $phoneNo;
-        return $this->updatePerson(['phoneNo' => $phoneNo]);
+        $fieldsToUpdate = [
+            'phoneNo' => $this->phoneNo
+        ];
+       return $this->updatePerson($fieldsToUpdate); 
     }
 
-    public function setLogin(iLogin $login): void
-    {
-        $this->login = $login;
+    // public function setLogin(iLogin $login): void
+    // {
+    //     $this->login = $login;
+    // }
+
+
+
+    public function chooseRole(): bool {
+        $this->setUserTypeID(0);
+        return true;
     }
 }
+
+
+
+
+?>

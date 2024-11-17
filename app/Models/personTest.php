@@ -10,9 +10,9 @@ require_once 'Person.php';
 $dummyLogin = new DummyLogin();
 
 // Create a new person instance for testing (using dummy data)
-$person = new class(1, 'Nina', 'Richie', 'john.ddoe@example.com', '1234567890', $dummyLogin) extends Person {
-    public function __construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login) {
-        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
+$person = new class(1, 'Nina', 'Richie', 'john.ddoe@example.com', '1234567890') extends Person {
+    public function __construct($userTypeID, $firstName, $lastName, $email, $phoneNo,) {
+        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo);
     }
 };
 
@@ -39,9 +39,6 @@ echo $updateResult ? "Update Success\n" : "Update Failed\n";
 //$deleteResult = $person->deletePerson();
 //echo $deleteResult ? "Delete Success\n" : "Delete Failed\n";
 
-// Test Logout using the dummy login
-$logoutResult = $person->logout();
-echo $logoutResult ? "Logout Success\n" : "Logout Failed\n";
 
 // Close connection
 close_connection();

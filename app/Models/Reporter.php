@@ -1,5 +1,4 @@
 <?php 
-
 // require_once __DIR__ . '/../../config/DB.php';
 // use __DIR__ . when they are not in the same file only pleas()
 require_once __DIR__ . '/../../config/DB.php';
@@ -7,14 +6,16 @@ require_once 'User.php';
 require_once 'ReportData.php'; 
 require_once 'Login.php'; 
 
-class Reporter extends User {
+class Reporter extends Person {
     private Reporting $reporting;
+    private int $userTypeID = Person::REPORTER_FLAG;  
     private ReportingData $reportingData;
     // Constructor
-    public function __construct($userTypeID, $firstName, $lastName, $email, $phoneNo, iLogin $login)
+    public function __construct($userTypeID, $firstName, $lastName, $email, $phoneNo)
     {
-        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
-          // Initialize reporting (pass userID and null for reportID initially)
+        $userTypeID = Person::REPORTER_FLAG;
+        $this->userTypeID = $userTypeID;
+        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo);
     }
 
     // Method for submitting a new report
@@ -37,8 +38,7 @@ class Reporter extends User {
         if ($this->reportingData->getReportDetails($reportID)) {  // Make sure the report exists before updating
             $updated = $this->reportingData->updateReport(['status' => $newStatus], $reportID);
             if ($updated) {
-                // Update the timestamp in the Reporting table
-                //$reporting->Reporting($this->getUserID(), $reportID);
+                
                 return $this->reporting->updateTimestamp();
             }
         } else {
@@ -50,7 +50,7 @@ class Reporter extends User {
     // Method to recognize a report, marking it as reviewed or acknowledged, to be used by ADMIN 
     public function recognizeReport($reportID) {
         // Fetch the report details
-        //$reportData = new ReportingData(null, null, null, null);
+        
         $reportDetails = $this->reportingData->getReportDetails($reportID);
 
         // Check if the report exists before updating
@@ -77,16 +77,20 @@ class Reporter extends User {
     }
     
     // Method to get all active reports
-    public function getAllActiveReports() {
-        //$reportData = new ReportingData(null, null, null, null); // Create an instance of ReportingData
+    public function getAllActiveReports() { 
         return $this->reportingData->getAllActiveReports();
     }
 
     // Method to get reports by a specific user's ID
     public function getReportsByUserID($reporterID) {
         // Use Reporting class to get reports by user ID
-        //$reporting = new Reporting($this->getUserID(), null);  // Initialize Reporting with userID
+       
         return $this->reporting->getReportsByUserID($reporterID);
+    }
+
+    public function getUserTypeID(): int
+    {
+        return $this->userTypeID;
     }
 }
 
