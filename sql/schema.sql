@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Nov 13, 2024 at 04:43 PM
+-- Host: localhost
+-- Generation Time: Nov 16, 2024 at 08:30 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `fds`
+-- Database: `FDS`
 --
 
 -- --------------------------------------------------------
@@ -37,23 +37,21 @@ CREATE TABLE `address` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `badge`
+-- Table structure for table `Badge`
 --
 
-CREATE TABLE `badge` (
+CREATE TABLE `Badge` (
   `badgeID` int(11) NOT NULL,
-  `badgeName` varchar(255) DEFAULT NULL,
-  `badgeLvl` int(11) DEFAULT NULL,
-  `expiryDate` date DEFAULT NULL
+  `badgeLvl` enum('Bronze Tier','Silver Tier','Gold Tier','Platinum Tier') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `cooking`
+-- Table structure for table `Cooking`
 --
 
-CREATE TABLE `cooking` (
+CREATE TABLE `Cooking` (
   `cookID` int(11) NOT NULL,
   `mealID` int(11) NOT NULL,
   `mealsTaken` int(11) DEFAULT NULL,
@@ -112,26 +110,48 @@ CREATE TABLE `deliveryguy` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `donating`
+-- Table structure for table `Donating`
 --
 
-CREATE TABLE `donating` (
+CREATE TABLE `Donating` (
   `userID` int(11) NOT NULL,
   `donationID` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `Donating`
+--
+
+INSERT INTO `Donating` (`userID`, `donationID`) VALUES
+(30, 59),
+(31, 60),
+(33, 61),
+(34, 62),
+(35, 63);
+
 -- --------------------------------------------------------
 
 --
--- Table structure for table `donation`
+-- Table structure for table `Donation`
 --
 
-CREATE TABLE `donation` (
+CREATE TABLE `Donation` (
   `donationID` int(11) NOT NULL,
   `donationDate` date NOT NULL,
   `donationAmount` decimal(10,2) NOT NULL,
-  `paymentMethod` enum('Cash','Credit Card','Bank Transfer','Online Payment') NOT NULL
+  `paymentMethod` enum('Fawry','Credit Card','Visa') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `Donation`
+--
+
+INSERT INTO `Donation` (`donationID`, `donationDate`, `donationAmount`, `paymentMethod`) VALUES
+(59, '2024-11-13', 150.75, 'Fawry'),
+(60, '2024-11-13', 150.75, 'Fawry'),
+(61, '2024-11-16', 150.75, 'Fawry'),
+(62, '2024-11-16', 150.75, 'Fawry'),
+(63, '2024-11-16', 150.75, 'Fawry');
 
 -- --------------------------------------------------------
 
@@ -161,16 +181,25 @@ CREATE TABLE `login` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `meal`
+-- Table structure for table `Meal`
 --
 
-CREATE TABLE `meal` (
+CREATE TABLE `Meal` (
   `mealID` int(11) NOT NULL,
   `needOfDelivery` tinyint(1) DEFAULT NULL,
   `nOFMeals` int(11) DEFAULT NULL,
   `remainingMeals` int(11) DEFAULT NULL,
   `mealDescription` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `Meal`
+--
+
+INSERT INTO `Meal` (`mealID`, `needOfDelivery`, `nOFMeals`, `remainingMeals`, `mealDescription`) VALUES
+(501, 1, 20, 20, 'Healthy Veggie Meals'),
+(502, 1, 20, 20, 'Healthy Veggie Meals'),
+(503, 1, 20, 20, 'Healthy Veggie Meals');
 
 -- --------------------------------------------------------
 
@@ -192,8 +221,13 @@ CREATE TABLE `person` (
 --
 
 INSERT INTO `person` (`userID`, `userTypeID`, `firstName`, `lastName`, `email`, `phoneNo`) VALUES
-(1, 1, 'Test', 'User', 'testuser1731511602@example.com', '123456789'),
-(2, 1, 'Test', 'User', 'testuser1731512422@example.com', '123456789');
+(30, 5, 'Johnny', 'DoeUpdated', 'johnny.doe@example.com', '0987654321'),
+(31, 5, 'Johnny', 'DoeUpdated', 'johnny.doe@example.com', '0987654321'),
+(32, 1, 'John', 'Doe', 'johndoe@example.com', '1234567890'),
+(33, 0, 'Johnny', 'DoeUpdated', 'johnny.doe@example.com', '0987654321'),
+(34, 5, 'Johnny', 'DoeUpdated', 'johnny.doe@example.com', '0987654321'),
+(35, 5, 'Johnny', 'DoeUpdated', 'johnny.doe@example.com', '0987654321'),
+(36, 1, 'John', 'Doe', 'john.doe@example.com', '1234567890');
 
 -- --------------------------------------------------------
 
@@ -212,15 +246,6 @@ CREATE TABLE `report` (
   `recognized` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `report`
---
-
-INSERT INTO `report` (`reportID`, `personINname`, `personINaddress`, `phoneINno`, `status`, `description`, `is_deleted`, `recognized`) VALUES
-(1, 'John Doe', '123 Main St', '5551234567', '', 'This is a test report', 1, 0),
-(2, 'John Doe', '123 Main St', '5551234567', '', 'This is a test report', 1, 0),
-(3, 'Jane Doe', '456 Another St', '5559876543', 'Pending', 'Description for a test report', 0, 0);
-
 -- --------------------------------------------------------
 
 --
@@ -231,8 +256,7 @@ CREATE TABLE `reporting` (
   `userID` int(11) NOT NULL,
   `reportID` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `is_deleted` tinyint(1) DEFAULT 0
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -244,7 +268,8 @@ CREATE TABLE `reporting` (
 CREATE TABLE `userbadge` (
   `userID` int(11) NOT NULL,
   `badgeID` int(11) NOT NULL,
-  `dateAwarded` date DEFAULT NULL
+  `dateAwarded` date DEFAULT NULL,
+  `expiryDate` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -294,15 +319,15 @@ ALTER TABLE `address`
   ADD KEY `parent_id` (`parent_id`);
 
 --
--- Indexes for table `badge`
+-- Indexes for table `Badge`
 --
-ALTER TABLE `badge`
+ALTER TABLE `Badge`
   ADD PRIMARY KEY (`badgeID`);
 
 --
--- Indexes for table `cooking`
+-- Indexes for table `Cooking`
 --
-ALTER TABLE `cooking`
+ALTER TABLE `Cooking`
   ADD PRIMARY KEY (`cookID`,`mealID`),
   ADD KEY `mealID` (`mealID`);
 
@@ -334,16 +359,16 @@ ALTER TABLE `deliveryguy`
   ADD KEY `vehicleID` (`vehicleID`);
 
 --
--- Indexes for table `donating`
+-- Indexes for table `Donating`
 --
-ALTER TABLE `donating`
+ALTER TABLE `Donating`
   ADD PRIMARY KEY (`userID`,`donationID`),
   ADD KEY `donationID` (`donationID`);
 
 --
--- Indexes for table `donation`
+-- Indexes for table `Donation`
 --
-ALTER TABLE `donation`
+ALTER TABLE `Donation`
   ADD PRIMARY KEY (`donationID`);
 
 --
@@ -360,9 +385,9 @@ ALTER TABLE `login`
   ADD PRIMARY KEY (`email`);
 
 --
--- Indexes for table `meal`
+-- Indexes for table `Meal`
 --
-ALTER TABLE `meal`
+ALTER TABLE `Meal`
   ADD PRIMARY KEY (`mealID`);
 
 --
@@ -420,13 +445,13 @@ ALTER TABLE `volunteering`
 -- AUTO_INCREMENT for table `address`
 --
 ALTER TABLE `address`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=124;
 
 --
--- AUTO_INCREMENT for table `badge`
+-- AUTO_INCREMENT for table `Badge`
 --
-ALTER TABLE `badge`
-  MODIFY `badgeID` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `Badge`
+  MODIFY `badgeID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `delivery`
@@ -435,34 +460,34 @@ ALTER TABLE `delivery`
   MODIFY `deliveryID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `donation`
+-- AUTO_INCREMENT for table `Donation`
 --
-ALTER TABLE `donation`
-  MODIFY `donationID` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `Donation`
+  MODIFY `donationID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT for table `event`
 --
 ALTER TABLE `event`
-  MODIFY `eventID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `eventID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=302;
 
 --
--- AUTO_INCREMENT for table `meal`
+-- AUTO_INCREMENT for table `Meal`
 --
-ALTER TABLE `meal`
-  MODIFY `mealID` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `Meal`
+  MODIFY `mealID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=504;
 
 --
 -- AUTO_INCREMENT for table `person`
 --
 ALTER TABLE `person`
-  MODIFY `userID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `userID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT for table `report`
 --
 ALTER TABLE `report`
-  MODIFY `reportID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `reportID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `vehicle`
@@ -478,14 +503,14 @@ ALTER TABLE `vehicle`
 -- Constraints for table `address`
 --
 ALTER TABLE `address`
-  ADD CONSTRAINT `address_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `address` (`id`);
+  ADD CONSTRAINT `address_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `address` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `cooking`
+-- Constraints for table `Cooking`
 --
-ALTER TABLE `cooking`
-  ADD CONSTRAINT `cooking_ibfk_1` FOREIGN KEY (`cookID`) REFERENCES `volunteer` (`userID`),
-  ADD CONSTRAINT `cooking_ibfk_2` FOREIGN KEY (`mealID`) REFERENCES `meal` (`mealID`);
+ALTER TABLE `Cooking`
+  ADD CONSTRAINT `cooking_ibfk_1` FOREIGN KEY (`cookID`) REFERENCES `Volunteer` (`userID`),
+  ADD CONSTRAINT `cooking_ibfk_2` FOREIGN KEY (`mealID`) REFERENCES `Meal` (`mealID`);
 
 --
 -- Constraints for table `coordinating`
@@ -502,17 +527,23 @@ ALTER TABLE `delivering`
   ADD CONSTRAINT `delivering_ibfk_2` FOREIGN KEY (`deliveryGuyID`) REFERENCES `deliveryguy` (`userID`);
 
 --
--- Constraints for table `donating`
+-- Constraints for table `Donating`
 --
-ALTER TABLE `donating`
+ALTER TABLE `Donating`
   ADD CONSTRAINT `donating_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `person` (`userID`),
-  ADD CONSTRAINT `donating_ibfk_2` FOREIGN KEY (`donationID`) REFERENCES `donation` (`donationID`);
+  ADD CONSTRAINT `donating_ibfk_2` FOREIGN KEY (`donationID`) REFERENCES `Donation` (`donationID`);
 
 --
 -- Constraints for table `event`
 --
 ALTER TABLE `event`
   ADD CONSTRAINT `event_ibfk_1` FOREIGN KEY (`eventLocation`) REFERENCES `address` (`id`);
+
+--
+-- Constraints for table `report`
+--
+ALTER TABLE `report`
+  ADD CONSTRAINT `report_ibfk_1` FOREIGN KEY (`reportID`) REFERENCES `reporting` (`reportID`);
 
 --
 -- Constraints for table `volunteer`

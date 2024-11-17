@@ -14,7 +14,7 @@ require_once 'Event.php';
 
 $email = "mohamed16@gmail.com";
  // Instantiate the login object (replace with actual strategy: withGoogle, withFacebook, or withEmail)
- $login = new withGoogle($email, 'password'); // Replace 'password' with the actual password for testing
+ $login = new withEmail($email, 'password'); // Replace 'password' with the actual password for testing
 
  // Attempt to log in with the provided credentials
  if (!$login->login(['email' => $email, 'password' => 'password'])) {

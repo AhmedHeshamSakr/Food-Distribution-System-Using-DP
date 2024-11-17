@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . "/../../config/DB.php";
 require_once 'User.php';
 require_once 'Payment.php'; // Ensure this includes IPayment and strategy classes
 
