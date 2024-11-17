@@ -9,7 +9,7 @@ require_once __DIR__ . "/../../config/DB.php";
 require_once 'Address.php';
 
 // Create a new Address object with valid ENUM level value ('City')
-$address = new Address(3,'Cairo', 1, 'City');
+$address = new Address('Cairo', Address::getIdByName('Egypt'), 'City');
 
 // Test creating a new address in the database
 echo "Testing Address Creation:<br>";
