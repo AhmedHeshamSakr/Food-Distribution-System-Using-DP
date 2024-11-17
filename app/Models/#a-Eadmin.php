@@ -7,11 +7,11 @@ class EventAdmin extends Person implements Observer
 {
     private int $userTypeID = Person::E_ADMIN_FLAG;
     // Constructor to initialize EventAdmin with required details
-    public function __construct(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, iLogin $login)
+    public function __construct(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo)
     {
         $userTypeID = Person::E_ADMIN_FLAG;
         $this->userTypeID = $userTypeID;
-        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
+        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo);
     }
 
       // Implementing Observer's update method

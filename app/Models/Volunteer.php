@@ -17,14 +17,14 @@ class Volunteer extends Person
         string $lastName, 
         string $email, 
         string $phoneNo, 
-        iLogin $login, 
+        // iLogin $login, 
         Address $address, 
         string $nationalID,
         Badges $badge
     ) {
         
         // Call the parent constructor to initialize the User (and Person) properties
-        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login );
+        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo );
         // Initialize the Volunteer-specific properties
         $this->address = $address;
         $this->nationalID = $nationalID;
@@ -158,8 +158,8 @@ abstract class VolunteerRoles extends Person
             $ref->getFirstName(), 
             $ref->getLastName(), 
             $ref->getEmail(), 
-            $ref->getPhoneNo(), 
-            $ref->getLogin()
+            $ref->getPhoneNo()
+            // $ref->getLogin()
         );
         $this->ref = $ref;
     }

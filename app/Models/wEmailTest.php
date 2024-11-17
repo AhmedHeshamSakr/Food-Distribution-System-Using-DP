@@ -16,7 +16,7 @@ $login = new withEmail($email, $password);
 echo "Attempting to register with email: $email\n";
 
 // Register the user
-$registerResult = $login->register($email, $password);
+// $registerResult = $login->register($email, $password);
 if ($registerResult) {
     echo "Registration successful!\n";
 } else {
@@ -38,7 +38,7 @@ if ($loginResult && $login->isAuthenticated()) {
     echo "Login successful!\n";
     
     // Fetch and display user data after successful login
-    $userData = $login->getUserData();
+    // $userData = $login->getUserData();
     echo "User Data:\n";
     print_r($userData);  // This will print the user's details from the 'person' table
 } else {

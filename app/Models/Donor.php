@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . "/../../config/DB.php";
 require_once 'User.php';
 require_once 'Payment.php'; // Ensure this includes IPayment and strategy classes
 
@@ -8,12 +9,12 @@ class Donor extends Person
     private const PAYMENT_METHODS = ['Fawry', 'Credit Card', 'Visa'];
     private int $userTypeID = Person::DONOR_FLAG;
 
-    public function __construct(int $userID, string $firstName, string $lastName, string $email, string $phoneNo, iLogin $login)
+    public function __construct(int $userID, string $firstName, string $lastName, string $email, string $phoneNo)
     {
-        parent::__construct(self::DONOR_FLAG, $firstName, $lastName, $email, $phoneNo, $login);
+        parent::__construct(self::DONOR_FLAG, $firstName, $lastName, $email, $phoneNo);
     }
 
-    public function addDonation(float $amount, string $paymentMethod, array $paymentDetails): bool
+    public function addDonation(float $amount, string $paymentMethod, string $paymentDetails): bool
     {
         if (!in_array($paymentMethod, self::PAYMENT_METHODS)) {
             throw new InvalidArgumentException("Invalid payment method.");
@@ -116,15 +117,16 @@ class Donor extends Person
         }
     }
 
-    private function getPaymentMethod(string $paymentMethod, array $paymentDetails): IPayment
+    private function getPaymentMethod(string $paymentMethod, string $paymentDetails): IPayment
     {
         switch ($paymentMethod) {
             case 'Credit Card':
-                return new PayCreditCard($paymentDetails['cardNumber'], new DateTime($paymentDetails['expiryDate']), $paymentDetails['cvv']);
+                return new PayCreditCard($paymentDetails);
+                // return new PayCreditCard($paymentDetails['cardNumber'], new DateTime($paymentDetails['expiryDate']), $paymentDetails['cvv']);
             case 'Visa':
-                return new PayVisa($paymentDetails['cardNumber'], new DateTime($paymentDetails['expiryDate']));
+                return new PayVisa($paymentDetails);
             case 'Fawry':
-                return new PayFawry($paymentDetails['fawryNumber'], $paymentDetails['referenceID']);
+                return new PayFawry($paymentDetails);
             default:
                 throw new InvalidArgumentException("Unsupported payment method.");
         }

@@ -12,7 +12,7 @@ class TestUser extends Person {
         $login = new withEmail($email, 'password');
         
         // Pass the login instance to the parent constructor
-        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
+        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo);
 
         // Add this user to the `volunteer` table
         $this->addToVolunteer();
