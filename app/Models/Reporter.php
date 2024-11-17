@@ -29,6 +29,43 @@ class Reporter extends Person {
         $reportID = $this->reportingData->getReportID();
         $this->reporting = new Reporting($this->getUserID(), $reportID);
         $this->reporting->addReporting($this->getUserID(), $reportID);  // Create the relationship in the reporting table
+        //$this->reportingData->createReport($personInName, $personInAddress, $personInPhone, $description);
+
+        return true; // Or any other necessary return value
+    }
+    public function updatePersonalInfo(string $firstName, string $lastName,  string $phoneNo): bool
+    {
+        $this->setFirstName($firstName);
+        $this->setLastName($lastName);
+        $this->setPhoneNo($phoneNo);
+
+        try {
+            $conn = Database::getInstance()->getConnection();
+            $userID = $this->getUserID();
+
+            $firstName = $conn->real_escape_string($firstName);
+            $lastName = $conn->real_escape_string($lastName);
+            $phoneNo = $conn->real_escape_string($phoneNo);
+
+            $query = "UPDATE Person SET firstName = '$firstName', lastName = '$lastName', phoneNo = '$phoneNo' 
+                      WHERE userID = '$userID'";
+            return $conn->query($query) === true;
+        } catch (Exception $e) {
+            error_log("Error updating personal info: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function GUI_submitReport($personInName, $personInAddress, $personInPhone, $description)
+    {
+        // Create the report using ReportingData (this keeps creating report data separate)
+        $this->reportingData = new ReportingData($personInName, $personInAddress, $personInPhone, $description);
+
+        // Add reporting relationship (assumes getReportID is set correctly in ReportingData)
+        $reportID = $this->reportingData->getReportID();
+        $this->reporting = new Reporting($this->getUserID(), $reportID);
+        $this->reporting->addReporting($this->getUserID(), $reportID);  // Create the relationship in the reporting table
+        //$this->reportingData->createReport($personInName, $personInAddress, $personInPhone, $description);
 
         return true; // Or any other necessary return value
     }
@@ -121,10 +158,9 @@ class Reporting {
     private $db;
 
     // Constructor
-    public function __construct($reporterID = null, $reportID = null) {
+    public function __construct($reporterID = null) {
         $this->db = Database::getInstance()->getConnection();
         $this->reporterID = $reporterID;
-        $this->reportID = $reportID;
     }
 
     // Create a new reporting relationship between a user and a report
@@ -152,7 +188,7 @@ class Reporting {
 
     // Fetch all the reports submitted by a certain user using their ID
     public function getReportsByUserID($reporterID) {
-        $query = "SELECT reportID FROM reporting WHERE userID = '$reporterID' AND is_deleted = FALSE";
+        $query = "SELECT reportID FROM reporting WHERE userID = '$reporterID'" ; // J removed is_deleted 3ashan msh fel database aslan
         $result = run_select_query($query);
 
         if (!$result) {
