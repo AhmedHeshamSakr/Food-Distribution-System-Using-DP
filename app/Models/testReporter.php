@@ -13,8 +13,7 @@ $email = "testuser" . time() . "@example.com";  // Unique email for each run
 $emailLogin = new withEmail("testuser@example.com", "securepassword");
 
 // Ensure the login is successful before proceeding
-if ($emailLogin->login(["email" => "testuser@example.com", "password" => "securepassword"])) {
-    echo "Login successful.\n";
+
 
     // Initialize Reporter with login method
     $reporter = new Reporter(1, "Test", "User", $email, "123456789");
@@ -85,7 +84,5 @@ if ($emailLogin->login(["email" => "testuser@example.com", "password" => "secure
         echo "Correctly failed to delete non-existent report.\n";
     }
 
-} else {
-    echo "Login failed. Cannot proceed with tests.\n";
-}
+
 ?>

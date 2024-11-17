@@ -21,6 +21,7 @@ class ReportingData {
         $this->recognized = 0; // Default to not recognized (false)
         $this->isDeleted = 0; // Default to not deleted (false)
         $this->description = $description;
+        
         $this->createReport($personInName, $personInAddress, $personInPhone, $description);
     
     }
