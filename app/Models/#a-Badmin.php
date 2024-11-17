@@ -6,9 +6,12 @@ require_once 'UserBadge.php';
 
 class BadgeAdmin extends Person
 {
+    private int $userTypeID = Person::B_ADMIN_FLAG;
     // Constructor to initialize BadgeAdmin with required details
     public function __construct(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, iLogin $login)
-    {
+    {   
+        $userTypeID = Person::B_ADMIN_FLAG;
+        $this->userTypeID = $userTypeID;
         parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
     }
 
@@ -65,6 +68,11 @@ class BadgeAdmin extends Person
     public function getUserBadge(int $userID, int $badgeID): ?UserBadge
     {
         return UserBadge::read($userID, $badgeID);
+    }
+
+    public function getUserTypeID(): int
+    {
+        return $this->userTypeID;
     }
 }
 

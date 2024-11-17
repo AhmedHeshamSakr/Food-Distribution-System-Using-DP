@@ -10,12 +10,13 @@ require_once __DIR__ . "/../../config/DB.php"; // Assuming DB.php handles your d
 class Coordinator extends VolunteerRoles
 {
     private string $coordinatorID;
+    private int $userTypeID= Person::COORDINATOR_FLAG;
     private DateTime $eventDate;
     private string $eventID;
-    private User $user;
+    private Person $user;
 
     // Constructor accepts a User object
-    public function __construct(User $user)
+    public function __construct(Person $user)
     {
         parent::__construct($user);
         $this->chooseRole();
@@ -23,9 +24,13 @@ class Coordinator extends VolunteerRoles
     }
 
     // Set Coordinator role
-    public function chooseRole(): bool
-    {
-        $this->roleType |= self::COORDINATOR_FLAG;
+    public function chooseRole(): bool {
+        
+        // Get the current userTypeID, then apply the Cook flag using the setter
+        $currentType = $this->ref->getUserTypeID();
+        //echo 'coordinator: current coordinator type is'. $currentType . '</br>';
+        $this->setUserTypeID($currentType | Person::COORDINATOR_FLAG); // Access the constant in User
+        //echo 'coordinator: current coordinator type is'. $this->getUserTypeID() . '</br>';
         return true;
     }
 
@@ -129,5 +134,21 @@ class Coordinator extends VolunteerRoles
         $result = $stmt->get_result();
 
         return $result->fetch_assoc() ?: null;
+    }
+    public function getUserTypeID(): int
+    {
+        return $this->userTypeID;
+    }
+    public function setUserTypeID(int $userTypeID): bool
+    {
+        $this->userTypeID = $userTypeID;
+        $fieldsToUpdate = [
+            'userTypeID' => $this->userTypeID
+        ];
+        //echo 'the new user type id is '.$this->userTypeID;
+
+        $gottenvalue = $this->getUserTypeID();
+        //echo 'the gotten value (COORDINATORRRRRRRRRRRRRRRRRRRRRRRRRR) is '.$gottenvalue;
+        return $this->updatePerson($fieldsToUpdate); 
     }
 }

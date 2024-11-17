@@ -4,13 +4,14 @@ require_once __DIR__ . "/../../config/DB.php";
 require_once 'User.php';
 require_once 'Payment.php'; // Ensure this includes IPayment and strategy classes
 
-class Donor extends User
+class Donor extends Person
 {
     private const PAYMENT_METHODS = ['Fawry', 'Credit Card', 'Visa'];
+    private int $userTypeID = Person::DONOR_FLAG;
 
     public function __construct(int $userID, string $firstName, string $lastName, string $email, string $phoneNo, iLogin $login)
     {
-        parent::__construct(self::USER_TYPE_ID_MAP['donor'], $firstName, $lastName, $email, $phoneNo, $login);
+        parent::__construct(self::DONOR_FLAG, $firstName, $lastName, $email, $phoneNo, $login);
     }
 
     public function addDonation(float $amount, string $paymentMethod, array $paymentDetails): bool
@@ -129,4 +130,10 @@ class Donor extends User
                 throw new InvalidArgumentException("Unsupported payment method.");
         }
     }
+    public function getUserTypeID(): int
+    {
+        return $this->userTypeID;
+    }
+    
+    
 }

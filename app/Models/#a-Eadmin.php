@@ -5,9 +5,12 @@ require_once 'Address.php';
 
 class EventAdmin extends Person implements Observer
 {
+    private int $userTypeID = Person::E_ADMIN_FLAG;
     // Constructor to initialize EventAdmin with required details
     public function __construct(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, iLogin $login)
     {
+        $userTypeID = Person::E_ADMIN_FLAG;
+        $this->userTypeID = $userTypeID;
         parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo, $login);
     }
 
@@ -43,6 +46,11 @@ class EventAdmin extends Person implements Observer
     {
         $event = new Event($eventID);
         return $event->read();
+    }
+
+    public function getUserTypeID(): int
+    {
+        return $this->userTypeID;
     }
 
 }

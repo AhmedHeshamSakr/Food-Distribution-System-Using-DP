@@ -9,9 +9,11 @@ interface iLogin {
 }
 
 class withEmail implements iLogin {
+class withEmail implements iLogin {
     private $email;
     private $password;
     private $isAuthenticated = false;
+    private $userData; // to Store user data after login from person table
     private $userData; // to Store user data after login from person table
 
     public function __construct($email, $password) {
@@ -19,6 +21,7 @@ class withEmail implements iLogin {
         $this->password = $password;
     }
 
+    // The login method will authenticate the user using the credentials
     // The login method will authenticate the user using the credentials
     public function login($credentials): bool {
         $this->email = $credentials['email'];
@@ -55,6 +58,7 @@ class withEmail implements iLogin {
     // The logout method simply sets authentication to false
     public function logout(): bool {
         $this->isAuthenticated = false;
+        return true;
         return true;
     }
     // Getter to check if the user is authenticated
