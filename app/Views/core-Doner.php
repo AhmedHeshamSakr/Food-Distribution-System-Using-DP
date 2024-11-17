@@ -14,3 +14,5 @@ if (session_status() === PHP_SESSION_NONE) {
 $view = new DonorView();
 $controller = new DonorController( $view);
 $controller->handleRequest();
+
+?>

@@ -16,6 +16,7 @@ class Reporter extends Person {
         $userTypeID = Person::REPORTER_FLAG;
         $this->userTypeID = $userTypeID;
         parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo);
+        $this->reporting = new Reporting();
     }
 
     // Method for submitting a new report
@@ -28,23 +29,70 @@ class Reporter extends Person {
         $reportID = $this->reportingData->getReportID();
         $this->reporting = new Reporting($this->getUserID(), $reportID);
         $this->reporting->addReporting($this->getUserID(), $reportID);  // Create the relationship in the reporting table
+        //$this->reportingData->createReport($personInName, $personInAddress, $personInPhone, $description);
+
+        return true; // Or any other necessary return value
+    }
+    public function updatePersonalInfo(string $firstName, string $lastName,  string $phoneNo): bool
+    {
+        $this->setFirstName($firstName);
+        $this->setLastName($lastName);
+        $this->setPhoneNo($phoneNo);
+
+        try {
+            $conn = Database::getInstance()->getConnection();
+            $userID = $this->getUserID();
+
+            $firstName = $conn->real_escape_string($firstName);
+            $lastName = $conn->real_escape_string($lastName);
+            $phoneNo = $conn->real_escape_string($phoneNo);
+
+            $query = "UPDATE Person SET firstName = '$firstName', lastName = '$lastName', phoneNo = '$phoneNo' 
+                      WHERE userID = '$userID'";
+            return $conn->query($query) === true;
+        } catch (Exception $e) {
+            error_log("Error updating personal info: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function GUI_submitReport($personInName, $personInAddress, $personInPhone, $description)
+    {
+        // Create the report using ReportingData (this keeps creating report data separate)
+        $this->reportingData = new ReportingData($personInName, $personInAddress, $personInPhone, $description);
+
+        // Add reporting relationship (assumes getReportID is set correctly in ReportingData)
+        $reportID = $this->reportingData->getReportID();
+        $this->reporting = new Reporting($this->getUserID(), $reportID);
+        $this->reporting->addReporting($this->getUserID(), $reportID);  // Create the relationship in the reporting table
+        //$this->reportingData->createReport($personInName, $personInAddress, $personInPhone, $description);
 
         return true; // Or any other necessary return value
     }
 
     // Method to update the status of an existing report, which will be used by ADMIN
-    public function updateReportStatus($reportID, $newStatus) {
-        //$reportData = new ReportingData(null, null, null, null); // Create an instance of ReportingData
-        if ($this->reportingData->getReportDetails($reportID)) {  // Make sure the report exists before updating
-            $updated = $this->reportingData->updateReport(['status' => $newStatus], $reportID);
-            if ($updated) {
-                
-                return $this->reporting->updateTimestamp();
-            }
-        } else {
-            echo "Report not found.\n";
+    public function updateReportStatus($reportID, $newStatus)
+    {
+        // Validate input
+        $validStatuses = ['Pending', 'Acknowledged', 'In Progress', 'Completed'];
+        if (!in_array($newStatus, $validStatuses)) {
+            
+            return false;
         }
-        return false;
+
+        // Ensure the report ID is provided
+        if (!$reportID) {
+            
+            return false;
+        }
+
+        // Create the database query to update the status
+        $query = "UPDATE report SET status = '$newStatus' WHERE reportID = '$reportID' AND is_deleted = FALSE";
+
+        // Execute the query
+        $result = run_query($query);
+        return $result ? true : false;
+
     }
 
     // Method to recognize a report, marking it as reviewed or acknowledged, to be used by ADMIN 
@@ -72,13 +120,20 @@ class Reporter extends Person {
             return $this->reportingData->deleteReport($reportID);
         }
     
-        echo "Report not found or already deleted.\n";
+        //echo "Report not found or already deleted.\n";
         return false;
     }
     
     // Method to get all active reports
-    public function getAllActiveReports() { 
-        return $this->reportingData->getAllActiveReports();
+    // public function getAllActiveReports() { 
+    //     return $this->reportingData->getAllActiveReports();
+    // }
+    public function getAllActiveReports() {
+        $query = "SELECT * FROM report WHERE is_deleted = FALSE";
+        $result = run_select_query($query);
+    
+        // Ensure the method always returns an array
+        return $result !== false ? $result : [];
     }
 
     // Method to get reports by a specific user's ID
@@ -104,10 +159,9 @@ class Reporting {
     private $db;
 
     // Constructor
-    public function __construct($reporterID = null, $reportID = null) {
+    public function __construct($reporterID = null) {
         $this->db = Database::getInstance()->getConnection();
         $this->reporterID = $reporterID;
-        $this->reportID = $reportID;
     }
 
     // Create a new reporting relationship between a user and a report
@@ -135,7 +189,7 @@ class Reporting {
 
     // Fetch all the reports submitted by a certain user using their ID
     public function getReportsByUserID($reporterID) {
-        $query = "SELECT reportID FROM reporting WHERE userID = '$reporterID' AND is_deleted = FALSE";
+        $query = "SELECT reportID FROM reporting WHERE userID = '$reporterID'" ; // J removed is_deleted 3ashan msh fel database aslan
         $result = run_select_query($query);
 
         if (!$result) {

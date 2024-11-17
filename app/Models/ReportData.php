@@ -21,6 +21,7 @@ class ReportingData {
         $this->recognized = 0; // Default to not recognized (false)
         $this->isDeleted = 0; // Default to not deleted (false)
         $this->description = $description;
+        
         $this->createReport($personInName, $personInAddress, $personInPhone, $description);
     
     }
@@ -77,10 +78,10 @@ class ReportingData {
         return $result ? $result[0] : null; // Return the first result as an associative array or null if not found
     }
 
-    public function getAllActiveReports() {
-        $query = "SELECT * FROM report WHERE is_deleted = FALSE";
-        return run_select_query($query);
-    }
+    // public function getAllActiveReports() {
+    //     $query = "SELECT * FROM report WHERE is_deleted = FALSE";
+    //     return run_select_query($query);
+    // }
 
 
 
