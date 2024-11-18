@@ -57,13 +57,13 @@ if ($deletedDetails) {
     echo "Report is marked as deleted and not accessible.\n";
 }
 
-// Fetch all active reports to confirm only active reports are retrieved
-echo "Fetching all active reports...\n";
-$activeReports = $reportData->getAllActiveReports();
-if (!empty($activeReports)) {
-    echo "Active Reports:\n";
-    print_r($activeReports);
-} else {
-    echo "No active reports found.\n";
-}
+// // Fetch all active reports to confirm only active reports are retrieved
+// echo "Fetching all active reports...\n";
+// $activeReports = $reportData->getAllActiveReports();
+// if (!empty($activeReports)) {
+//     echo "Active Reports:\n";
+//     print_r($activeReports);
+// } else {
+//     echo "No active reports found.\n";
+// }
 

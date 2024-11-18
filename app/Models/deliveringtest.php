@@ -47,7 +47,7 @@ function setupVolunteer()
     $uniqueEmail = "john.doe_{$randomString}@example.com";
 
     $login = new DummyLogin(); // Placeholder for a login interface implementation
-    $address = new Address(3, '123 Main St', 1, 'Street'); // Example Address object
+    $address = new Address('Cairo', null, 1); // Example Address object
     $badge = new Badges(101, 'Trusted'); // Example Badge object
 
     // Create and return a Volunteer instance

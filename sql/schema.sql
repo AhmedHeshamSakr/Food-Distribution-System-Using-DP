@@ -231,10 +231,6 @@ INSERT INTO `person` (`userID`, `userTypeID`, `firstName`, `lastName`, `email`, 
 
 -- --------------------------------------------------------
 
---
--- Table structure for table `report`
---
-
 CREATE TABLE `report` (
   `reportID` int(11) NOT NULL,
   `personINname` varchar(255) DEFAULT NULL,
@@ -245,6 +241,14 @@ CREATE TABLE `report` (
   `is_deleted` tinyint(1) DEFAULT 0,
   `recognized` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `report`
+--
+
+INSERT INTO `report` (`reportID`, `personINname`, `personINaddress`, `phoneINno`, `status`, `description`, `is_deleted`, `recognized`) VALUES
+(24, 'Jane Doe', '456 Another St', '5559876543', 'Acknowledged', 'Description for a test report', 1, 1),
+(25, 'Jane Doe', '456 Another St', '5559876543', 'Pending', 'Description for a test report', 0, 0);
 
 --
 -- Dumping data for table `report`
@@ -266,6 +270,8 @@ CREATE TABLE `reporting` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `is_deleted` tinyint(1) DEFAULT 0
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `is_deleted` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -275,8 +281,6 @@ CREATE TABLE `reporting` (
 INSERT INTO `reporting` (`userID`, `reportID`, `created_at`, `updated_at`, `is_deleted`) VALUES
 (5, 24, '2024-11-17 12:43:06', '2024-11-17 12:43:06', 0),
 (6, 25, '2024-11-17 12:51:12', '2024-11-17 12:51:12', 0);
-
--- --------------------------------------------------------
 -- --------------------------------------------------------
 
 --
@@ -428,6 +432,7 @@ ALTER TABLE `reporting`
   ADD KEY `reportID` (`reportID`);
 
 --
+--
 -- Indexes for table `userbadge`
 --
 ALTER TABLE `userbadge`
@@ -505,7 +510,7 @@ ALTER TABLE `person`
 -- AUTO_INCREMENT for table `report`
 --
 ALTER TABLE `report`
-  MODIFY `reportID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `reportID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `vehicle`
@@ -513,9 +518,6 @@ ALTER TABLE `report`
 ALTER TABLE `vehicle`
   MODIFY `vehicleID` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- Constraints for dumped tables
---
 
 --
 -- Constraints for table `address`
@@ -557,11 +559,6 @@ ALTER TABLE `Donating`
 ALTER TABLE `event`
   ADD CONSTRAINT `event_ibfk_1` FOREIGN KEY (`eventLocation`) REFERENCES `address` (`id`);
 
---
--- Constraints for table `report`
---
-ALTER TABLE `report`
-  ADD CONSTRAINT `report_ibfk_1` FOREIGN KEY (`reportID`) REFERENCES `reporting` (`reportID`);
 
 --
 -- Constraints for table `volunteer`

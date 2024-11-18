@@ -1,34 +1,38 @@
 <?php
 
-require_once __DIR__ . "/../models/Event.php";
+// Enable error reporting for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+require_once __DIR__ . "/../Models/Event.php";
+require_once __DIR__ . "/../Views/EventView.php";
 
 class EventController
 {
-    // Fetch and return all events
-    public function getAllEvents(): array
+    private EventView $view;
+
+    public function __construct(EventView $view)
     {
-        $query = "SELECT * FROM Event";
-        $results = run_select_query($query);
-        $events = [];
-
-        foreach ($results as $row) {
-            $eventLocation = Address::read($row['eventLocation']);
-            $events[] = new Event(
-                $row['eventID'],
-                $row['eventDate'],
-                $eventLocation,
-                $row['name'],
-                $row['eventDescription']
-            );
-        }
-
-        return $events;
+        // Initialize the view
+        $this->view = $view;
     }
 
-    // Method to display the event view
-    public function displayEvents(): void
+    /**
+     * Handle the request and render the list of all events.
+     */
+    public function handleRequest()
     {
-        $events = $this->getAllEvents();
-        include __DIR__ . "/../Views/EventView.php";
+        // Fetch all events using the fetchAll() method
+        $allEvents = Event::fetchAll();
+
+        // Render the page header
+        $this->view->renderPageHeader();
+
+        // Render the list of all events
+        $this->view->renderEventList($allEvents);
+
+        // Render the page footer
+        $this->view->renderPageFooter();
     }
 }

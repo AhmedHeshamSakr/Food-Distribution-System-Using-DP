@@ -38,6 +38,11 @@ class Database
         }
         self::$instance = null;
     }
+
+    public function get_last_inserted_id(): int
+    {
+        return $this->connection->insert_id;
+    }
 }
 
 // Executes multiple SQL queries and optionally displays their results
