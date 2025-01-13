@@ -37,16 +37,15 @@ class Volunteer extends Person
         
     }
 
-    public function insertVolunteer(Volunteer $volunteer): bool
+    public function insertVolunteer(Address $address, string $nationalID): bool
     {
         //$conn = Database::getInstance()->getConnection();
         
-        $address = $volunteer->address->getID();
+        $address = $this->address->getID();
         $address = mysqli_real_escape_string(Database::getInstance()->getConnection(), $address);
-        $nationalID = $volunteer->getNationalID();
         $nationalID = mysqli_real_escape_string(Database::getInstance()->getConnection(), $nationalID);
-        $userid = $volunteer->getUserID();
-        $defaultBadge = $volunteer->badge->getBadgeID();
+        $userid = $this->getUserID();
+        $defaultBadge = $this->badge->getBadgeID();
         $this->volunteerList->addVolunteer($this);
         // SQL query to insert the person into the database
         $query = "INSERT INTO volunteer (userID, nationalID, `address`, badge) 
