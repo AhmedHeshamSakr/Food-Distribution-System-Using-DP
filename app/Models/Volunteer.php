@@ -10,6 +10,8 @@ class Volunteer extends Person
     public string $nationalID;
     public Badges $badge;
 
+    private VolunteerList $volunteerList;
+
     // Constructor that calls the parent constructor
     public function __construct(
         int $userTypeID, 
@@ -29,20 +31,23 @@ class Volunteer extends Person
         $this->address = $address;
         $this->nationalID = $nationalID;
         $this->badge = $badge;
+        $this->volunteerList = new VolunteerList();
         $this->insertVolunteer($address, $nationalID);
         $this->chooseRole();
         
     }
 
-    public function insertVolunteer(Address $address, string $nationalID): bool
+    public function insertVolunteer(Volunteer $volunteer): bool
     {
         //$conn = Database::getInstance()->getConnection();
         
-        $address = $this->address->getID();
+        $address = $volunteer->address->getID();
         $address = mysqli_real_escape_string(Database::getInstance()->getConnection(), $address);
+        $nationalID = $volunteer->getNationalID();
         $nationalID = mysqli_real_escape_string(Database::getInstance()->getConnection(), $nationalID);
-        $userid = $this->getUserID();
-        $defaultBadge = $this->badge->getBadgeID();
+        $userid = $volunteer->getUserID();
+        $defaultBadge = $volunteer->badge->getBadgeID();
+        $this->volunteerList->addVolunteer($this);
         // SQL query to insert the person into the database
         $query = "INSERT INTO volunteer (userID, nationalID, `address`, badge) 
                 VALUES ('{$userid}', '{$nationalID}', '{$address}', '{$defaultBadge}')";
