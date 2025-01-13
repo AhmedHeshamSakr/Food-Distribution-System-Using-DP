@@ -3,8 +3,8 @@
 require_once '../../config/DB.php';
 
 class Delivery
-{
-    private int $deliveryID;
+{  
+     private int $deliveryID;
     private string $deliveryDate;
     private string $startLocation;
     private string $endLocation;

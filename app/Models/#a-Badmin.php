@@ -4,6 +4,8 @@ require_once 'Person.php';
 require_once 'Badges.php';
 require_once 'UserBadge.php';
 
+
+
 class BadgeAdmin extends Person
 {
     private int $userTypeID = Person::B_ADMIN_FLAG;

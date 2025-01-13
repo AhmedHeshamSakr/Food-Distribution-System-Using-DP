@@ -24,7 +24,7 @@ abstract class Person
     private string $phoneNo;
     // private iLogin $login;
 
-    public function __construct(int $userTypeID=0, string $firstName, string $lastName, string $email, string $phoneNo)
+    public function __construct(string $firstName, string $lastName, string $email, string $phoneNo, int $userTypeID=0)
     {
         $this->userTypeID = $userTypeID;
         $this->firstName = $firstName;
@@ -43,8 +43,6 @@ abstract class Person
             $this->userID = $row['userID'];
             }
         }
-
-
     }
 
     private function emailExists(string $email): bool
