@@ -38,33 +38,49 @@ class DeliveryTest
         self::assertEqual($delivery->getStartLocation(), 'Warehouse A', "Start Location", $testsPassed, $testsFailed);
         self::assertEqual($delivery->getEndLocation(), 'Customer B', "End Location", $testsPassed, $testsFailed);
         self::assertEqual($delivery->getDeliveryGuy(), 1, "Delivery Guy ID", $testsPassed, $testsFailed);
-        self::assertEqual($delivery->getStatus(), 'pending', "Status", $testsPassed, $testsFailed);
+        self::assertEqual($delivery->getCurrentStatus(), 'pending', "Initial Status", $testsPassed, $testsFailed);
         self::assertEqual($delivery->getDeliveryDetails(), 'Delivering electronics', "Delivery Details", $testsPassed, $testsFailed);
 
-        // Test updating delivery date
-        echo "Testing Delivery Date Update...\n";
-        $delivery->setDeliveryDate('2024-12-02');
-        self::assertEqual($delivery->getDeliveryDate(), '2024-12-02', "Updated Delivery Date", $testsPassed, $testsFailed);
+        // Test state transitions
+        echo "Testing State Transitions...\n";
+        try {
+            $delivery->request(); // pending -> delivering
+            self::assertEqual($delivery->getCurrentStatus(), 'delivering', "Transition to Delivering", $testsPassed, $testsFailed);
+            
+            $delivery->request(); // delivering -> delivered
+            self::assertEqual($delivery->getCurrentStatus(), 'delivered', "Transition to Delivered", $testsPassed, $testsFailed);
+        } catch (Exception $e) {
+            echo "✘ State transition failed with exception: " . $e->getMessage() . "\n";
+            $testsFailed++;
+        }
 
-        // Test updating start location
-        echo "Testing Start Location Update...\n";
-        $delivery->setStartLocation('Warehouse B');
-        self::assertEqual($delivery->getStartLocation(), 'Warehouse B', "Updated Start Location", $testsPassed, $testsFailed);
+        // Test invalid state transition
+        echo "Testing Invalid State Transition...\n";
+        try {
+            $delivery->request(); // Should throw exception as already delivered
+            echo "✘ Should have thrown exception for invalid transition from delivered state.\n";
+            $testsFailed++;
+        } catch (Exception $e) {
+            if ($e->getMessage() === "Delivery is already in final state") {
+                echo "✔ Correctly threw exception for invalid transition.\n";
+                $testsPassed++;
+            } else {
+                echo "✘ Unexpected exception message: " . $e->getMessage() . "\n";
+                $testsFailed++;
+            }
+        }
 
-        // Test updating end location
-        echo "Testing End Location Update...\n";
-        $delivery->setEndLocation('Customer C');
-        self::assertEqual($delivery->getEndLocation(), 'Customer C', "Updated End Location", $testsPassed, $testsFailed);
-
-        // Test updating status
-        echo "Testing Status Update...\n";
-        $delivery->setStatus('delivering');
-        self::assertEqual($delivery->getStatus(), 'delivering', "Updated Status", $testsPassed, $testsFailed);
-
-        // Attempt setting invalid status
-        echo "Testing Invalid Status Update...\n";
-        $delivery->setStatus('invalid_status');
-        self::assertEqual($delivery->getStatus(), 'delivering', "Status should remain 'delivering' on invalid input", $testsPassed, $testsFailed);
+        // Test creating delivery with custom initial state
+        echo "Testing Custom Initial State...\n";
+        $customDelivery = new Delivery(
+            '2024-12-01',
+            'Warehouse A',
+            'Customer B',
+            1,
+            'delivering',
+            'Test delivery'
+        );
+        self::assertEqual($customDelivery->getCurrentStatus(), 'delivering', "Custom Initial State", $testsPassed, $testsFailed);
 
         // Test updating delivery details
         echo "Testing Delivery Details Update...\n";

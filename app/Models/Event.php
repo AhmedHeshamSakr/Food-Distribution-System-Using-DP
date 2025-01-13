@@ -174,6 +174,42 @@ class Event implements Subject
         return $events;
     }
     
+    // Fetch a single event by its ID
+    public static function fetchById(int $eventID): ?Event
+    {
+        $query = "SELECT * FROM `event` WHERE eventID = {$eventID}";
+        $result = run_select_query($query);
+
+        if ($result) {
+            $row = $result[0]; // Assuming one event will be returned
+
+            // Ensure $row is an array and $row['eventLocation'] is the correct data for Address
+            if (isset($row['eventLocation'])) {
+                $eventLocation = Address::read($row['eventLocation']);
+            } else {
+                // Handle the case if eventLocation is not found or is invalid
+                $eventLocation = null;  // Adjust accordingly
+            }
+
+            // Ensure required fields exist in $row before using them
+            if (isset($row['eventID'], $row['eventDate'], $row['name'], $row['eventDescription'])) {
+                // Create and return the Event object
+                return new Event(
+                    (int)$row['eventID'],
+                    $row['eventDate'],
+                    $eventLocation,
+                    $row['name'],
+                    $row['eventDescription']
+                );
+            } else {
+                // Log an error or handle missing fields gracefully
+                error_log("Missing required fields in event data: " . json_encode($row));
+            }
+        }
+
+        return null;
+    }
+
     public function create(): bool
     {
         // Ensure that the address has been created in the database and has a valid ID
