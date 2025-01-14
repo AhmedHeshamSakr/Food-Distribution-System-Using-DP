@@ -17,8 +17,6 @@ function logResult($message, $success) {
 try {
     // Create an EventAdmin instance
     $admin = new EventAdmin("John", "Doe", "john.doe@example.com", "1234567890");
-
-
     echo "Creating an address...\n";
     $address = new Address("Cairo", null, "City");
     $addressCreated = $address->create();
@@ -70,12 +68,12 @@ try {
     // }
 
     // Step 4: Update event details
-    echo "\nUpdating event details for the first event...\n";
-    if ($eventFetched) {
-        $eventFetched->setEventName("Updated Christmas Celebration");
-        $eventFetched->setEventDescription("Updated event details for the Christmas Celebration.");
-        logResult("Event updated", $eventFetched->update());
-    }
+    // echo "\nUpdating event details for the first event...\n";
+    // if ($eventFetched) {
+    //     $eventFetched->setEventName("Updated Christmas Celebration");
+    //     $eventFetched->setEventDescription("Updated event details for the Christmas Celebration.");
+    //     logResult("Event updated", $eventFetched->update());
+    // }
 
     // Step 5: Fetch all events using fetchAll()
     echo "\nFetching all events from the database...\n";

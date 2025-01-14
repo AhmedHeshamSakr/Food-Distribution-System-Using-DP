@@ -1,19 +1,29 @@
 <?php
 
 require_once '../../config/DB.php';
+require_once 'DeliveryState.php';
 
 class Delivery
 {
-    private int $deliveryID;
-    private string $deliveryDate;
-    private string $startLocation;
-    private string $endLocation;
-    private int $deliveryGuyID;
-    private string $status;
+    private int     $deliveryID;
+    private string  $deliveryDate;
+    private string  $startLocation;
+    private string  $endLocation;
+    private int     $deliveryGuyID;
+    private string   $status = 'pending';
     private ?string $deliveryDetails;
+    private State $state;
 
     public function __construct(string $deliveryDate, string $startLocation, string $endLocation, int $deliveryGuyID, string $status = 'pending', ?string $deliveryDetails = null)
     {
+
+        $this->state = match($status) {
+            'pending' => new PendingState(),
+            'delivering' => new DeliveringState(),
+            'delivered' => new DeliveredState(),
+            default => new PendingState()
+        };
+
         $this->deliveryDate = $deliveryDate;
         $this->startLocation = $startLocation;
         $this->endLocation = $endLocation;
@@ -21,6 +31,26 @@ class Delivery
         $this->status = $status;
         $this->deliveryDetails = $deliveryDetails;
         $this->insertDelivery($deliveryDate, $startLocation, $endLocation, $deliveryGuyID, $status, $deliveryDetails);
+    }
+
+     // Request method that delegates to state's handle method
+     public function request(): void {
+        $this->state->handle($this);
+    }
+
+    // Method to transition between states
+    public function transitionTo(State $state): void {
+        $this->state = $state;
+    }
+
+     // Get current state status for database
+     public function getCurrentStatus(): string {
+        return match(get_class($this->state)) {
+            PendingState::class => 'pending',
+            DeliveringState::class => 'delivering',
+            DeliveredState::class => 'delivered',
+            default => 'pending'
+        };
     }
 
     // Getter for deliveryID

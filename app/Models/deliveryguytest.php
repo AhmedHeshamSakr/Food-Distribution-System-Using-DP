@@ -9,7 +9,7 @@ require_once 'Vehicle.php';
 require_once 'Delivery.php';
 require_once 'Delivering.php';
 
-$vehicle = new Vehicle('car12', 22);
+$vehicle = new Vehicle('car112', 22);
 
 // Initialize shared objects
 function setupVolunteer()
@@ -18,7 +18,6 @@ function setupVolunteer()
     $randomString = substr(md5(mt_rand()), 0, 5);
     $uniqueEmail = "john.doe_{$randomString}@example.com";
 
-    $login = new DummyLogin(); // Placeholder for a login interface implementation
     $address = new Address('Cairo', null, 1); // Example Address object
     $badge = new Badges(101, 'Trusted'); // Example Badge object
 

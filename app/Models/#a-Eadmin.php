@@ -4,7 +4,13 @@ require_once 'Person.php';
 require_once 'Event.php';
 require_once 'Address.php';
 
-class EventAdmin extends Person implements Observer
+
+
+class Admin extends Person {
+    
+}
+
+class EventAdmin extends Admin implements Observer
 {
     private int $userTypeID = Person::E_ADMIN_FLAG;
 

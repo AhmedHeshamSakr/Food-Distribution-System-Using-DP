@@ -6,14 +6,14 @@ require_once __DIR__ . "/../../config/DB.php";
 abstract class Person
 {
 
-    public const COOK_FLAG = 1 << 0;       // Binary 00001
-    public const DELIVERY_FLAG = 1 << 1;   // Binary 00010
-    public const COORDINATOR_FLAG = 1 << 2; // Binary 00100
-    public const REPORTER_FLAG = 1 << 3;   // Binary 01000
-    public const DONOR_FLAG = 1 << 4;  // Binary 10000 
-    public const B_ADMIN_FLAG = 1 << 5;  // Binary 100000
-    public const E_ADMIN_FLAG = 1<< 6;
-    public const V_ADMIN_FLAG = 1<< 7;
+    protected const COOK_FLAG = 1 << 0;       // Binary 00001
+    protected const DELIVERY_FLAG = 1 << 1;   // Binary 00010
+    protected const COORDINATOR_FLAG = 1 << 2; // Binary 00100
+    protected const REPORTER_FLAG = 1 << 3;   // Binary 01000
+    protected const DONOR_FLAG = 1 << 4;  // Binary 10000 
+    protected const B_ADMIN_FLAG = 1 << 5;  // Binary 100000
+    protected const E_ADMIN_FLAG = 1<< 6;
+    protected const V_ADMIN_FLAG = 1<< 7;
 
 
     private int $userTypeID = 0;
@@ -24,7 +24,7 @@ abstract class Person
     private string $phoneNo;
     // private iLogin $login;
 
-    public function __construct(int $userTypeID=0, string $firstName, string $lastName, string $email, string $phoneNo)
+    public function __construct(string $firstName, string $lastName, string $email, string $phoneNo, int $userTypeID=0)
     {
         $this->userTypeID = $userTypeID;
         $this->firstName = $firstName;
@@ -43,8 +43,6 @@ abstract class Person
             $this->userID = $row['userID'];
             }
         }
-
-
     }
 
     private function emailExists(string $email): bool

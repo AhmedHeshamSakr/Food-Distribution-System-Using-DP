@@ -24,6 +24,7 @@ class Reporter extends Person {
     {
         // Create the report using ReportingData (this keeps creating report data separate)
         $this->reportingData = new ReportingData($personInName, $personInAddress, $personInPhone, $description);
+        $this->reportingData->createReport($personInName, $personInAddress, $personInPhone, $description);
 
         // Add reporting relationship (assumes getReportID is set correctly in ReportingData)
         $reportID = $this->reportingData->getReportID();
@@ -60,6 +61,7 @@ class Reporter extends Person {
     {
         // Create the report using ReportingData (this keeps creating report data separate)
         $this->reportingData = new ReportingData($personInName, $personInAddress, $personInPhone, $description);
+        $this->reportingData->createReport($personInName, $personInAddress, $personInPhone, $description);
 
         // Add reporting relationship (assumes getReportID is set correctly in ReportingData)
         $reportID = $this->reportingData->getReportID();
