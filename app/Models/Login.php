@@ -128,153 +128,34 @@ class withGoogle implements iLogin {
         $this->auth = $auth;
     }
 
-    public function login($idToken) {
+    public function login($credentials): bool {
         try {
             // Verify the ID token received from the frontend
+            $idToken = $credentials['idToken']; // Ensure credentials include the ID token
             $verifiedIdToken = $this->auth->verifyIdToken($idToken);
 
             // Retrieve user details
             $uid = $verifiedIdToken->claims()->get('sub'); // User's unique ID
             $email = $verifiedIdToken->claims()->get('email'); // User's email
 
-            return [
-                'status' => 'success',
-                'uid' => $uid,
-                'email' => $email,
-            ];
+            // Log success (can store $uid and $email for later use)
+            return true; // Login successful
         } catch (FailedToVerifyToken $e) {
-            return [
-                'status' => 'error',
-                'message' => 'Invalid Token: ' . $e->getMessage(),
-            ];
+            // Log or handle error
+            return false; // Login failed
         }
     }
+
+    public function authenticate(string $username, string $password): bool {
+        // Google login does not require username/password
+        return false; // Not applicable
+    }
+
+    public function logout(): bool {
+        // Google login session management can be handled on the client-side
+        return true; // Logout successful
+    }
 }
-    
-
-//     private $client;
-//     private $service;
-//     private $isAuthenticated = false;
-//     private $userData;
-
-//     public function __construct() {
-//         $this->client = new Google_Client();
-//         $this->client->setClientId('713975107412-uamp9g6c9ltmfjblkhvumggrt5r3h659.apps.googleusercontent.com');
-//         $this->client->setClientSecret('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');
-//         $this->client->setRedirectUri('http://localhost/Food-Distribution-System-Using-DP/app/Models/Login.php');  
-//         $this->client->addScope('email');
-//         $this->client->addScope('profile');
-//     }
-
-//     // Redirect to Google's OAuth consent screen
-//     public function login($credentials = null): bool {
-//         //session_start();
-//         if (isset($_GET['code'])) {
-//             $this->client->authenticate($_GET['code']);
-//             $_SESSION['access_token'] = $this->client->getAccessToken();
-//             return $this->authenticate();  // Authenticate the user after login
-//         } else {
-//             $authUrl = $this->client->createAuthUrl();
-//             header('Location: ' . $authUrl);  // Redirect to Google OAuth screen
-//             exit();
-//         }
-//     }
-
-//     // Authenticate the user by fetching data from Google
-//     public function authenticate(string $email = null, string $password = null): bool {
-//         if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
-//             $this->client->setAccessToken($_SESSION['access_token']);
-//             $this->service = new Google_Service_Oauth2($this->client);
-//             $userInfo = $this->service->userinfo->get();
-
-//             if ($userInfo) {
-//                 // Store user data in session or database
-//                 $this->isAuthenticated = true;
-//                 $this->userData = $userInfo;
-//                 return true;  // Authentication success
-//             }
-//         }
-
-//         return false;  // Authentication failed
-//     }
-
-//     // Logout the user and clear session
-//     public function logout(): bool {
-//         $this->isAuthenticated = false;
-//         unset($_SESSION['access_token']);
-//         return true;
-//     }
-
-//     // Getter to check if the user is authenticated
-//     public function isAuthenticated(): bool {
-//         return $this->isAuthenticated;
-//     }
-
-//     // Getter to retrieve the user's details after authentication
-//     public function getUserData() {
-//         return $this->userData;
-//     }
-
-
-// }
-
-
-
-
-// class withGoogle implements iLogin {
-//     private $email;
-//     private $password;
-//     private $isAuthenticated = false;
-
-//     public function __construct($email, $password) {
-//         $this->email = $email;
-//         $this->password = $password;
-//     }
-
-//     public function login($credentials): bool {
-//         // Implement Google authentication logic here
-//         $this->isAuthenticated = $this->authenticate($credentials['email'], $credentials['password']);
-//         return $this->isAuthenticated;
-//     }
-
-//     public function authenticate(string $username, string $password): bool {
-//         // Placeholder for Google-specific authentication
-//         return true; // Assume success for this example
-//     }
-
-//     public function logout(): bool {
-//         $this->isAuthenticated = false;
-//         return !$this->isAuthenticated;
-//     }
-// }
-
-
-// class withFacebook implements iLogin {
-//     private $email;
-//     private $password;
-//     private $isAuthenticated = false;
-
-//     public function __construct($email, $password) {
-//         $this->email = $email;
-//         $this->password = $password;
-//     }
-
-//     public function login($credentials): bool {
-//         // Implement Facebook authentication logic here
-//         $this->isAuthenticated = $this->authenticate($credentials['email'], $credentials['password']);
-//         return $this->isAuthenticated;
-//     }
-
-//     public function authenticate(string $username, string $password): bool {
-//         // Placeholder for Facebook-specific authentication
-//         return true; // Assume success for this example
-//     }
-
-//     public function logout(): bool {
-//         $this->isAuthenticated = false;
-//         return !$this->isAuthenticated;
-//     }
-// }
 
 
 ?>

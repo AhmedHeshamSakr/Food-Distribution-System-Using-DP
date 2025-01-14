@@ -250,14 +250,6 @@ INSERT INTO `report` (`reportID`, `personINname`, `personINaddress`, `phoneINno`
 (24, 'Jane Doe', '456 Another St', '5559876543', 'Acknowledged', 'Description for a test report', 1, 1),
 (25, 'Jane Doe', '456 Another St', '5559876543', 'Pending', 'Description for a test report', 0, 0);
 
---
--- Dumping data for table `report`
---
-
-INSERT INTO `report` (`reportID`, `personINname`, `personINaddress`, `phoneINno`, `status`, `description`, `is_deleted`, `recognized`) VALUES
-(24, 'Jane Doe', '456 Another St', '5559876543', 'Acknowledged', 'Description for a test report', 1, 1),
-(25, 'Jane Doe', '456 Another St', '5559876543', 'Pending', 'Description for a test report', 0, 0);
-
 -- --------------------------------------------------------
 
 --
@@ -268,13 +260,11 @@ CREATE TABLE `reporting` (
   `userID` int(11) NOT NULL,
   `reportID` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `is_deleted` tinyint(1) DEFAULT 0
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `is_deleted` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
+
 -- Dumping data for table `reporting`
 --
 

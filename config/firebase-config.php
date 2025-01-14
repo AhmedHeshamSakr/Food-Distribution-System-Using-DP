@@ -2,24 +2,12 @@
 
 //Include the autoload file from the Firebase PHP SDK 
 
-require_once __DIR__ . "/../vendor/autoload.php";
+require_once "../vendor/autoload.php";
 
 
 use Kreait\Firebase\Factory; 
 
-use Kreait\Firebase\ServiceAccount; 
-
-// Path to your Firebase service account JSON file 
-
-$serviceAccount = ServiceAccount::fromJsonFile("firebase_credentials.json"); 
-
-
-
-$firebase = (new Factory) 
-
-    ->withServiceAccount($serviceAccount) 
-
-    ->create(); 
+$firebase = (new Factory)->withServiceAccount('../config/firebase_credentials.json'); 
 
 $auth = $firebase->createAuth();
 
