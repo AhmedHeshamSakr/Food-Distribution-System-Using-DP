@@ -1,2 +1,3 @@
 .DS_Store
 .app/Models/personTest.php
+config/firebase_credentials.json

@@ -1,4 +1,9 @@
 <?php
+require_once __DIR__ . "/../../config/firebase-config.php";
+
+
+use Kreait\Firebase\Auth;
+use Kreait\Firebase\Exception\Auth\FailedToVerifyToken;
 
 require_once __DIR__ . "/../../config/DB.php";
 require_once "User.php";
@@ -116,7 +121,35 @@ class withEmail implements iLogin {
 }
 
 
-// class withGoogle implements iLogin {
+class withGoogle implements iLogin {
+    private $auth;
+
+    public function __construct($auth) {
+        $this->auth = $auth;
+    }
+
+    public function login($idToken) {
+        try {
+            // Verify the ID token received from the frontend
+            $verifiedIdToken = $this->auth->verifyIdToken($idToken);
+
+            // Retrieve user details
+            $uid = $verifiedIdToken->claims()->get('sub'); // User's unique ID
+            $email = $verifiedIdToken->claims()->get('email'); // User's email
+
+            return [
+                'status' => 'success',
+                'uid' => $uid,
+                'email' => $email,
+            ];
+        } catch (FailedToVerifyToken $e) {
+            return [
+                'status' => 'error',
+                'message' => 'Invalid Token: ' . $e->getMessage(),
+            ];
+        }
+    }
+}
     
 
 //     private $client;
