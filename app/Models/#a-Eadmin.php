@@ -4,7 +4,13 @@ require_once 'Person.php';
 require_once 'Event.php';
 require_once 'Address.php';
 
-class EventAdmin extends Person implements Observer
+
+
+class Admin extends Person {
+    
+}
+
+class EventAdmin extends Admin implements Observer
 {
     private int $userTypeID = Person::E_ADMIN_FLAG;
 
@@ -13,7 +19,7 @@ class EventAdmin extends Person implements Observer
     {
         // Set userTypeID as E_ADMIN_FLAG for EventAdmin
         $this->userTypeID = Person::E_ADMIN_FLAG;
-        parent::__construct($this->userTypeID, $firstName, $lastName, $email, $phoneNo);
+        parent::__construct($firstName, $lastName, $email, $phoneNo, $this->userTypeID);
     }
 
     // Implementing Observer's update method for notifications

@@ -1,4 +1,8 @@
 <?php
+// Enable error reporting for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 class EmailLoginView
 {
     private $loginHandler;
@@ -92,6 +96,21 @@ class EmailLoginView
             <div class="mb-3">
                 <label for="phoneNo" class="form-label">Phone Number:</label>
                 <input type="text" id="phoneNo" name="phoneNo" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="userTypeID" class="form-label">user type:</label>
+                <input type="text" id="userTypeID" name="userTypeID" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="nationalID" class="form-label">id:</label>
+                <input type="text" id="nationalID" name="nationalID" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="address" class="form-label">address:</label>
+                <input type="text" id="address" name="address" class="form-control" required>
             </div>
 
             <button type="submit" name="action" value="register" class="btn btn-success">Register</button>

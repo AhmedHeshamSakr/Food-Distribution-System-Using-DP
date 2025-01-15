@@ -62,11 +62,23 @@ class Event implements Subject
     }
 
     // Getter and Setter methods for all properties
-    public function getEventID(): int { return $this->eventID; }
-    public function setEventID(int $eventID): void { $this->eventID = $eventID; }
+    public function getEventID(): int
+    {
+        return $this->eventID;
+    }
+    public function setEventID(int $eventID): void
+    {
+        $this->eventID = $eventID;
+    }
 
-    public function getEventDate(): string { return $this->eventDate; }
-    public function setEventDate(string $eventDate): void { $this->eventDate = $eventDate; }
+    public function getEventDate(): string
+    {
+        return $this->eventDate;
+    }
+    public function setEventDate(string $eventDate): void
+    {
+        $this->eventDate = $eventDate;
+    }
 
     public function getEventLocation(): Address { return $this->eventLocation; }
 
@@ -77,14 +89,32 @@ class Event implements Subject
     public function getEventName(): string { return $this->eventName; }
     public function setEventName(string $eventName): void { $this->eventName = $eventName; }
 
-    public function getEventDescription(): string { return $this->eventDescription; }
-    public function setEventDescription(string $eventDescription): void { $this->eventDescription = $eventDescription; }
+    public function getEventDescription(): string
+    {
+        return $this->eventDescription;
+    }
+    public function setEventDescription(string $eventDescription): void
+    {
+        $this->eventDescription = $eventDescription;
+    }
 
-    public function getReqCooks(): int { return $this->reqCooks; }
-    public function setReqCooks(int $reqCooks): void { $this->reqCooks = $reqCooks; }
+    public function getReqCooks(): int
+    {
+        return $this->reqCooks;
+    }
+    public function setReqCooks(int $reqCooks): void
+    {
+        $this->reqCooks = $reqCooks;
+    }
 
-    public function getReqForDelivery(): int { return $this->reqForDelivery; }
-    public function setReqForDelivery(int $reqForDelivery): void { $this->reqForDelivery = $reqForDelivery; }
+    public function getReqForDelivery(): int
+    {
+        return $this->reqForDelivery;
+    }
+    public function setReqForDelivery(int $reqForDelivery): void
+    {
+        $this->reqForDelivery = $reqForDelivery;
+    }
 
     public function getReqCoordinators(): int { return $this->reqCoordinators; }
     public function setReqCoordinators(int $reqCoordinators): void { $this->reqCoordinators = $reqCoordinators; }
