@@ -5,19 +5,13 @@ require_once 'Address.php';
 
 interface Observer
 {
-    // Method that gets called when a notification is sent
     public function update(string $message): void;
 }
 
 interface Subject 
 {
-    // Method to add an observer
     public function addObserver(Observer $observer): void;
-
-    // Method to remove an observer
     public function removeObserver(Observer $observer): void;
-
-    // Method to notify all observers
     public function notifyObservers(string $message): void;
 }
 
@@ -25,7 +19,7 @@ class Event implements Subject
 {
     private ?int $eventID;
     private string $eventDate;
-    private Address $eventLocation; // Address is now a required parameter
+    private Address $eventLocation;
     private string $eventName;
     private string $eventDescription;
     private int $reqCooks;
@@ -33,7 +27,6 @@ class Event implements Subject
     private int $reqCoordinators;
     private array $observers = [];
 
-    // Constructor
     public function __construct(
         ?int $eventID = 0, 
         string $eventDate = '', 
@@ -44,15 +37,13 @@ class Event implements Subject
         int $reqForDelivery = 0, 
         int $reqCoordinators = 0
     ) {
-         // Ensure valid address is passed or set a default
-         if (!$eventLocation || !$eventLocation->getLevel()) {
+        if (!$eventLocation || !$eventLocation->getLevel()) {
             throw new Exception("Invalid Address passed to Event.");
         }
-        
 
         $this->eventID = $eventID;
         $this->eventDate = $eventDate;
-        $this->eventLocation = $eventLocation ?? new Address('', 0, ''); // Default to an Address object if null
+        $this->eventLocation = $eventLocation;
         $this->eventName = $eventName;
         $this->eventDescription = $eventDescription;
         $this->reqCooks = $reqCooks;
@@ -60,7 +51,7 @@ class Event implements Subject
         $this->reqCoordinators = $reqCoordinators;
     }
 
-    // Getter and Setter methods for all properties
+    // Getters and Setters
     public function getEventID(): int { return $this->eventID; }
     public function setEventID(int $eventID): void { $this->eventID = $eventID; }
 
@@ -68,11 +59,8 @@ class Event implements Subject
     public function setEventDate(string $eventDate): void { $this->eventDate = $eventDate; }
 
     public function getEventLocation(): Address { return $this->eventLocation; }
+    public function setEventLocation(Address $location): void { $this->eventLocation = $location; }
 
-    public function setEventLocation(Address $location)
-    {
-        $this->eventLocation = $location;
-    }
     public function getEventName(): string { return $this->eventName; }
     public function setEventName(string $eventName): void { $this->eventName = $eventName; }
 
@@ -88,7 +76,7 @@ class Event implements Subject
     public function getReqCoordinators(): int { return $this->reqCoordinators; }
     public function setReqCoordinators(int $reqCoordinators): void { $this->reqCoordinators = $reqCoordinators; }
 
-    // Implementing Subject methods
+    // Observer pattern methods
     public function addObserver(Observer $observer): void
     {
         $this->observers[] = $observer;
@@ -139,103 +127,107 @@ class Event implements Subject
         $this->checkRequirements();
     }
 
-    // Fetch all events from the database
+    // Database operations
+    public function create(): bool
+    {
+        if ($this->eventLocation->getId() === 0) {
+            $this->eventLocation->create();
+        }
+
+        $locationID = $this->eventLocation->getId();
+        $sql = "INSERT INTO `event` (eventDate, eventLocation, `name`, eventDescription) 
+                VALUES ('{$this->eventDate}', {$locationID}, '{$this->eventName}', '{$this->eventDescription}')";
+
+        $result = run_query($sql);
+        if ($result) {
+            $this->eventID = Database::getInstance()->get_last_inserted_id();
+        }
+        return $result;
+    }
+
+    public function read(): ?Event
+    {
+        $sql = "SELECT e.*, a.* 
+                FROM `event` e
+                JOIN address a ON e.eventLocation = a.id
+                WHERE e.eventID = {$this->eventID}";
+
+        $result = run_select_query($sql);
+        if ($result && !empty($result[0])) {
+            $event = $result[0];
+            $address = new Address($event['name'], $event['parent_id'], $event['level']);
+            $address->setId((int)$event['eventLocation']);
+
+            return new Event(
+                (int)$event['eventID'],
+                $event['eventDate'],
+                $address,
+                $event['name'],
+                $event['eventDescription'],
+                (int)($event['reqCooks'] ?? 0),
+                (int)($event['reqForDelivery'] ?? 0),
+                (int)($event['reqCoordinators'] ?? 0)
+            );
+        }
+
+        return null;
+    }
+
     public static function fetchAll(): array
     {
-        // Assuming `run_select_query` returns an array of rows
         $query = "SELECT * FROM `event`";
         $results = run_select_query($query);
         $events = [];
-        // Loop through each result row
+
         foreach ($results as $row) {
-            // Ensure $row is an array and $row['eventLocation'] is the correct data for Address
-            if (isset($row['eventLocation'])) {
-                $eventLocation = Address::read($row['eventLocation']);
-            } else {
-                // Handle the case if eventLocation is not found or is invalid
-                $eventLocation = null;  // Adjust accordingly
-            }
-            // Ensure required fields exist in $row before using them
-            if (isset($row['eventID'], $row['eventDate'], $row['name'], $row['eventDescription'])) {
-                // Create the Event object and add to the events array
-                $events[] = new Event(
+            $eventLocation = Address::read((int)$row['eventLocation']) ?? new Address('Unknown', null, 'Unknown');
+            $events[] = new Event(
+                (int)$row['eventID'],
+                $row['eventDate'],
+                $eventLocation,
+                $row['name'],
+                $row['eventDescription'],
+                (int)($row['reqCooks'] ?? 0),
+                (int)($row['reqForDelivery'] ?? 0),
+                (int)($row['reqCoordinators'] ?? 0)
+            );
+        }
+
+        return $events;
+    }
+
+    public static function fetchUpcomingEvents(): array
+    {
+        $today = date('Y-m-d');
+        $query = "SELECT * FROM `event` WHERE eventDate > '$today'";
+        $results = run_select_query($query);
+        $upcomingEvents = [];
+
+        foreach ($results as $row) {
+            if (isset($row['eventID'], $row['eventDate'], $row['name'], $row['eventDescription'], $row['eventLocation'])) {
+                $eventLocation = Address::read($row['eventLocation']) ?? new Address('Unknown', 0, 'Unknown');
+                $upcomingEvents[] = new Event(
                     (int)$row['eventID'],
                     $row['eventDate'],
                     $eventLocation,
                     $row['name'],
-                    $row['eventDescription']
+                    $row['eventDescription'],
+                    (int)($row['reqCooks'] ?? 0),
+                    (int)($row['reqForDelivery'] ?? 0),
+                    (int)($row['reqCoordinators'] ?? 0)
                 );
-            } else {
-                // Log an error or handle missing fields gracefully
-                error_log("Missing required fields in event data: " . json_encode($row));
             }
         }
-    
-        return $events;
+
+        return $upcomingEvents;
     }
-    
-    public function create(): bool
-    {
-        // Ensure that the address has been created in the database and has a valid ID
-        if ($this->eventLocation->getId() === 0) {
-            $this->eventLocation->create();
-        }
-    
-        // Get the address ID from the Address object
-        $locationID = $this->eventLocation->getId();
-    
-        // SQL Query to insert the event (without setting eventID)
-        $sql = "INSERT INTO `event` (eventDate, eventLocation, `name`, eventDescription) 
-        VALUES ('{$this->eventDate}', {$locationID}, '{$this->eventName}', '{$this->eventDescription}')";
-
-        // Execute the query
-        $result = run_query($sql);
-    
-        // If the query was successful, retrieve the auto-generated eventID
-        if ($result) {
-            // Retrieve the last inserted eventID
-            $this->eventID = Database::getInstance()->get_last_inserted_id();
-        }
-    
-        return $result;
-    }
-    
-
-
-    public function read(): ?Event
-{
-    $sql = "SELECT * FROM `event` WHERE eventID = {$this->eventID}";
-    $result = run_select_query($sql);
-
-    if ($result) {
-        $event = $result[0];  // Assuming one event will be returned
-
-        // Assuming eventLocation is a string and parent_id and level need to be set manually
-        $locationName = $event['eventLocation'];  // Assuming it's just a name
-        $parentId = null;  // Set parent ID based on your logic (e.g., fetch from another table)
-        $level = 'City';  // Set the level based on your logic or default value
-
-        return new Event(
-            $event['eventID'],
-            $event['eventDate'],
-            new Address($locationName, $parentId, $level),  // Properly passing 3 arguments
-            $event['name'],
-            $event['eventDescription']
-        );
-    }
-
-    return null;
-}
-
 
     public function update(): bool
     {
         $locationID = $this->eventLocation->getId();
-
         $sql = "UPDATE `event` 
                 SET eventDate = '{$this->eventDate}', eventLocation = {$locationID}, `name` = '{$this->eventName}', eventDescription = '{$this->eventDescription}' 
                 WHERE eventID = {$this->eventID}";
-
         return run_query($sql);
     }
 
@@ -244,6 +236,4 @@ class Event implements Subject
         $sql = "DELETE FROM `event` WHERE eventID = {$this->eventID}";
         return run_query($sql);
     }
-
-
 }

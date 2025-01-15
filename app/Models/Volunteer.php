@@ -94,7 +94,7 @@ class Volunteer extends Person
         return $this->badge->getBadgeID();
     }
 
-    public function setBadge(Badges $badge): bool
+    public function setBadge(?Badges $badge): bool
     {
         // Optional validation (e.g., ensure it's a valid Badge object)
         if (!$badge instanceof Badges) {
@@ -174,7 +174,6 @@ abstract class VolunteerRoles extends Person
     public function getAllRoles(): array {
         $roles = [];
 
-    
         // Check each role flag in userTypeID
         if ($this->hasRole(self::COOK_FLAG)) {
             $roles[] = 'Cook';
