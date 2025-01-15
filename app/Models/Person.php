@@ -24,7 +24,7 @@ abstract class Person
     private string $phoneNo;
     // private iLogin $login;
 
-    public function __construct(string $firstName, string $lastName, string $email, string $phoneNo, int $userTypeID=0)
+    public function __construct(string $firstName, string $lastName, string $email, string $phoneNo, int $userTypeID)
     {
         $this->userTypeID = $userTypeID;
         $this->firstName = $firstName;

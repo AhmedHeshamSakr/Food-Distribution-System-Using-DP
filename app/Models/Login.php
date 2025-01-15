@@ -3,6 +3,11 @@
 require_once __DIR__ . "/../../config/DB.php";
 require_once "Person.php";
 require_once "User.php";
+require_once "Address.php";
+require_once "Volunteer.php";
+require_once "#a-Badmin.php";
+require_once "#a-Eadmin.php";
+require_once "#a-Vadmin.php";
 interface iLogin {
     public function login($credentials): bool;
     public function authenticate(string $username, string $password): bool;
@@ -91,7 +96,7 @@ class withEmail implements iLogin {
     }
 
     // This function should be used to register a user, storing a hashed password in the database
-    public function register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID, $nationalID, $address): bool {
+    public function register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID, $nationalID, Address $address): bool {
         // Establish the database connection
         $db = Database::getInstance()->getConnection();
 
@@ -120,7 +125,7 @@ class withEmail implements iLogin {
             $userID = mysqli_insert_id($db);
 
             // Use the factory to create the user object
-            $user = $this->createUser($userTypeID, $firstName, $lastName, $email, $phoneNo, $nationalID, $address);
+            $user = $this->createUser($userTypeID, $firstName, $lastName, $email, $phoneNo,$address ,$nationalID);
 
             // Insert additional user details into the person table
             return true;

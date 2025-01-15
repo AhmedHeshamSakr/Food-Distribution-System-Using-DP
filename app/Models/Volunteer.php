@@ -2,6 +2,7 @@
 require_once 'User.php';
 require_once 'Address.php';
 require_once 'Badges.php';
+require_once 'Iterator.php';
 
 
 class Volunteer extends Person
@@ -10,6 +11,8 @@ class Volunteer extends Person
     public string $nationalID;
     public Badges $badge;
 
+    private VolunteerList $volunteerList;
+
     // Constructor that calls the parent constructor
     public function __construct(
         int $userTypeID, 
@@ -17,38 +20,57 @@ class Volunteer extends Person
         string $lastName, 
         string $email, 
         string $phoneNo, 
+        // iLogin $login, 
         Address $address, 
         string $nationalID,
-        ?Badges $badge = null // Badge is now optional and defaults to null
+        ?Badges $badge = null,
     ) {
+        
         // Call the parent constructor to initialize the User (and Person) properties
-        parent::__construct($firstName, $lastName, $email, $phoneNo, $userTypeID);
-    
+        parent::__construct( $firstName, $lastName, $email, $phoneNo,$userTypeID );
         // Initialize the Volunteer-specific properties
         $this->address = $address;
         $this->nationalID = $nationalID;
-        $this->badge = $badge ?? new Badges(); // Default to a new Badges instance if none is provided
-        $this->insertVolunteer($address, $nationalID);
+        $this->badge = $badge ?? new Badges();
+        $this->volunteerList = new VolunteerList();
+        $this->insertVolunteer($this);
         $this->chooseRole();
-    }
-    
-
-    public function insertVolunteer(Address $address, string $nationalID): bool
-    {
-        //$conn = Database::getInstance()->getConnection();
         
-        $address = $this->address->getID();
-        $address = mysqli_real_escape_string(Database::getInstance()->getConnection(), $address);
-        $nationalID = mysqli_real_escape_string(Database::getInstance()->getConnection(), $nationalID);
-        $userid = $this->getUserID();
-        $defaultBadge = $this->badge->getBadgeID();
-        // SQL query to insert the person into the database
-        $query = "INSERT INTO volunteer (userID, nationalID, `address`, badge) 
-                VALUES ('{$userid}', '{$nationalID}', '{$address}', '{$defaultBadge}')";
+    }
 
+    public function insertVolunteer(Volunteer $volunteer){
+        $conn = Database::getInstance()->getConnection();
+        $nationalID = $volunteer->getNationalID();
+        $address = $volunteer->getAddress();
+        
+        $userid = $volunteer->getUserID();
+        $defaultBadge = $volunteer->getBadge();
+        $this->volunteerList->addVolunteer($volunteer);
+        // SQL query to insert the person into the database
+        $query = "INSERT INTO volunteer (userID, `address`, badge, nationalID) 
+                VALUES ('{$userid}', '{$address}', '{$defaultBadge}', '{$nationalID}')";
         // Run the query and return whether it was successful
         return run_query($query);
+
     }
+
+    // public function insertVolunteer(Address $address, string $nationalID): bool
+    // {
+    //     //$conn = Database::getInstance()->getConnection();
+        
+    //     $address = $this->address->getID();
+    //     $address = mysqli_real_escape_string(Database::getInstance()->getConnection(), $address);
+    //     $nationalID = mysqli_real_escape_string(Database::getInstance()->getConnection(), $nationalID);
+    //     $userid = $this->getUserID();
+    //     $defaultBadge = $this->badge->getBadgeID();
+    //     $this->volunteerList->addVolunteer($this);
+    //     // SQL query to insert the person into the database
+    //     $query = "INSERT INTO volunteer (userID, nationalID, `address`, badge) 
+    //             VALUES ('{$userid}', '{$nationalID}', '{$address}', '{$defaultBadge}')";
+
+    //     // Run the query and return whether it was successful
+    //     return run_query($query);
+    // }
 
     public function updateVolunteer(array $fieldsToUpdate): bool
     {
