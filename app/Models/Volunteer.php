@@ -17,22 +17,21 @@ class Volunteer extends Person
         string $lastName, 
         string $email, 
         string $phoneNo, 
-        // iLogin $login, 
         Address $address, 
         string $nationalID,
-        Badges $badge
+        ?Badges $badge = null // Badge is now optional and defaults to null
     ) {
-        
         // Call the parent constructor to initialize the User (and Person) properties
-        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo );
+        parent::__construct($firstName, $lastName, $email, $phoneNo, $userTypeID);
+    
         // Initialize the Volunteer-specific properties
         $this->address = $address;
         $this->nationalID = $nationalID;
-        $this->badge = $badge;
+        $this->badge = $badge ?? new Badges(); // Default to a new Badges instance if none is provided
         $this->insertVolunteer($address, $nationalID);
         $this->chooseRole();
-        
     }
+    
 
     public function insertVolunteer(Address $address, string $nationalID): bool
     {
