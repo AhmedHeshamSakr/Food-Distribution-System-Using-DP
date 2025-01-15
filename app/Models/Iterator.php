@@ -210,32 +210,3 @@ class VolunteerList implements Lists
         return count($this->volunteers);
     }
 }
-
-class BadgeIterator implements IteratorInterface
-{
-    private $badges;
-    private $position = 0;
-
-    public function __construct(array $badges)
-    {
-        $this->badges = $badges;
-    }
-
-    public function hasNext(): bool
-    {
-        return isset($this->badges[$this->position]);
-    }
-
-    public function next(): mixed
-    {
-        return $this->badges[$this->position++];
-    }
-
-    public function remove(): void
-    {
-        if ($this->position > 0) {
-            array_splice($this->badges, $this->position - 1, 1);
-            $this->position--;
-        }
-    }
-}
