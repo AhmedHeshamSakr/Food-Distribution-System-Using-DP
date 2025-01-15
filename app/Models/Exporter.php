@@ -6,44 +6,61 @@ interface ExporterInterface {
 
 class JsonExporter implements ExporterInterface {
     public function export(array $reportData) {
-        echo json_encode($reportData, JSON_PRETTY_PRINT);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'header' => $reportData['header'],
+            'timestamp' => $reportData['timestamp'],
+            'title' => $reportData['title'],
+            'body' => $reportData['body'],
+            'summary' => $reportData['summary'],
+            'footer' => $reportData['footer']
+        ], JSON_PRETTY_PRINT);
     }
 }
 
 class CsvExporter implements ExporterInterface {
     public function export(array $reportData) {
-        // Create a temporary file to store CSV data
-        $filename = tempnam(sys_get_temp_dir(), 'report_') . '.csv';
-        $file = fopen($filename, 'w');
-
-        // Write the header row
-        fputcsv($file, ['Header', 'Timestamp', 'Title', 'Summary', 'Footer']);
-
-        // Write the main report data
-        fputcsv($file, [
-            $reportData['header'],
-            $reportData['timestamp'],
-            $reportData['title'],
-            $reportData['summary'],
-            $reportData['footer']
-        ]);
-
-        // Write the body data
-        fputcsv($file, []); // Empty row for separation
-        fputcsv($file, ['Body Data']);
-        foreach ($reportData['body'] as $item) {
-            fputcsv($file, $item);
-        }
-
-        // Close the file
-        fclose($file);
-
-        // Output the CSV file to the browser
+        $filename = 'report_' . date('Y-m-d_H-i-s') . '.csv';
+        
         header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="report.csv"');
-        readfile($filename);
-
-        // Delete the temporary file
-        unlink($filename);
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        
+        $output = fopen('php://output', 'w');
+        
+        // Write report metadata
+        fputcsv($output, ['Report Metadata']);
+        fputcsv($output, ['Header', $reportData['header']]);
+        fputcsv($output, ['Timestamp', $reportData['timestamp']]);
+        fputcsv($output, ['Title', $reportData['title']]);
+        fputcsv($output, ['Summary', $reportData['summary']]);
+        fputcsv($output, ['Footer', $reportData['footer']]);
+        fputcsv($output, []); // Empty row for separation
+        
+        // Write body data
+        fputcsv($output, ['Report Data']);
+        
+        // Get all possible keys from body items
+        $headers = [];
+        foreach ($reportData['body'] as $item) {
+            foreach (array_keys($item) as $key) {
+                if (!in_array($key, $headers)) {
+                    $headers[] = $key;
+                }
+            }
+        }
+        
+        // Write headers
+        fputcsv($output, $headers);
+        
+        // Write data rows
+        foreach ($reportData['body'] as $item) {
+            $row = [];
+            foreach ($headers as $header) {
+                $row[] = $item[$header] ?? '';
+            }
+            fputcsv($output, $row);
+        }
+        
+        fclose($output);
     }
 }
