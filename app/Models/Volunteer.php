@@ -33,7 +33,7 @@ class Volunteer extends Person
         $this->nationalID = $nationalID;
         $this->badge = $badge;
         $this->volunteerList = new VolunteerList();
-        $this->insertVolunteer($address, $nationalID);
+        $this->insertVolunteer($this);
         $this->chooseRole();
         
     }
