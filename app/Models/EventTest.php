@@ -59,12 +59,12 @@ try {
         echo "No events found.<br>";
     }
 
-    // Step 6: Cleanup - Delete the created events
-    logResult("Event 1 deleted", $event1->delete());
-    logResult("Event 2 deleted", $event2->delete());
+    // // Step 6: Cleanup - Delete the created events
+    // logResult("Event 1 deleted", $event1->delete());
+    // logResult("Event 2 deleted", $event2->delete());
 
-    // Step 7: Cleanup - Delete the address used in the test
-    logResult("Initial address deleted", $eventLocation->delete());
+    // // Step 7: Cleanup - Delete the address used in the test
+    // logResult("Initial address deleted", $eventLocation->delete());
 
 } catch (Exception $e) {
     echo "An error occurred: " . $e->getMessage();

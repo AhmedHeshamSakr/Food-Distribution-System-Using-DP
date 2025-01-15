@@ -2,6 +2,7 @@
 
 require_once __DIR__ . "/../../config/DB.php";
 require_once 'Address.php';
+require_once 'Iterator.php';
 
 interface Observer
 {
@@ -280,6 +281,64 @@ class Event implements Subject
         $sql = "DELETE FROM `event` WHERE eventID = {$this->eventID}";
         return run_query($sql);
     }
+
+    public static function getAllEvents(): EventList
+    {
+        $eventList = new EventList();
+    
+        // Get the database connection
+        $connection = Database::getInstance()->getConnection();
+        if (!$connection) {
+            die("Database connection failed: " . mysqli_connect_error());
+        }
+    
+        // SQL query to select all events
+        $query = "SELECT * FROM event";
+        $result = mysqli_query($connection, $query);
+    
+        // Check if the query executed successfully
+        if (!$result) {
+            die("Query error: " . mysqli_error($connection));
+        }
+    
+        // Check if the query returned any rows
+        if (mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                // Safely handle eventLocation
+                $eventLocation = null;
+                if (!empty($row['eventLocation'])) {
+                    try {
+                        $eventLocation = Address::read($row['eventLocation']);
+                    } catch (Exception $e) {
+                        print("Error reading event location: " . $e->getMessage() . "\n");
+                    }
+                }
+    
+                // Validate required fields before creating an Event object
+                if (isset($row['eventID'], $row['eventDate'], $row['name'], $row['eventDescription'])) {
+                    $event = new Event(
+                        (int)$row['eventID'], // Convert to integer for safety
+                        $row['eventDate'],
+                        $eventLocation,
+                        $row['name'],
+                        $row['eventDescription']
+                    );
+    
+                    // Add the event to the event list
+                    $eventList->addEvent($event);
+                } else {
+                    print("Missing required fields in event data: " . json_encode($row) . "\n");
+                }
+            }
+        } else {
+            print("No events found in the database.\n");
+        }
+    
+        return $eventList;
+    }
+    
+
+
 
 
 }

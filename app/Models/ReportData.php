@@ -20,10 +20,7 @@ class ReportingData {
         $this->status = 'Pending'; // Default to "Pending"
         $this->recognized = 0; // Default to not recognized (false)
         $this->isDeleted = 0; // Default to not deleted (false)
-        $this->description = $description;
-        
-        $this->createReport($personInName, $personInAddress, $personInPhone, $description);
-    
+        $this->description = $description;    
     }
 
     public function createReport($personInName, $personInAddress, $personInPhone, $description) {
@@ -71,6 +68,20 @@ class ReportingData {
         return run_query($query);
     }
 
+    // Method for updating an existing report field
+    public function updateReportField($reportID, $field, $value) {
+        // Sanitize the field name to prevent SQL injection
+        $field = $this->db->real_escape_string($field);
+        // Sanitize the value based on its type
+        if (is_int($value)) {
+            $value = intval($value);
+        } else {
+            $value = $this->db->real_escape_string($value);
+        }
+        $query = "UPDATE report SET $field = $value WHERE reportID = $reportID AND is_deleted = FALSE";
+        return run_query($query);
+    }
+
     //REAADD
     public function getReportDetails($reportID) {
         $query = "SELECT * FROM report WHERE reportID = $reportID AND is_deleted = FALSE";
@@ -78,10 +89,11 @@ class ReportingData {
         return $result ? $result[0] : null; // Return the first result as an associative array or null if not found
     }
 
-    // public function getAllActiveReports() {
-    //     $query = "SELECT * FROM report WHERE is_deleted = FALSE";
-    //     return run_select_query($query);
-    // }
+    public function fetchReportDetails($reportID) {
+        $query = "SELECT * FROM report WHERE reportID = $reportID AND is_deleted = FALSE";
+        $result = run_select_query($query);
+        return $result ? $result[0] : null;
+    }
 
 
 
@@ -151,6 +163,24 @@ class ReportingData {
 
     public function setIsDeleted($isDeleted) {
         $this->isDeleted = $isDeleted;
+    }
+
+    public static function getAllActiveReports(): ReportingDataList {
+        $reportList = new ReportingDataList();
+        $query = "SELECT * FROM report WHERE is_deleted = FALSE";
+        $results = run_select_query($query);
+        
+        foreach ($results as $row) {
+            $report = new ReportingData(
+                $row['personINname'],
+                $row['personINaddress'],
+                $row['phoneINno'],
+                $row['description']
+            );
+            $reportList->addReport($report);
+        }
+        
+        return $reportList;
     }
  
 }

@@ -17,10 +17,10 @@ require_once '#a-Badmin.php';
 
 $emailLogin = new withEmail('hello','hello');
 $loginResult = $emailLogin->login(['email' => 'hello', 'password' => 'hello']);
-// $address = new Address(1, 'hello', 2, 3);
+$address = new Address('Tagammoa', 124, level: 'Neighborhood');
 $badge = new Badges(2, 'Gold Tier');
-$vehicle = new Vehicle(350576465456664, '12345');
-$user = new Volunteer(0, 'Jumana', 'Yasser', 'juamna2a6r5144444555464564525556445664456565255744552654476465644355555474446D584245949446654752465955564465679687151a@gmail.com', '01236', $address, '0158655', $badge);
+$vehicle = new Vehicle(350537646455443356664, '12345');
+$user = new Volunteer(0, 'Jumana', 'Yasser', 'juamna2a6r5144444555464564525556445664456565255744552654476465644355555474446D5842459494466547524659255564465679687151a@gmail.com', '01236', $address, '0158655', $badge);
 //$user = new Donor(50, 'Leon', 'Kennedy','Ada@gmail.com', '01236', $emailLogin);
 //$user = new Reporter(2,'Ada', 'Wong', 'Leon@gmail.com', '01236', $emailLogin);
 //$user = new EventAdmin(4,'Jill', 'Valentine', 'jill@gmail.com', '01236', $emailLogin);

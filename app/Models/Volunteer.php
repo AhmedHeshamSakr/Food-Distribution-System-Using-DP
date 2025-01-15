@@ -32,28 +32,44 @@ class Volunteer extends Person
         $this->nationalID = $nationalID;
         $this->badge = $badge;
         $this->volunteerList = new VolunteerList();
-        $this->insertVolunteer($address, $nationalID);
+        $this->insertVolunteer($this);
         $this->chooseRole();
         
     }
 
-    public function insertVolunteer(Address $address, string $nationalID): bool
-    {
-        //$conn = Database::getInstance()->getConnection();
+    public function insertVolunteer(Volunteer $volunteer){
+        $conn = Database::getInstance()->getConnection();
+        $nationalID = $volunteer->getNationalID();
+        $address = $volunteer->getAddress();
         
-        $address = $this->address->getID();
-        $address = mysqli_real_escape_string(Database::getInstance()->getConnection(), $address);
-        $nationalID = mysqli_real_escape_string(Database::getInstance()->getConnection(), $nationalID);
-        $userid = $this->getUserID();
-        $defaultBadge = $this->badge->getBadgeID();
-        $this->volunteerList->addVolunteer($this);
+        $userid = $volunteer->getUserID();
+        $defaultBadge = $volunteer->getBadge();
+        $this->volunteerList->addVolunteer($volunteer);
         // SQL query to insert the person into the database
         $query = "INSERT INTO volunteer (userID, nationalID, `address`, badge) 
                 VALUES ('{$userid}', '{$nationalID}', '{$address}', '{$defaultBadge}')";
-
         // Run the query and return whether it was successful
         return run_query($query);
+
     }
+
+    // public function insertVolunteer(Address $address, string $nationalID): bool
+    // {
+    //     //$conn = Database::getInstance()->getConnection();
+        
+    //     $address = $this->address->getID();
+    //     $address = mysqli_real_escape_string(Database::getInstance()->getConnection(), $address);
+    //     $nationalID = mysqli_real_escape_string(Database::getInstance()->getConnection(), $nationalID);
+    //     $userid = $this->getUserID();
+    //     $defaultBadge = $this->badge->getBadgeID();
+    //     $this->volunteerList->addVolunteer($this);
+    //     // SQL query to insert the person into the database
+    //     $query = "INSERT INTO volunteer (userID, nationalID, `address`, badge) 
+    //             VALUES ('{$userid}', '{$nationalID}', '{$address}', '{$defaultBadge}')";
+
+    //     // Run the query and return whether it was successful
+    //     return run_query($query);
+    // }
 
     public function updateVolunteer(array $fieldsToUpdate): bool
     {
