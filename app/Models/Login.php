@@ -39,7 +39,7 @@ class withEmail implements iLogin {
             case 1<< 7: 
                 return new VerificationAdmin($firstName, $lastName, $email, $phoneNo);
             default:
-                return new Volunteer($userTypeID,$firstName, $lastName, $email, $phoneNo, $address, $nationalID);
+                return new Volunteer($userTypeID,$firstName, $lastName, $email, $phoneNo, $address, $nationalID, new Badges(0,'Gold Tier'));
         }
     }
 

@@ -23,7 +23,7 @@ class Volunteer extends Person
         // iLogin $login, 
         Address $address, 
         string $nationalID,
-        ?Badges $badge = null,
+        Badges $badge,
     ) {
         
         // Call the parent constructor to initialize the User (and Person) properties
@@ -33,15 +33,17 @@ class Volunteer extends Person
         $this->nationalID = $nationalID;
         $this->badge = $badge;
         $this->volunteerList = new VolunteerList();
-        $this->insertVolunteer($this);
+        error_log("I will insert volunteer");
+        $flag = $this->insertVolunteer($this);
+        error_log("done, " . var_export($flag, true));
         $this->chooseRole();
         
     }
 
     public function insertVolunteer(Volunteer $volunteer): bool
     {
-        //$conn = Database::getInstance()->getConnection();
-        
+        $conn = Database::getInstance()->getConnection();
+        error_log("Inserting volunteer");
         $address = $volunteer->address->getID();
         $address = mysqli_real_escape_string(Database::getInstance()->getConnection(), $address);
         $nationalID = $volunteer->getNationalID();
@@ -55,6 +57,7 @@ class Volunteer extends Person
         // Run the query and return whether it was successful
         return run_query($query);
 
+        
     }
 
     // public function insertVolunteer(Address $address, string $nationalID): bool
