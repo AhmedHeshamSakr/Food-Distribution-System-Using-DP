@@ -23,6 +23,7 @@ class DeliveryTest
             'pending',
             'Delivering electronics'
         );
+        $delivery->insertDelivery($delivery);
 
         if ($delivery->getDeliveryID()) {
             echo "✔ Delivery insertion test passed.\n";
@@ -80,6 +81,7 @@ class DeliveryTest
             'delivering',
             'Test delivery'
         );
+        $customDelivery->insertDelivery($customDelivery);
         self::assertEqual($customDelivery->getCurrentStatus(), 'delivering', "Custom Initial State", $testsPassed, $testsFailed);
 
         // Test updating delivery details
