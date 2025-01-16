@@ -127,13 +127,13 @@ class LoginController
         $lastName = $_POST['lastName'] ?? '';
         $phoneNo = $_POST['phoneNo'] ?? '';
         $userTypeID = $_POST['userTypeID'] ?? ''; 
-        $nationalID = $_POST['nationalId'] ?? '';  
+        $nationalID = $_POST['nationalID'] ?? '';  
         $address_string = $_POST['address'] ?? ''; 
 
         $address = new Address($address_string, Address::getIdByName('Egypt'),'City');
         $address->create();
 
-        if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID,$nationalID,$address)) {
+        if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID,  $nationalID, $address)) {
             $this->errorMessage = 'Registration successful! You can now log in.';
             $this->mode = 'login'; // Switch to login mode on success
         } else {

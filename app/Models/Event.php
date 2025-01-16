@@ -274,29 +274,6 @@ class Event implements Subject
         return null;
     }
 
-    public static function fetchAll(): array
-    {
-        $query = "SELECT * FROM `event`";
-        $results = run_select_query($query);
-        $events = [];
-
-        foreach ($results as $row) {
-            $eventLocation = Address::read((int)$row['eventLocation']) ?? new Address('Unknown', null, 'Unknown');
-            $events[] = new Event(
-                (int)$row['eventID'],
-                $row['eventDate'],
-                $eventLocation,
-                $row['name'],
-                $row['eventDescription'],
-                (int)($row['reqCooks'] ?? 0),
-                (int)($row['reqForDelivery'] ?? 0),
-                (int)($row['reqCoordinators'] ?? 0)
-            );
-        }
-
-        return $events;
-    }
-
     public static function fetchUpcomingEvents(): array
     {
         $today = date('Y-m-d');

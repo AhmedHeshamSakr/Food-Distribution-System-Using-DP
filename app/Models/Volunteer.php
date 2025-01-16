@@ -31,6 +31,8 @@ class Volunteer extends Person
         // Initialize the Volunteer-specific properties
         $this->address = $address;
         $this->nationalID = $nationalID;
+        error_log("MY CONSTRUCTOR, " . var_export($nationalID, true));
+
         $this->badge = $badge;
         $this->volunteerList = new VolunteerList();
         $this->insertVolunteer($this);
@@ -41,6 +43,7 @@ class Volunteer extends Person
     public function insertVolunteer(Volunteer $volunteer){
         $conn = Database::getInstance()->getConnection();
         $nationalID = $volunteer->getNationalID();
+        error_log("done, " . var_export($nationalID, true));
         $address = $volunteer->getAddress();
         
         $userid = $volunteer->getUserID();

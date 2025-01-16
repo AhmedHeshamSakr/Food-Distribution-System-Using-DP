@@ -32,6 +32,8 @@ class withEmail implements iLogin {
 
     public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID): Person{
         error_log("User Type ID: $userTypeID");
+        error_log("Creat User, " . var_export($nationalID, true));
+
         switch ($userTypeID) {
             case 1 << 5: 
                 return new BadgeAdmin($firstName, $lastName, $email, $phoneNo);
@@ -107,6 +109,7 @@ class withEmail implements iLogin {
         $firstName = mysqli_real_escape_string($db, $firstName);
         $lastName = mysqli_real_escape_string($db, $lastName);
         $phoneNo = mysqli_real_escape_string($db, $phoneNo);
+        $nationalID = mysqli_real_escape_string($db, $nationalID);
 
         // Check if the email already exists in the database
         $queryCheck = "SELECT * FROM login WHERE email = '$email'";
@@ -124,6 +127,9 @@ class withEmail implements iLogin {
         if (mysqli_query($db, $query)) {
             // After successful registration, get the userID
             $userID = mysqli_insert_id($db);
+
+
+            error_log("With Email, " . var_export($nationalID, true));
 
             // Use the factory to create the user object
             $user = $this->createUser($userTypeID, $firstName, $lastName, $email, $phoneNo,$address ,$nationalID);
