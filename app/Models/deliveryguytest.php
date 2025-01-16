@@ -9,7 +9,7 @@ require_once 'Vehicle.php';
 require_once 'Delivery.php';
 require_once 'Delivering.php';
 
-$vehicle = new Vehicle('car112', 22);
+$vehicle = new Vehicle('car1112', 22);
 
 // Initialize shared objects
 function setupVolunteer()
@@ -166,6 +166,7 @@ function testAssignDelivery()
     $deliveryGuy = new DeliveryGuy($volunteer, $vehicle);
 
     $delivery = new Delivery(1, '2024-11-12', 'Warehouse', $deliveryGuy->getUserID(), 'Customer');
+    $delivery->insertDelivery($delivery);
     if ($deliveryGuy->assignDelivery($delivery, '12:00')) {
         echo "assignDelivery: Success\n";
     } else {
@@ -181,6 +182,7 @@ function testUnassignDelivery()
     $deliveryGuy = new DeliveryGuy($volunteer, $vehicle);
 
     $delivery = new Delivery(1, '2024-11-12', 'Warehouse', $deliveryGuy->getUserID(), 'Customer');
+    $delivery->insertDelivery($delivery);
     $deliveryGuy->assignDelivery($delivery, '12:00');
 
     if ($deliveryGuy->unassignDelivery($delivery)) {

@@ -2,12 +2,14 @@
 
 //Include the autoload file from the Firebase PHP SDK 
 
-require_once "../vendor/autoload.php";
+require_once 'D:/xampp/htdocs/sdp project/Food-Distribution-System-Using-DP/vendor/autoload.php';
+
 
 
 use Kreait\Firebase\Factory; 
 
-$firebase = (new Factory)->withServiceAccount('../config/firebase_credentials.json'); 
+$firebase = (new Factory)->withServiceAccount(__DIR__ . '/firebase_credentials.json');
+
 
 $auth = $firebase->createAuth();
 

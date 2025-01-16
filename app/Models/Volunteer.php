@@ -2,6 +2,7 @@
 require_once 'User.php';
 require_once 'Address.php';
 require_once 'Badges.php';
+require_once 'Iterator.php';
 
 
 class Volunteer extends Person
@@ -9,6 +10,8 @@ class Volunteer extends Person
     private Address $address;
     public string $nationalID;
     public Badges $badge;
+
+    private VolunteerList $volunteerList;
 
     // Constructor that calls the parent constructor
     public function __construct(
@@ -20,36 +23,57 @@ class Volunteer extends Person
         // iLogin $login, 
         Address $address, 
         string $nationalID,
-        Badges $badge
+        Badges $badge,
     ) {
         
         // Call the parent constructor to initialize the User (and Person) properties
-        parent::__construct($userTypeID, $firstName, $lastName, $email, $phoneNo );
+        parent::__construct( $firstName, $lastName, $email, $phoneNo,$userTypeID );
         // Initialize the Volunteer-specific properties
         $this->address = $address;
         $this->nationalID = $nationalID;
+        error_log("MY CONSTRUCTOR, " . var_export($nationalID, true));
+
         $this->badge = $badge;
-        $this->insertVolunteer($address, $nationalID);
+        $this->volunteerList = new VolunteerList();
+        $this->insertVolunteer($this);
         $this->chooseRole();
         
     }
 
-    public function insertVolunteer(Address $address, string $nationalID): bool
-    {
-        //$conn = Database::getInstance()->getConnection();
+    public function insertVolunteer(Volunteer $volunteer){
+        $conn = Database::getInstance()->getConnection();
+        $nationalID = $volunteer->getNationalID();
+        error_log("done, " . var_export($nationalID, true));
+        $address = $volunteer->getAddress();
         
-        $address = $this->address->getID();
-        $address = mysqli_real_escape_string(Database::getInstance()->getConnection(), $address);
-        $nationalID = mysqli_real_escape_string(Database::getInstance()->getConnection(), $nationalID);
-        $userid = $this->getUserID();
-        $defaultBadge = $this->badge->getBadgeID();
+        $userid = $volunteer->getUserID();
+        $defaultBadge = $volunteer->getBadge();
+        $this->volunteerList->addVolunteer($volunteer);
         // SQL query to insert the person into the database
         $query = "INSERT INTO volunteer (userID, nationalID, `address`, badge) 
                 VALUES ('{$userid}', '{$nationalID}', '{$address}', '{$defaultBadge}')";
-
         // Run the query and return whether it was successful
         return run_query($query);
+
     }
+
+    // public function insertVolunteer(Address $address, string $nationalID): bool
+    // {
+    //     //$conn = Database::getInstance()->getConnection();
+        
+    //     $address = $this->address->getID();
+    //     $address = mysqli_real_escape_string(Database::getInstance()->getConnection(), $address);
+    //     $nationalID = mysqli_real_escape_string(Database::getInstance()->getConnection(), $nationalID);
+    //     $userid = $this->getUserID();
+    //     $defaultBadge = $this->badge->getBadgeID();
+    //     $this->volunteerList->addVolunteer($this);
+    //     // SQL query to insert the person into the database
+    //     $query = "INSERT INTO volunteer (userID, nationalID, `address`, badge) 
+    //             VALUES ('{$userid}', '{$nationalID}', '{$address}', '{$defaultBadge}')";
+
+    //     // Run the query and return whether it was successful
+    //     return run_query($query);
+    // }
 
     public function updateVolunteer(array $fieldsToUpdate): bool
     {
@@ -94,7 +118,7 @@ class Volunteer extends Person
         return $this->badge->getBadgeID();
     }
 
-    public function setBadge(Badges $badge): bool
+    public function setBadge(?Badges $badge): bool
     {
         // Optional validation (e.g., ensure it's a valid Badge object)
         if (!$badge instanceof Badges) {
@@ -174,7 +198,6 @@ abstract class VolunteerRoles extends Person
     public function getAllRoles(): array {
         $roles = [];
 
-    
         // Check each role flag in userTypeID
         if ($this->hasRole(self::COOK_FLAG)) {
             $roles[] = 'Cook';

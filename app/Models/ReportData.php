@@ -164,5 +164,23 @@ class ReportingData {
     public function setIsDeleted($isDeleted) {
         $this->isDeleted = $isDeleted;
     }
+
+    public static function getAllActiveReports(): ReportingDataList {
+        $reportList = new ReportingDataList();
+        $query = "SELECT * FROM report WHERE is_deleted = FALSE";
+        $results = run_select_query($query);
+        
+        foreach ($results as $row) {
+            $report = new ReportingData(
+                $row['personINname'],
+                $row['personINaddress'],
+                $row['phoneINno'],
+                $row['description']
+            );
+            $reportList->addReport($report);
+        }
+        
+        return $reportList;
+    }
  
 }

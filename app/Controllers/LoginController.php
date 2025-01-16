@@ -1,7 +1,9 @@
 <?php
 
+
 require_once __DIR__ . '/../Models/Login.php';
 require_once __DIR__ . '/../Views/LoginView.php';
+require_once __DIR__ . '/../Models/Address.php';
 class LoginController
 {
     private $loginHandler;
@@ -120,11 +122,17 @@ class LoginController
         $password = $_POST['password'] ?? '';
         $firstName = $_POST['firstName'] ?? '';
         $lastName = $_POST['lastName'] ?? '';
-        $phoneNo = $_POST['phoneNo'] ?? '';  // Assuming 1 is the default user type ID
+        $phoneNo = $_POST['phoneNo'] ?? '';
+        $userTypeID = $_POST['userTypeID'] ?? ''; 
+        $nationalID = $_POST['nationalID'] ?? '';  
+        $address_string = $_POST['address'] ?? ''; 
 
-        if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo)) {
+        $address = new Address($address_string, Address::getIdByName('Egypt'),'City');
+        $address->create();
+
+        if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID,  $nationalID, $address)) {
             $this->errorMessage = 'Registration successful! You can now log in.';
-            $this->mode = 'login'; // Switch to login mode on success
+            #$this->mode = 'login'; // Switch to login mode on success
         } else {
             $this->errorMessage = 'Registration failed. The email might already be in use.';
             $this->mode = 'register'; // Stay on the register form on failure

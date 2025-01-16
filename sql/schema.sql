@@ -319,6 +319,15 @@ CREATE TABLE `volunteering` (
   `eventID` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+
+CREATE TABLE `transactions` (
+  `transactionID` int(11) NOT NULL AUTO_INCREMENT,
+  `amount` float(10,2) DEFAULT NULL,
+  `userID` int(11) NOT NULL,
+  `date` datetime NOT NULL,
+  PRIMARY KEY (`transactionID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 --
 -- Indexes for dumped tables
 --
@@ -513,6 +522,9 @@ ALTER TABLE `vehicle`
 -- Constraints for table `address`
 --
 ALTER TABLE `address`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=124;
+
+ALTER TABLE `address`
   ADD CONSTRAINT `address_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `address` (`id`) ON DELETE CASCADE;
 
 --
@@ -542,6 +554,9 @@ ALTER TABLE `delivering`
 ALTER TABLE `Donating`
   ADD CONSTRAINT `donating_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `person` (`userID`),
   ADD CONSTRAINT `donating_ibfk_2` FOREIGN KEY (`donationID`) REFERENCES `Donation` (`donationID`);
+
+ALTER TABLE `transactions`
+  ADD CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `person` (`userID`);
 
 --
 -- Constraints for table `event`

@@ -118,7 +118,7 @@ class DeliveryGuy extends VolunteerRoles
                 $row['deliveryDate'],
                 $row['startLocation'],
                 $row['endLocation'],
-                $row['deliveryGuyID'],  // Passing the ID or DeliveryGuy object depending on your design
+                $row['deliveryGuy'],  
                 $row['status'],
                 $row['deliveryDetails']
             );
