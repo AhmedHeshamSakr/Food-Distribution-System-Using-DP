@@ -21,29 +21,43 @@ class Address
         $this->name = $name;
         $this->parent_id = $parent_id;
         $this->level = $level;
+
+        // Check for duplicates and create if not exists
+        $duplicateId = $this->findDuplicate();
+        if ($duplicateId !== null) {
+            $this->id = $duplicateId;
+        } else {
+            $this->create();
+        }
     }
-    
+
     // Create a new address record in the database
-   // Create a new address record in the database
-public function create(): bool
-{
-    // Handle null values for parent_id
-    $parentIdValue = is_null($this->parent_id) ? "NULL" : (int)$this->parent_id;
+    public function create(): bool
+    {
+        // Check for duplicates
+        $duplicateId = $this->findDuplicate();
+        if ($duplicateId !== null) {
+            $this->id = $duplicateId;
+            return false; // Address already exists, no need to create
+        }
 
-    // Prepare the SQL statement
-    $sql = "INSERT INTO address (name, parent_id, level) VALUES ('{$this->name}', {$parentIdValue}, '{$this->level}')";
+        // Handle null values for parent_id
+        $parentIdValue = is_null($this->parent_id) ? "NULL" : (int)$this->parent_id;
 
-    // Execute the query
-    $result = run_query($sql);
+        // Prepare the SQL statement
+        $sql = "INSERT INTO address (name, parent_id, level) VALUES ('{$this->name}', {$parentIdValue}, '{$this->level}')";
 
-    if ($result) {
-        // Fetch and set the last inserted ID
-        $this->id = $this->getLastInsertedID();
-        return true;
+        // Execute the query
+        $result = run_query($sql);
+
+        if ($result) {
+            // Fetch and set the last inserted ID
+            $this->id = $this->getLastInsertedID();
+            return true;
+        }
+
+        return false;
     }
-
-    return false;
-}
 
     private function getLastInsertedID(): int
     {
@@ -62,7 +76,6 @@ public function create(): bool
         }
         return $this->id;
     }
-
 
     // Read an address record from the database
     public static function read(?int $id): ?Address
@@ -91,6 +104,19 @@ public function create(): bool
         return null; // Return null if not found
     }
 
+    // Find duplicate address
+    private function findDuplicate(): ?int
+    {
+        $parentIdValue = is_null($this->parent_id) ? "IS NULL" : "= {$this->parent_id}";
+        $sql = "SELECT id FROM address WHERE name = '{$this->name}' AND parent_id {$parentIdValue} AND level = '{$this->level}' LIMIT 1";
+        $result = run_select_query($sql);
+
+        if ($result && count($result) > 0) {
+            return (int)$result[0]['id'];
+        }
+
+        return null;
+    }
 
     // Getters and Setters
     public function getName(): string

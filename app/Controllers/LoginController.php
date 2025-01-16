@@ -128,7 +128,6 @@ class LoginController
         $address_string = $_POST['address'] ?? ''; 
 
         $address = new Address($address_string, Address::getIdByName('Egypt'),'City');
-        $address->create();
 
         if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID,$nationalID,$address)) {
             $this->errorMessage = 'Registration successful! You can now log in.';

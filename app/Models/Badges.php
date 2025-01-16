@@ -1,19 +1,25 @@
 <?php
 
-require_once __DIR__ . "/../../config/DB.php"; 
+require_once __DIR__ . "/../../config/DB.php";
 
 class Badges
 {
-    private int $badgeID;
+    private int $badgeID = 0; // Default to 0 to handle uninitialized state
     private string $badgeLvl;
     private mysqli $connection;
 
-    public function __construct(int $badgeID = 0, string $badgeLvl = '')
+    public function __construct(string $badgeLvl)
     {
-        $this->badgeID = $badgeID;
         $this->badgeLvl = $badgeLvl;
         $this->connection = Database::getInstance()->getConnection(); // Get DB connection
-        $this->insertBadge();
+
+        // Check for duplicates and insert if not exists
+        $duplicateId = $this->findDuplicateBadge();
+        if ($duplicateId !== null) {
+            $this->badgeID = $duplicateId;
+        } else {
+            $this->insertBadge();
+        }
     }
 
     // Getters
@@ -33,29 +39,54 @@ class Badges
         $this->badgeLvl = $badgeLvl;
     }
 
-    // CRUD Operations
-
     // CREATE: Insert a new badge
     public function insertBadge(): bool
-{
-    $query = "INSERT INTO Badge (badgeLvl) VALUES (?)";
-    $stmt = $this->connection->prepare($query);
-    if ($stmt === false) {
-        die("Error preparing query: " . $this->connection->error);
+    {
+        // Check for duplicates
+        $duplicateId = $this->findDuplicateBadge();
+        if ($duplicateId !== null) {
+            $this->badgeID = $duplicateId;
+            return false; // Badge already exists
+        }
+
+        $query = "INSERT INTO Badge (badgeLvl) VALUES (?)";
+        $stmt = $this->connection->prepare($query);
+        if ($stmt === false) {
+            die("Error preparing query: " . $this->connection->error);
+        }
+
+        $stmt->bind_param('s', $this->badgeLvl);
+        if ($stmt->execute()) {
+            // Assign the last inserted ID to $this->badgeID
+            $this->badgeID = $this->connection->insert_id;
+            $stmt->close();
+            return true;
+        } else {
+            $stmt->close();
+            return false;
+        }
     }
 
-    $stmt->bind_param('s', $this->badgeLvl);
-    if ($stmt->execute()) {
-        // Assign the last inserted ID to $this->badgeID
-        $this->badgeID = $this->connection->insert_id;
-        $stmt->close();
-        return true;
-    } else {
-        $stmt->close();
-        return false;
-    }
-}
+    // Find duplicate badge
+    private function findDuplicateBadge(): ?int
+    {
+        $query = "SELECT badgeID FROM Badge WHERE badgeLvl = ? LIMIT 1";
+        $stmt = $this->connection->prepare($query);
+        if ($stmt === false) {
+            die("Error preparing query: " . $this->connection->error);
+        }
 
+        $stmt->bind_param('s', $this->badgeLvl);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+        if ($result && $result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            return (int)$row['badgeID'];
+        }
+
+        return null;
+    }
 
     // READ: Get a badge by its ID
     public function getBadgeByID(int $badgeID): ?array
@@ -128,5 +159,4 @@ class Badges
         return $stmt->execute();
     }
 }
-
 ?>
