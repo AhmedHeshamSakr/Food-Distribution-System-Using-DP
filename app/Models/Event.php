@@ -2,6 +2,7 @@
 
 require_once __DIR__ . "/../../config/DB.php";
 require_once 'Address.php';
+require_once 'Iterator.php';
 
 interface Observer
 {
@@ -51,12 +52,24 @@ class Event implements Subject
         $this->reqCoordinators = $reqCoordinators;
     }
 
-    // Getters and Setters
-    public function getEventID(): int { return $this->eventID; }
-    public function setEventID(int $eventID): void { $this->eventID = $eventID; }
+    // Getter and Setter methods for all properties
+    public function getEventID(): int
+    {
+        return $this->eventID;
+    }
+    public function setEventID(int $eventID): void
+    {
+        $this->eventID = $eventID;
+    }
 
-    public function getEventDate(): string { return $this->eventDate; }
-    public function setEventDate(string $eventDate): void { $this->eventDate = $eventDate; }
+    public function getEventDate(): string
+    {
+        return $this->eventDate;
+    }
+    public function setEventDate(string $eventDate): void
+    {
+        $this->eventDate = $eventDate;
+    }
 
     public function getEventLocation(): Address { return $this->eventLocation; }
     public function setEventLocation(Address $location): void { $this->eventLocation = $location; }
@@ -64,14 +77,32 @@ class Event implements Subject
     public function getEventName(): string { return $this->eventName; }
     public function setEventName(string $eventName): void { $this->eventName = $eventName; }
 
-    public function getEventDescription(): string { return $this->eventDescription; }
-    public function setEventDescription(string $eventDescription): void { $this->eventDescription = $eventDescription; }
+    public function getEventDescription(): string
+    {
+        return $this->eventDescription;
+    }
+    public function setEventDescription(string $eventDescription): void
+    {
+        $this->eventDescription = $eventDescription;
+    }
 
-    public function getReqCooks(): int { return $this->reqCooks; }
-    public function setReqCooks(int $reqCooks): void { $this->reqCooks = $reqCooks; }
+    public function getReqCooks(): int
+    {
+        return $this->reqCooks;
+    }
+    public function setReqCooks(int $reqCooks): void
+    {
+        $this->reqCooks = $reqCooks;
+    }
 
-    public function getReqForDelivery(): int { return $this->reqForDelivery; }
-    public function setReqForDelivery(int $reqForDelivery): void { $this->reqForDelivery = $reqForDelivery; }
+    public function getReqForDelivery(): int
+    {
+        return $this->reqForDelivery;
+    }
+    public function setReqForDelivery(int $reqForDelivery): void
+    {
+        $this->reqForDelivery = $reqForDelivery;
+    }
 
     public function getReqCoordinators(): int { return $this->reqCoordinators; }
     public function setReqCoordinators(int $reqCoordinators): void { $this->reqCoordinators = $reqCoordinators; }
@@ -127,7 +158,77 @@ class Event implements Subject
         $this->checkRequirements();
     }
 
-    // Database operations
+    // Fetch all events from the database
+    public static function fetchAll(): array
+    {
+        // Assuming `run_select_query` returns an array of rows
+        $query = "SELECT * FROM `event`";
+        $results = run_select_query($query);
+        $events = [];
+        // Loop through each result row
+        foreach ($results as $row) {
+            // Ensure $row is an array and $row['eventLocation'] is the correct data for Address
+            if (isset($row['eventLocation'])) {
+                $eventLocation = Address::read($row['eventLocation']);
+            } else {
+                // Handle the case if eventLocation is not found or is invalid
+                $eventLocation = null;  // Adjust accordingly
+            }
+            // Ensure required fields exist in $row before using them
+            if (isset($row['eventID'], $row['eventDate'], $row['name'], $row['eventDescription'])) {
+                // Create the Event object and add to the events array
+                $events[] = new Event(
+                    (int)$row['eventID'],
+                    $row['eventDate'],
+                    $eventLocation,
+                    $row['name'],
+                    $row['eventDescription']
+                );
+            } else {
+                // Log an error or handle missing fields gracefully
+                error_log("Missing required fields in event data: " . json_encode($row));
+            }
+        }
+    
+        return $events;
+    }
+    
+    // Fetch a single event by its ID
+    public static function fetchById(int $eventID): ?Event
+    {
+        $query = "SELECT * FROM `event` WHERE eventID = {$eventID}";
+        $result = run_select_query($query);
+
+        if ($result) {
+            $row = $result[0]; // Assuming one event will be returned
+
+            // Ensure $row is an array and $row['eventLocation'] is the correct data for Address
+            if (isset($row['eventLocation'])) {
+                $eventLocation = Address::read($row['eventLocation']);
+            } else {
+                // Handle the case if eventLocation is not found or is invalid
+                $eventLocation = null;  // Adjust accordingly
+            }
+
+            // Ensure required fields exist in $row before using them
+            if (isset($row['eventID'], $row['eventDate'], $row['name'], $row['eventDescription'])) {
+                // Create and return the Event object
+                return new Event(
+                    (int)$row['eventID'],
+                    $row['eventDate'],
+                    $eventLocation,
+                    $row['name'],
+                    $row['eventDescription']
+                );
+            } else {
+                // Log an error or handle missing fields gracefully
+                error_log("Missing required fields in event data: " . json_encode($row));
+            }
+        }
+
+        return null;
+    }
+
     public function create(): bool
     {
         if ($this->eventLocation->getId() === 0) {
@@ -236,4 +337,64 @@ class Event implements Subject
         $sql = "DELETE FROM `event` WHERE eventID = {$this->eventID}";
         return run_query($sql);
     }
+
+    public static function getAllEvents(): EventList
+    {
+        $eventList = new EventList();
+    
+        // Get the database connection
+        $connection = Database::getInstance()->getConnection();
+        if (!$connection) {
+            die("Database connection failed: " . mysqli_connect_error());
+        }
+    
+        // SQL query to select all events
+        $query = "SELECT * FROM event";
+        $result = mysqli_query($connection, $query);
+    
+        // Check if the query executed successfully
+        if (!$result) {
+            die("Query error: " . mysqli_error($connection));
+        }
+    
+        // Check if the query returned any rows
+        if (mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                // Safely handle eventLocation
+                $eventLocation = null;
+                if (!empty($row['eventLocation'])) {
+                    try {
+                        $eventLocation = Address::read($row['eventLocation']);
+                    } catch (Exception $e) {
+                        print("Error reading event location: " . $e->getMessage() . "\n");
+                    }
+                }
+    
+                // Validate required fields before creating an Event object
+                if (isset($row['eventID'], $row['eventDate'], $row['name'], $row['eventDescription'])) {
+                    $event = new Event(
+                        (int)$row['eventID'], // Convert to integer for safety
+                        $row['eventDate'],
+                        $eventLocation,
+                        $row['name'],
+                        $row['eventDescription']
+                    );
+    
+                    // Add the event to the event list
+                    $eventList->addEvent($event);
+                } else {
+                    print("Missing required fields in event data: " . json_encode($row) . "\n");
+                }
+            }
+        } else {
+            print("No events found in the database.\n");
+        }
+    
+        return $eventList;
+    }
+    
+
+
+
+
 }

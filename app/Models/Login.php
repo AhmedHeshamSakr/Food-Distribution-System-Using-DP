@@ -1,12 +1,22 @@
 <?php
 
 require_once __DIR__ . "/../../config/DB.php";
+require_once "Person.php";
 require_once "User.php";
+require_once "Address.php";
+require_once "Volunteer.php";
+require_once "#a-Badmin.php";
+require_once "#a-Eadmin.php";
+require_once "#a-Vadmin.php";
 interface iLogin {
     public function login($credentials): bool;
     public function authenticate(string $username, string $password): bool;
     public function logout(): bool;
+
+    public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID): Person;
 }
+
+
 
 
 class withEmail implements iLogin {
@@ -20,7 +30,20 @@ class withEmail implements iLogin {
         $this->password = $password;
     }
 
-    // The login method will authenticate the user using the credentials
+    public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID): Person{
+        error_log("User Type ID: $userTypeID");
+        switch ($userTypeID) {
+            case 1 << 5: 
+                return new BadgeAdmin($firstName, $lastName, $email, $phoneNo);
+            case 1<< 6: 
+                return new EventAdmin($firstName, $lastName, $email, $phoneNo);
+            case 1<< 7: 
+                return new VerificationAdmin($firstName, $lastName, $email, $phoneNo);
+            default:
+                return new Volunteer($userTypeID,$firstName, $lastName, $email, $phoneNo, $address, $nationalID, new Badges(badgeLvl:'Silver Tier'));
+        }
+    }
+
     // The login method will authenticate the user using the credentials
     public function login($credentials): bool {
         $this->email = $credentials['email'];
@@ -74,43 +97,42 @@ class withEmail implements iLogin {
     }
 
     // This function should be used to register a user, storing a hashed password in the database
-    public function register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID=0): bool {
+    public function register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID, $nationalID, Address $address): bool {
         // Establish the database connection
         $db = Database::getInstance()->getConnection();
-    
+
         // Sanitize inputs
         $email = mysqli_real_escape_string($db, $email);
         $password = mysqli_real_escape_string($db, $password);
         $firstName = mysqli_real_escape_string($db, $firstName);
         $lastName = mysqli_real_escape_string($db, $lastName);
         $phoneNo = mysqli_real_escape_string($db, $phoneNo);
-    
+
         // Check if the email already exists in the database
         $queryCheck = "SELECT * FROM login WHERE email = '$email'";
         $resultCheck = mysqli_query($db, $queryCheck);
-    
-        // If email already exists, return false (email is already taken)
+
         if (mysqli_num_rows($resultCheck) > 0) {
             return false; // Email already exists
         }
-    
-        // Hash the password before storing it
+
+        // Hash the password
         $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-    
-        // Insert the new user into the login table with the hashed password
+
+        // Insert the login data
         $query = "INSERT INTO login (email, password) VALUES ('$email', '$hashedPassword')";
-    
-        // Execute the query to insert login details
         if (mysqli_query($db, $query)) {
             // After successful registration, get the userID
-            $userID = mysqli_insert_id($db); // Get the last inserted ID (userID)
-            $login = new withEmail($email, 'password');
-            // Create an instance of the Person class and insert extra information
-            $User = new User($userTypeID=0, $firstName, $lastName, $email, $phoneNo);
-            // If person is successfully inserted, return true
+            $userID = mysqli_insert_id($db);
+
+            // Use the factory to create the user object
+            $user = $this->createUser($userTypeID, $firstName, $lastName, $email, $phoneNo,$address ,$nationalID);
+
+            // Insert additional user details into the person table
             return true;
+            //return $user->saveToDatabase();
         }
-    
+
         return false; // Registration failed
     }
 }

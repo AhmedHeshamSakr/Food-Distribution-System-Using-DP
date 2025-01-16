@@ -13,6 +13,7 @@ class Badges
         $this->badgeID = $badgeID;
         $this->badgeLvl = $badgeLvl;
         $this->connection = Database::getInstance()->getConnection(); // Get DB connection
+        $this->insertBadge();
     }
 
     // Getters
@@ -36,16 +37,25 @@ class Badges
 
     // CREATE: Insert a new badge
     public function insertBadge(): bool
-    {
-        $query = "INSERT INTO Badge (badgeLvl) VALUES (?)";
-        $stmt = $this->connection->prepare($query);
-        if ($stmt === false) {
-            die("Error preparing query: " . $this->connection->error);
-        }
-
-        $stmt->bind_param('s', $this->badgeLvl);
-        return $stmt->execute();
+{
+    $query = "INSERT INTO Badge (badgeLvl) VALUES (?)";
+    $stmt = $this->connection->prepare($query);
+    if ($stmt === false) {
+        die("Error preparing query: " . $this->connection->error);
     }
+
+    $stmt->bind_param('s', $this->badgeLvl);
+    if ($stmt->execute()) {
+        // Assign the last inserted ID to $this->badgeID
+        $this->badgeID = $this->connection->insert_id;
+        $stmt->close();
+        return true;
+    } else {
+        $stmt->close();
+        return false;
+    }
+}
+
 
     // READ: Get a badge by its ID
     public function getBadgeByID(int $badgeID): ?array

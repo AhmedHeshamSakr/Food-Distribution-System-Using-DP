@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . "/../../config/DB.php";  
+require_once __DIR__ . "/../../config/DB.php";
 
 class Address
 {
@@ -65,7 +65,7 @@ public function create(): bool
 
 
     // Read an address record from the database
-    public static function read(int $id): ?Address
+    public static function read(?int $id): ?Address
     {
         $query = "SELECT * FROM address WHERE id = {$id}";
         $result = run_select_query($query);

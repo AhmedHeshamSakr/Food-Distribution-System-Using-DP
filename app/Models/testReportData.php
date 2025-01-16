@@ -66,4 +66,3 @@ if ($deletedDetails) {
 // } else {
 //     echo "No active reports found.\n";
 // }
-
