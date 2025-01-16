@@ -22,11 +22,11 @@ try {
     logResult("Address created", $eventLocation->create());
 
     // Step 2: Create an Event object with the valid Address object as eventLocation
-    $event1 = new Event(null, '2024-12-01', $eventLocation, 'Music Concert', 'A wonderful concert with popular artists.', 2, 1, 1);
+    $event1 = new Event(null, '2029-12-01', $eventLocation, 'Music Concert', 'A wonderful concert with popular artists.', 2, 1, 1);
     logResult("Event 1 created", $event1->create());
 
     // Step 3: Create another event to have multiple events for fetching
-    $event2 = new Event(null, '2024-12-15', $eventLocation, 'Food Festival', 'A fun-filled food festival.', 3, 2, 1);
+    $event2 = new Event(null, '2029-12-15', $eventLocation, 'Food Festival', 'A fun-filled food festival.', 3, 2, 1);
     logResult("Event 2 created", $event2->create());
 
     // Step 4: Fetch and display individual event details

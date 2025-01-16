@@ -1,4 +1,5 @@
 <?php
+require_once '../../config/DB.php';
 // Define the Strategy Interface for Payment
 interface IPayment {
     public function pay(float $amount): array;
@@ -109,7 +110,9 @@ class PaymentModel {
     }
 
     private function storeTransaction($paymentResult) {
-        
+        $conn = $this->db->getConnection();
+        $sql = "INSERT INTO transactions (order_id, amount, currency, payment_method, status) VALUES (?, ?, ?, ?, ?)";
+
     }
 }
 
@@ -128,4 +131,106 @@ class PaymentContext {
     public function setPaymentMethod(IPayment $paymentMethod) {
         $this->paymentMethod = $paymentMethod;
     }
+}
+
+
+class Transaction{
+    private $transactionID;
+    private $amount;
+    private $userID;
+    private $date;
+
+
+    public function __construct( $amount, $userID, $date){
+
+        $this->amount = $amount;
+        $this->userID = $userID;
+        $this->date = $date;
+
+    }
+
+    public function storeTransaction(): bool {
+        try {
+            $conn= database::getInstance()->getConnection();
+            $date = $this->date;
+            $amount = $this->amount;
+            $userID = $this->userID;
+
+            $query = "INSERT INTO transactions (`date`, amount, userID) 
+                VALUES ('{$date}', '{$amount}', '{$userID}')";
+            $stmt = $conn->prepare($query);
+            $stmt->execute();
+
+            // Fetch the transaction ID and set it
+            $this->transactionID = $stmt->insert_id;
+
+            $stmt->close();
+            return true;
+        } catch (Exception $e) {
+            // Log the error or handle it as needed
+            error_log("Transaction failed: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getTransactionID() {
+        return $this->transactionID;
+    }
+    public function getAmount() {
+        return $this->amount;
+    }
+    public function getUserID() {
+        return $this->userID;
+    }
+    public function getDate() {
+        return $this->date;
+    }
+    
+    public function updateTransaction(array $fieldsToUpdate): bool
+    {
+        // Create an array to hold the SET part of the SQL query
+        $setQuery = [];
+        
+        // Loop through the fieldsToUpdate array and create the SET portion of the query
+        foreach ($fieldsToUpdate as $field => $value) {
+            // Escape the value to prevent SQL injection
+            $escapedValue = mysqli_real_escape_string(Database::getInstance()->getConnection(), $value);
+            $setQuery[] = "$field = '$escapedValue'";
+        }
+
+        // Join the setQuery array into a string with commas
+        $setQueryStr = implode(', ', $setQuery);
+
+        // Construct the full SQL query
+        $query = "UPDATE transactions SET $setQueryStr WHERE transactionID = '{$this->transactionID}'";
+
+        // Run the query and return the result
+        return run_query($query);
+    }
+
+    public function setAmount($amount) {
+        $this->amount = $amount;
+        $fieldsToUpdate = ['amount' => $amount];
+        return $this->updateTransaction($fieldsToUpdate);
+    }
+
+    public function setDate($date) {
+        $this->date = $date;
+        $fieldsToUpdate = ['date' => $date];
+        return $this->updateTransaction($fieldsToUpdate);
+    }
+
+    public function setUserID($userID) {
+        $this->userID = $userID;
+        $fieldsToUpdate = ['userID' => $userID];
+        return $this->updateTransaction($fieldsToUpdate);
+    }
+    
+    public function deleteTransaction(): bool
+    {
+        $query = "DELETE FROM transactions WHERE transactionID = '{$this->transactionID}'";
+        return run_query($query);
+    }
+
+    
 }

@@ -31,6 +31,8 @@ class Volunteer extends Person
         // Initialize the Volunteer-specific properties
         $this->address = $address;
         $this->nationalID = $nationalID;
+        error_log("MY CONSTRUCTOR, " . var_export($nationalID, true));
+
         $this->badge = $badge;
         $this->volunteerList = new VolunteerList();
         $this->insertVolunteer($this);
@@ -41,7 +43,7 @@ class Volunteer extends Person
     public function insertVolunteer(Volunteer $volunteer){
         $conn = Database::getInstance()->getConnection();
         $nationalID = $volunteer->getNationalID();
-        print($nationalID);
+        error_log("done, " . var_export($nationalID, true));
         $address = $volunteer->getAddress();
         
         $userid = $volunteer->getUserID();
@@ -116,7 +118,7 @@ class Volunteer extends Person
         return $this->badge->getBadgeID();
     }
 
-    public function setBadge(Badges $badge): bool
+    public function setBadge(?Badges $badge): bool
     {
         // Optional validation (e.g., ensure it's a valid Badge object)
         if (!$badge instanceof Badges) {
@@ -196,7 +198,6 @@ abstract class VolunteerRoles extends Person
     public function getAllRoles(): array {
         $roles = [];
 
-    
         // Check each role flag in userTypeID
         if ($this->hasRole(self::COOK_FLAG)) {
             $roles[] = 'Cook';
