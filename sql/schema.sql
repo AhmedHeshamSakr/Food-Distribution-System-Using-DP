@@ -331,26 +331,11 @@ CREATE TABLE `volunteering` (
 
 
 CREATE TABLE `transactions` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `item_number` varchar(50) DEFAULT NULL,
-  `item_name` varchar(255) DEFAULT NULL,
-  `item_price` float(10,2) DEFAULT NULL,
-  `item_price_currency` varchar(10) DEFAULT NULL,
-  `payer_id` varchar(50) DEFAULT NULL,
-  `payer_name` varchar(50) DEFAULT NULL,
-  `payer_email` varchar(50) DEFAULT NULL,
-  `payer_country` varchar(20) DEFAULT NULL,
-  `merchant_id` varchar(255) DEFAULT NULL,
-  `merchant_email` varchar(50) DEFAULT NULL,
-  `order_id` varchar(50) NOT NULL,
-  `transaction_id` varchar(50) NOT NULL,
-  `paid_amount` float(10,2) NOT NULL,
-  `paid_amount_currency` varchar(10) NOT NULL,
-  `payment_source` varchar(50) DEFAULT NULL,
-  `payment_status` varchar(25) NOT NULL,
-  `created` datetime NOT NULL,
-  `modified` datetime NOT NULL,
-  PRIMARY KEY (`id`)
+  `transactionID` int(11) NOT NULL AUTO_INCREMENT,
+  `amount` float(10,2) DEFAULT NULL,
+  `userID` int(11) NOT NULL,
+  `date` datetime NOT NULL,
+  PRIMARY KEY (`transactionID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -579,6 +564,9 @@ ALTER TABLE `delivering`
 ALTER TABLE `Donating`
   ADD CONSTRAINT `donating_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `person` (`userID`),
   ADD CONSTRAINT `donating_ibfk_2` FOREIGN KEY (`donationID`) REFERENCES `Donation` (`donationID`);
+
+ALTER TABLE `transactions`
+  ADD CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `person` (`userID`);
 
 --
 -- Constraints for table `event`

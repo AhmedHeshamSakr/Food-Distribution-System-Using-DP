@@ -8,7 +8,7 @@ require_once 'ReportData.php';
 
 class VerificationAdmin extends Person {
 
-    private int $userTypeID = Person::B_ADMIN_FLAG;
+    private int $userTypeID = Person::V_ADMIN_FLAG;
 
     // Constructor
     public function __construct(string $firstName, string $lastName, string $email, string $phoneNo)
