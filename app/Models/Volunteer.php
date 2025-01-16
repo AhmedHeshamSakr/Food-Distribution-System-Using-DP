@@ -41,6 +41,7 @@ class Volunteer extends Person
     public function insertVolunteer(Volunteer $volunteer){
         $conn = Database::getInstance()->getConnection();
         $nationalID = $volunteer->getNationalID();
+        print($nationalID);
         $address = $volunteer->getAddress();
         
         $userid = $volunteer->getUserID();

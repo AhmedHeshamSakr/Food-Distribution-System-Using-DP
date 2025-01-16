@@ -1,8 +1,5 @@
 <?php
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 require_once __DIR__ . '/../Models/Login.php';
 require_once __DIR__ . '/../Views/LoginView.php';
@@ -135,7 +132,7 @@ class LoginController
 
         if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID,$nationalID,$address)) {
             $this->errorMessage = 'Registration successful! You can now log in.';
-            $this->mode = 'login'; // Switch to login mode on success
+            #$this->mode = 'login'; // Switch to login mode on success
         } else {
             $this->errorMessage = 'Registration failed. The email might already be in use.';
             $this->mode = 'register'; // Stay on the register form on failure

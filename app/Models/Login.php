@@ -1,5 +1,4 @@
 <?php
-
 require_once __DIR__ . "/../../config/DB.php";
 require_once "Person.php";
 require_once "User.php";
@@ -31,6 +30,7 @@ class withEmail implements iLogin {
     }
 
     public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID): Person{
+        
         switch ($userTypeID) {
             case 1 << 5: 
                 return new BadgeAdmin($firstName, $lastName, $email, $phoneNo);
@@ -39,7 +39,7 @@ class withEmail implements iLogin {
             case 1<< 7: 
                 return new VerificationAdmin($firstName, $lastName, $email, $phoneNo);
             default:
-                return new Volunteer($userTypeID,$firstName, $lastName, $email, $phoneNo, $address, $nationalID, new Badges(0,'Gold Tier'));
+                return new Volunteer($userTypeID,$firstName, $lastName, $email, $phoneNo, $address, $nationalID, new Badges(badgeLvl:'Silver Tier'));
         }
     }
 
