@@ -6,14 +6,14 @@ require_once __DIR__ . "/../../config/DB.php";
 abstract class Person
 {
 
-    protected const COOK_FLAG = 1 << 0;       // Binary 00001
-    protected const DELIVERY_FLAG = 1 << 1;   // Binary 00010
-    protected const COORDINATOR_FLAG = 1 << 2; // Binary 00100
-    protected const REPORTER_FLAG = 1 << 3;   // Binary 01000
-    protected const DONOR_FLAG = 1 << 4;  // Binary 10000 
-    protected const B_ADMIN_FLAG = 1 << 5;  // Binary 100000
-    protected const E_ADMIN_FLAG = 1<< 6;
-    protected const V_ADMIN_FLAG = 1<< 7;
+    public const COOK_FLAG = 1 << 0;       // Binary 00001
+    public const DELIVERY_FLAG = 1 << 1;   // Binary 00010
+    public const COORDINATOR_FLAG = 1 << 2; // Binary 00100
+    public const REPORTER_FLAG = 1 << 3;   // Binary 01000
+    public const DONOR_FLAG = 1 << 4;  // Binary 10000 
+    public const B_ADMIN_FLAG = 1 << 5;  // Binary 100000
+    public const E_ADMIN_FLAG = 1<< 6;
+    public const V_ADMIN_FLAG = 1<< 7;
 
 
     private int $userTypeID = 0;
@@ -27,12 +27,17 @@ abstract class Person
     public function __construct(string $firstName, string $lastName, string $email, string $phoneNo, int $userTypeID)
     {
         $this->userTypeID = $userTypeID;
+        print('userTypeID'.$this->userTypeID);
         $this->firstName = $firstName;
+        print('firstName'.$this->firstName);
         $this->lastName = $lastName;
+        print('lastName'.$this->lastName);  
         $this->email = $email;
+        print('email'.$this->email);
         $this->phoneNo = $phoneNo;
+        print('phoneNo'.$this->phoneNo);
         // $this->login = $login;
-
+        
         if (!$this->emailExists($email)) {
             $this->insertPerson($userTypeID, $firstName, $lastName, $email, $phoneNo);
         } else {
@@ -57,11 +62,17 @@ abstract class Person
 
     public function insertPerson(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo): bool
     {
+
+        print('<br> userTypeID'.$userTypeID);
         // Sanitize inputs to prevent SQL injection (if not already done)
         $firstName = mysqli_real_escape_string(Database::getInstance()->getConnection(), $firstName);
+        print('<br> firstName'.$firstName);
         $lastName = mysqli_real_escape_string(Database::getInstance()->getConnection(), $lastName);
+        print('<br> lastName'.$lastName);    
         $email = mysqli_real_escape_string(Database::getInstance()->getConnection(), $email);
+        print('<br> email'.$email);  
         $phoneNo = mysqli_real_escape_string(Database::getInstance()->getConnection(), $phoneNo);
+        print('<br> phoneNo'.$phoneNo);  
 
         // SQL query to insert the person into the database
         $query = "INSERT INTO person (userTypeID, firstName, lastName, email, phoneNo) 
@@ -173,6 +184,18 @@ abstract class Person
         //echo 'the gotten value is '.$gottenvalue;
         return $this->updatePerson($fieldsToUpdate); 
     }
+
+    public function setUserID(int $userID): bool
+    {
+        $this->userID = $userID;
+        $fieldsToUpdate = [
+            'userID' => $this->userID
+        ];
+
+        return $this->updatePerson($fieldsToUpdate);
+    }
+
+
 
 
     public function setFirstName(string $firstName): bool

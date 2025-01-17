@@ -1,255 +1,251 @@
 <?php
 
 class VolunteerView {
-    private $events;
-    private $db;
-
-    public function __construct() {
-        // Initialize database connection
-        $this->db = Database::getInstance()->getConnection();
-        $this->loadEvents();
-    }
-
     /**
-     * Loads events from the database
-     * Fetches event information along with counts of volunteers in each role
+     * Renders the standard page header with navigation
      */
-    private function loadEvents() {
-        $query = "
-            SELECT e.*, 
-                   COUNT(DISTINCT c.cookID) AS cook_count,
-                   COUNT(DISTINCT d.userID) AS delivery_count,
-                   COUNT(DISTINCT co.userID) AS coordinator_count
-            FROM events e
-            LEFT JOIN cooking c ON e.eventID = c.eventID
-            LEFT JOIN delivery d ON e.eventID = d.eventID
-            LEFT JOIN coordinating co ON e.eventID = co.eventID
-            WHERE e.date >= CURDATE()
-            GROUP BY e.eventID
-        ";
-
-        $result = mysqli_query($this->db, $query);
-        $this->events = mysqli_fetch_all($result, MYSQLI_ASSOC);
-    }
-
-    /**
-     * Renders the main volunteer page with event cards and modal
-     * @return string The HTML content for the page
-     */
-    public function render() {
-        return $this->getHeader() 
-             . $this->getEventsContainer() 
-             . $this->getEventModal() 
-             . $this->getFooter();
-    }
-
-    /**
-     * Generates the page header with necessary CSS and meta tags
-     */
-    private function getHeader() {
-        return <<<HTML
+    public function renderPageHeader(): void {
+        ?>
         <!DOCTYPE html>
         <html lang="en">
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Volunteer Events Dashboard</title>
-            <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-            <style>
-                .event-card { transition: transform 0.2s; }
-                .event-card:hover { transform: translateY(-5px); }
-                .role-count { font-size: 1.2rem; font-weight: bold; }
-                .required-count { color: #dc3545; }
-            </style>
+            <title>Volunteer Portal</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
         </head>
-        <body class="bg-light">
-        HTML;
-    }
-
-    /**
-     * Creates the container holding all event cards
-     */
-    private function getEventsContainer() {
-        $html = <<<HTML
-        <div class="container py-5">
-            <h1 class="text-center mb-5">Upcoming Volunteer Events</h1>
-            <div class="row g-4" id="events-container">
-        HTML;
-
-        foreach ($this->events as $event) {
-            $html .= $this->generateEventCard($event);
-        }
-
-        $html .= '</div></div>';
-        return $html;
-    }
-
-    /**
-     * Generates an individual event card
-     * @param array $event Event data
-     */
-    private function generateEventCard($event) {
-        return <<<HTML
-        <div class="col-md-6 col-lg-4">
-            <div class="card event-card h-100 shadow-sm" data-event-id="{$event['eventID']}">
-                <div class="card-body">
-                    <h5 class="card-title">{$event['title']}</h5>
-                    <p class="card-text">
-                        <i class="bi bi-calendar"></i> {$event['date']}<br>
-                        <i class="bi bi-geo-alt"></i> {$event['location']}
-                    </p>
-                    <button class="btn btn-primary w-100" onclick="volunteerView.showEventDetails({$event['eventID']})">
-                        View Details
-                    </button>
-                </div>
-            </div>
-        </div>
-        HTML;
-    }
-
-    /**
-     * Creates the modal for displaying detailed event information
-     */
-    private function getEventModal() {
-        return <<<HTML
-        <div class="modal fade" id="eventModal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Event Details</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body" id="eventModalBody"></div>
-                </div>
-            </div>
-        </div>
-        HTML;
-    }
-
-    /**
-     * Creates the page footer and JavaScript
-     */
-    private function getFooter() {
-        return <<<HTML
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-        <script>
-        class VolunteerViewJS {
-            constructor() {
-                this.events = {$this->getEventsJson()};
-                this.initializeEventListeners();
-            }
-
-            initializeEventListeners() {
-                document.addEventListener('DOMContentLoaded', () => this.loadEvents());
-            }
-
-            showEventDetails(eventId) {
-                const event = this.events.find(e => e.eventID === eventId);
-                const modalBody = document.getElementById('eventModalBody');
-                modalBody.innerHTML = this.createEventDetails(event);
-                new bootstrap.Modal(document.getElementById('eventModal')).show();
-            }
-
-            handleRoleSelection(checkbox) {
-                const role = checkbox.dataset.role;
-                const eventId = checkbox.dataset.event;
-                const isChecked = checkbox.checked;
-
-                $.ajax({
-                    url: 'volunteer-controller.php',
-                    method: 'POST',
-                    data: { action: 'updateRole', eventId, role, selected: isChecked },
-                    success: response => this.handleRoleUpdateResponse(response, checkbox),
-                    error: () => this.handleRoleUpdateError(checkbox)
-                });
-            }
-
-            handleRoleUpdateResponse(response, checkbox) {
-                if (response.success) {
-                    this.updateRequiredCount(checkbox.dataset.role, checkbox.dataset.eventId, checkbox.checked);
-                    this.showAlert('Success!', 'Role updated successfully', 'success');
-                } else {
-                    checkbox.checked = !checkbox.checked;
-                    this.showAlert('Error', 'Failed to update role', 'danger');
-                }
-            }
-
-            handleRoleUpdateError(checkbox) {
-                checkbox.checked = !checkbox.checked;
-                this.showAlert('Error', 'An error occurred', 'danger');
-            }
-
-            showAlert(title, message, type = 'info') {
-                const alertHtml = `<div class="alert alert-\${type} alert-dismissible fade show" role="alert">
-                                     <strong>\${title}</strong> \${message}
-                                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                   </div>`;
-                document.querySelector('.modal-body').insertAdjacentHTML('afterbegin', alertHtml);
-            }
-
-            updateRequiredCount(role, eventId, isChecked) {
-                const element = document.getElementById(`${role}-required-${event}`);
-                const currentCount = parseInt(element.textContent, 10);
-                element.textContent = isChecked ? currentCount - 1 : currentCount + 1;
-            }
-
-            createEventDetails(event) {
-                return <<<HTML
-                <div class="container-fluid">
-                    <h4>{$event['title']}</h4>
-                    <p class="text-muted">
-                        <strong>Date:</strong> {$event['date']}<br>
-                        <strong>Location:</strong> {$event['location']}
-                    </p>
-                    <p>{$event['description']}</p>
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Role</th>
-                                    <th>Required</th>
-                                    <th>Current</th>
-                                    <th>Volunteer</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Cook</td>
-                                    <td>
-                                        <span class="required-count" id="cook-required-{$event['id']}">
-                                            {$event['roles']['cook']['required']}
-                                        </span>
-                                    </td>
-                                    <td>{$event['roles']['cook']['current']}</td>
-                                    <td>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" 
-                                                data-role="cook" 
-                                                data-event="{$event['id']}"
-                                                onchange="handleRoleSelection(this)">
-                                        </div>
-                                    </td>
-                                </tr>
-                                <!-- Add more roles here -->
-                            </tbody>
-                        </table>
+        <body>
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+                <div class="container">
+                    <a class="navbar-brand" href="?action=upcoming">Volunteer Portal</a>
+                    <div class="navbar-nav">
+                        <a class="nav-link" href="?action=upcoming">Upcoming Events</a>
                     </div>
                 </div>
-                HTML;
-        }
+            </nav>
+            <div class="container">
+        <?php
+    }
 
-        const volunteerView = new VolunteerViewJS();
-        </script>
+    /**
+     * Renders the page footer with necessary scripts
+     */
+    public function renderPageFooter(): void {
+        ?>
+            </div>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
         </body>
         </html>
-        HTML;
+        <?php
     }
 
     /**
-     * Converts event data to JSON for use in JavaScript
+     * Renders a list of upcoming events
      */
-    private function getEventsJson() {
-        return json_encode($this->events);
+    public function renderUpcomingEvents(array $events): void {
+        ?>
+        <h2 class="mb-4">Upcoming Events</h2>
+        <?php if (empty($events)): ?>
+            <div class="alert alert-info">No upcoming events found.</div>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Date</th>
+                            <th>Location</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($events as $event): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($event->getEventName()) ?></td>
+                                <td><?= htmlspecialchars($event->getEventDate()) ?></td>
+                                <td><?= htmlspecialchars($event->getEventLocation()->getName()) ?></td>
+                                <td>
+                                    <a href="?action=details&id=<?= $event->getEventID() ?>" class="btn btn-sm btn-primary">View Details</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+        <?php
+    }
+
+
+// Inside the renderEventDetails method, replace the staff requirements section with:
+
+public function renderEventDetails(Event $event): void {
+    ?>
+    <div class="card">
+        <div class="card-header">
+            <h2><?= htmlspecialchars($event->getEventName()) ?></h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <!-- Event Information section remains the same -->
+                    <h4>Event Information</h4>
+                    <dl class="row">
+                        <dt class="col-sm-3">Date</dt>
+                        <dd class="col-sm-9"><?= htmlspecialchars($event->getEventDate()) ?></dd>
+
+                        <dt class="col-sm-3">Location</dt>
+                        <dd class="col-sm-9"><?= htmlspecialchars($event->getEventLocation()->getName()) ?></dd>
+
+                        <dt class="col-sm-3">Description</dt>
+                        <dd class="col-sm-9"><?= htmlspecialchars($event->getEventDescription()) ?></dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <h4>Staff Requirements</h4>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <!-- Cook Section -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5>Cooks Needed: <span id="cooksCount"><?= $event->getReqCooks() ?></span></h5>
+                                    <div class="form-check">
+                                        <input class="form-check-input staff-checkbox" type="checkbox" 
+                                               id="cookCheckbox" 
+                                               data-staff-type="cook"
+                                               data-event-id="<?= $event->getEventID() ?>"
+                                               <?= $event->getReqCooks() <= 0 ? 'disabled' : '' ?>>
+                                        <label class="form-check-label" for="cookCheckbox">
+                                            Volunteer as Cook
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Delivery Section -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5>Delivery Staff Needed: <span id="deliveryCount"><?= $event->getReqForDelivery() ?></span></h5>
+                                    <div class="form-check">
+                                        <input class="form-check-input staff-checkbox" type="checkbox" 
+                                               id="deliveryCheckbox" 
+                                               data-staff-type="delivery"
+                                               data-event-id="<?= $event->getEventID() ?>"
+                                               <?= $event->getReqForDelivery() <= 0 ? 'disabled' : '' ?>>
+                                        <label class="form-check-label" for="deliveryCheckbox">
+                                            Volunteer for Delivery
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Coordinator Section -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5>Coordinators Needed: <span id="coordinatorCount"><?= $event->getReqCoordinators() ?></span></h5>
+                                    <div class="form-check">
+                                        <input class="form-check-input staff-checkbox" type="checkbox" 
+                                               id="coordinatorCheckbox" 
+                                               data-staff-type="coordinator"
+                                               data-event-id="<?= $event->getEventID() ?>"
+                                               <?= $event->getReqCoordinators() <= 0 ? 'disabled' : '' ?>>
+                                        <label class="form-check-label" for="coordinatorCheckbox">
+                                            Volunteer as Coordinator
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const staffCheckboxes = document.querySelectorAll('.staff-checkbox');
+    
+    staffCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', async function(e) {
+            if (!this.checked) {
+                return;
+            }
+
+            try {
+                // Get the form data from the checkbox's data attributes
+                const eventId = this.dataset.eventId;
+                const staffType = this.dataset.staffType;
+                
+                // Instead of FormData, let's use URLSearchParams for a standard form submission
+                const formData = new URLSearchParams();
+                formData.append('eventID', eventId);
+                formData.append('staffType', staffType);
+                
+                const response = await fetch('?action=volunteer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData.toString()
+                });
+
+                // Add debugging output
+                console.log('Request sent:', {
+                    eventId: eventId,
+                    staffType: staffType
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Response received:', data);
+                
+                if (data.success) {
+                    // Update the count in the UI
+                    const countElement = document.getElementById(`${staffType}Count`);
+                    if (countElement) {
+                        const currentCount = parseInt(countElement.textContent);
+                        countElement.textContent = Math.max(0, currentCount - 1);
+                        
+                        if (currentCount <= 1) {
+                            this.disabled = true;
+                        }
+                    }
+                    alert('Successfully registered as ' + staffType);
+                } else {
+                    this.checked = false;
+                    alert(data.message || 'Registration failed');
+                }
+            } catch (error) {
+                console.error('Error details:', error);
+                this.checked = false;
+                alert('Unable to process request. Please try again.');
+            }
+        });
+    });
+});
+</script>
+    <?php
+}
+// Helper function to show notifications
+public function showNotification(string $type, string $message): void {
+    // You can replace this with a more sophisticated notification system
+    if ($type === 'error') {
+        echo '<script>alert("Error: ' . $message . '");</script>';
+    } else {
+        echo '<script>alert("' . $message . '");</script>';
+    }
+}
+
+
+
+    public function renderError(string $message): void {
+        ?>
+        <div class="alert alert-danger">
+            <strong>Error:</strong> <?= htmlspecialchars($message) ?>
+        </div>
+        <?php
     }
 }

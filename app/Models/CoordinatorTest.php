@@ -100,7 +100,7 @@ if (!empty($assignedEvents)) {
 
 // Step 5: Fetch Details of a Specific Event
 echo "\n[Step 5] Fetching Details for Event ID: 5...\n";
-$eventDetails = $coordinator->getEventDetails(5);
+// $eventDetails = $coordinator->getEventDetails(5);
 
 if ($eventDetails) {
     echo "Event Details:\n";

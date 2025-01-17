@@ -55,6 +55,19 @@ class withEmail implements iLogin {
         return $this->authenticate($this->email, $this->password);
     }
 
+
+    public function getUserDetails(string $email): array {
+
+        
+        // Query your database to get user details
+        $query = "SELECT userID FROM person WHERE email = '$email'";
+        $result= run_select_query($query);
+        // Return array with user details
+        return [
+            'userID' => $result[0]['userID'],
+        ];
+    }
+
     // This method authenticates the user by checking email and password in the database
     public function authenticate(string $email, string $password): bool {
         // Establish the database connection

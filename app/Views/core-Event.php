@@ -22,5 +22,5 @@ $eventCreated = $event->create();
 $controller = new EventController();
 
 // Display the events
-$controller->displayEvents();
+// $controller->displayEvents();
 
