@@ -10,7 +10,7 @@ class Address
     private string $level; // Level of the address ('Country', 'State', 'City', 'Neighborhood')
 
     // Constructor to initialize properties
-    public function __construct(string $name, ?int $parent_id, string $level)
+    public function __construct(string $name, ?int $parent_id, string $level, int $id = 0) 
     {
         // Validate the level
         $validLevels = ['Country', 'State', 'City', 'Neighborhood'];
@@ -39,6 +39,7 @@ public function create(): bool
     if ($result) {
         // Fetch and set the last inserted ID
         $this->id = $this->getLastInsertedID();
+        print("Last inserted ID: " . $this->id);
         return true;
     }
 
