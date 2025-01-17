@@ -52,6 +52,7 @@ class PayCard implements IPayment {
 }
 
 // Payment Model that integrates with PayPal API
+//Facade pattern
 class PaymentModel {
     private $db;
     private $currency;

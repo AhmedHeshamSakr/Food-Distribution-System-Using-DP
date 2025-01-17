@@ -8,6 +8,7 @@ require_once __DIR__ . "/../Models/Event.php";
 require_once __DIR__ . "/../Views/EventView.php";
 require_once __DIR__ . "/../Views/VolunteerView.php";
 require_once __DIR__ . "/../Models/Volunteer.php";
+require_once __DIR__ . "/../Models/ControlePanelDPs.php";
 
 /**
  * EventController Class
@@ -18,6 +19,8 @@ class EventController implements Observer {
     private EventView $view;
     private VolunteerView $volunteerView;
     private bool $isVolunteerContext;
+    private ControlPanel $controlPanel;
+    private EventReceiver $eventReceiver;
 
     private function checkAuthentication(): void {
         if (!isset($_SESSION['email'])) {
@@ -34,6 +37,9 @@ class EventController implements Observer {
         $this->view = new EventView();
         $this->volunteerView = new VolunteerView();
         $this->isVolunteerContext = $isVolunteerContext;
+        $this->eventReceiver = new EventReceiver(new Event());
+
+        $this->controlPanel = new ControlPanel();
     }
 
     /**
@@ -361,79 +367,88 @@ class EventController implements Observer {
  * Handles creating a new event with proper address initialization and validation
  */
 private function handleCreateEvent(): void {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        // If not a POST request, render the form and exit
+        $this->view->renderEventForm();
+        return;
+    }
+
+    try {
+        // Validate all input parameters first
+        $params = $this->validateInputParams($_POST, [
+            'eventName',
+            'eventDate',
+            'eventDescription',
+            'addressName',
+            'addressLevel',
+            'parentId',
+            'reqCooks',
+            'reqForDelivery',
+            'reqCoordinators'
+        ]);
+
+        // Validate address level before proceeding
+        $validLevels = ['Country', 'State', 'City', 'Neighborhood'];
+        if (!in_array($params['addressLevel'], $validLevels)) {
+            throw new Exception("Invalid address level. Must be one of: " . implode(', ', $validLevels));
+        }
+
         try {
-            $params = $this->validateInputParams($_POST, [
-                'eventName', 
-                'eventDate', 
-                'eventDescription',
-                'addressName',
-                'addressLevel',
-                'parentId',
-                'reqCooks',
-                'reqForDelivery',
-                'reqCoordinators'
-            ]);
+            // Create and validate the Address object
+            $address = new Address(
+                $params['addressName'],
+                !empty($params['parentId']) ? (int)$params['parentId'] : null,
+                $params['addressLevel']
+            );
+
+            // Ensure address is created in database before proceeding
+            if (!$address->create()) {
+                throw new Exception("Failed to create address record");
+            }
+
+            // Verify the address was created and has an ID
+            if ($address->getId() <= 0) {
+                throw new Exception("Address creation failed - no ID returned");
+            }
+
+            // Create the command with validated data
+            $createEventCommand = new CreateEventCommand($this->eventReceiver);
             
-            // First validate the address level
-            $validLevels = ['Country', 'State', 'City', 'Neighborhood'];
-            if (!in_array($params['addressLevel'], $validLevels)) {
-                throw new Exception("Invalid address level. Must be one of: " . implode(', ', $validLevels));
+            // Set the event data for the command
+            $createEventCommand->setEventData([
+                'eventDate' => $params['eventDate'],
+                'eventLocation' => $address,
+                'eventName' => $params['eventName'],
+                'eventDescription' => $params['eventDescription'],
+                'reqCooks' => (int)$params['reqCooks'],
+                'reqForDelivery' => (int)$params['reqForDelivery'],
+                'reqCoordinators' => (int)$params['reqCoordinators']
+            ]);
+
+            // Set and execute the command using the control panel
+            $this->controlPanel->setCommand($createEventCommand);
+            $success = $this->controlPanel->executeCommand();
+
+            if (!$success) {
+                // If command execution fails, clean up the address
+                $address->delete();
+                throw new Exception("Failed to create event");
             }
 
-            try {
-                // Create and validate the Address object
-                $address = new Address(
-                    $params['addressName'],
-                    !empty($params['parentId']) ? (int)$params['parentId'] : null,
-                    $params['addressLevel']
-                );
-                
-                // Ensure address is created in database before proceeding
-                if (!$address->create()) {
-                    throw new Exception("Failed to create address record");
-                }
-
-                // Verify the address was created and has an ID
-                if ($address->getId() <= 0) {
-                    throw new Exception("Address creation failed - no ID returned");
-                }
-
-                // Create the event with the validated address
-                $event = new Event(
-                    null,
-                    $params['eventDate'],
-                    $address,
-                    $params['eventName'],
-                    $params['eventDescription'],
-                    (int)$params['reqCooks'],
-                    (int)$params['reqForDelivery'],
-                    (int)$params['reqCoordinators']
-                );
-
-                if (!$event->create()) {
-                    // If event creation fails, clean up the address we just created
-                    $address->delete();
-                    throw new Exception("Failed to create event");
-                }
-
-                $_SESSION['notification'] = "Event created successfully";
-                header("Location: ?action=list");
-                exit;
-
-            } catch (Exception $e) {
-                // Clean up any partially created data
-                if (isset($address) && $address->getId() > 0) {
-                    $address->delete();
-                }
-                throw $e;
-            }
+            // Set success notification and redirect
+            $_SESSION['notification'] = "Event created successfully";
+            header("Location: ?action=list");
+            exit;
 
         } catch (Exception $e) {
-            $this->view->renderError($e->getMessage());
+            // Clean up any partially created data
+            if (isset($address) && $address->getId() > 0) {
+                $address->delete();
+            }
+            throw $e;
         }
-    } else {
-        $this->view->renderEventForm();
+    } catch (Exception $e) {
+        $this->view->renderError($e->getMessage());
     }
 }
 

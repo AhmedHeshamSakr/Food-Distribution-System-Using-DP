@@ -15,6 +15,17 @@ class PaymentController {
         ];
     }
 
+
+    public function getUserDetails(string $email): int {
+
+        
+        // Query your database to get user details
+        $query = "SELECT userID FROM Person WHERE email = '$email'";
+        $result= run_select_query($query);
+        // Return array with user details
+        return (int)$result[0]['userID'];
+    }
+
     public function validatePayment() {
         error_log('in validate 1');
         
@@ -23,7 +34,8 @@ class PaymentController {
         error_log('Donation amount from URL: ' . $donationAmount);
         
         ######################### JUST FOR TESTING
-        $userID = 41;
+        $userID = $this->getUserDetails($_SESSION['email']);
+
         #########################
         
         if($donationAmount > 0) {  // Only create transaction if amount exists
@@ -43,4 +55,7 @@ class PaymentController {
             exit;
         }
     }
+
+    
 }
+

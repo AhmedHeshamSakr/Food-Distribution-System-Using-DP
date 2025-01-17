@@ -12,7 +12,7 @@
         <h2>Home Page</h2>
         <div>
             <a href="core-Reporter.php?view=volunteer" class="btn btn-primary btn-lg">Report</a>
-            <a href="core-Doner.php" class="btn btn-success btn-lg">Donate</a>
+            <a href="core-payment.php" class="btn btn-success btn-lg">Donate</a>
             <a href="core-AllEvents.php" class="btn btn-warning btn-lg">Volunteer</a>
         </div>
     </div>

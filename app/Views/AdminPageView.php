@@ -13,7 +13,7 @@
         <div>
             <a href="core-AllEvents.php?view=admin" class="btn btn-primary btn-lg">Manage Events</a>
             <a href="core-Doner.php" class="btn btn-success btn-lg">Manage Badges</a>
-            <a href="core-VAdmin.php" class="btn btn-warning btn-lg">Manage Reports</a>
+            <a href="core-Reports.php" class="btn btn-warning btn-lg">Manage Reports</a>
         </div>
     </div>
 </body>
