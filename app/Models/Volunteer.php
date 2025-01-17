@@ -95,6 +95,35 @@ class Volunteer extends Person
         return run_query($query);
     }
 
+
+    private static function getVolunteerByID(int $userID): array
+{
+    // Construct the SQL query to fetch the entire volunteer data
+    $sql = "SELECT * FROM `volunteer` WHERE `userID` = {$userID}";
+    
+    // Execute the query
+    $result = run_select_query($sql);
+
+    // If the result is valid and not empty, return the first row; otherwise, return an empty array
+    return $result && count($result) > 0 ? $result[0] : [];
+}
+
+
+
+    public static function updateBadgeByUserID(int $userID, int $badgeID): bool
+{
+    // Escape the parameters to prevent SQL injection
+    $escapedUserID = mysqli_real_escape_string(Database::getInstance()->getConnection(), $userID);
+    $escapedBadgeID = mysqli_real_escape_string(Database::getInstance()->getConnection(), $badgeID);
+
+    // Construct the SQL query to update the badge ID for the given user ID
+    $query = "UPDATE volunteer SET badge = '{$escapedBadgeID}' WHERE userID = '{$escapedUserID}'";
+
+    // Run the query and return whether it was successful
+    return run_query($query);
+}
+
+
     public function deleteVolunteer(): bool
     {
         $query = "DELETE FROM volunteer WHERE userID = '{$this->getUserID()}'";
@@ -218,11 +247,10 @@ abstract class VolunteerRoles extends Person
     }
 
     public function chooseRole(): bool{
-         $this->setUserTypeID(0);
-         return true;
+        $this->setUserTypeID(0);
+        return true;
     }
     
     
 
- 
 }

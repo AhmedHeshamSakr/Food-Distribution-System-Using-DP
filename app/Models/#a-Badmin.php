@@ -38,7 +38,7 @@ class BadgeAdmin extends Person
 
     public function getBadge(int $badgeID): ?array
     {
-        $badge = new Badges('Silver Tier');
+        $badge = new Badges();
         return $badge->getBadgeByID($badgeID);
     }
 
@@ -51,8 +51,7 @@ class BadgeAdmin extends Person
     // User-Badge Assignment Methods
     public function assignBadgeToUser(int $userID, int $badgeID, string $dateAwarded, string $expiryDate): bool
     {
-        $userBadge = new UserBadge($userID, $badgeID, $dateAwarded, $expiryDate);
-        return $userBadge->create();
+        
     }
 
     public function updateBadgeAssignment(int $userID, int $badgeID, string $newDateAwarded, string $newExpiryDate): bool

@@ -93,12 +93,28 @@ class LoginController
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
 
-        // Check if the email contains @admin
-        if (strpos($email, '@admin') !== false) {
+        if (strpos($email, '@badmin') !== false) {
             // Redirect to the admin dashboard page if email contains @admin
             session_start();
             $_SESSION['email'] = $email; // Store email in session
             header("Location: ../app/Views/AdminPageView.php"); // Admin dashboard
+            exit();
+        }
+
+        if (strpos($email, '@eadmin') !== false) {
+            // Redirect to the admin dashboard page if email contains @admin
+            session_start();
+            $_SESSION['email'] = $email; // Store email in session
+            header("Location: ../app/Views/EAdminView.php"); // Admin dashboard
+            exit();
+        }
+
+
+        if (strpos($email, '@vadmin') !== false) {
+            // Redirect to the admin dashboard page if email contains @admin
+            session_start();
+            $_SESSION['email'] = $email; // Store email in session
+            header("Location: ../app/Views/vAdminView.php"); // Admin dashboard
             exit();
         }
 
