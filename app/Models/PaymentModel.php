@@ -16,7 +16,7 @@ class PayPayPal implements IPayment {
     }
 
     public function pay(float $amount): array {
-        // PayPal specific response format
+        
         return [
             'status' => 1,
             'payment_method' => 'PayPal',
@@ -84,22 +84,37 @@ class PaymentModel {
         $this->paymentContext->setPaymentMethod($paymentStrategy);
     }
 
-    public function validateAndProcessPayment($orderId, $donationAmount, $paymentMethod = 'paypal') {
+    public function validateAndProcessPayment($userID, $orderId, $donationAmount, $paymentMethod = 'paypal') {
         try {
             // Set the payment method with order ID
             $this->setPaymentMethod($paymentMethod, $orderId);
             
             // Process the payment
             $result = $this->paymentContext->executePayment($donationAmount);
-            
-            // Store transaction in database if needed
-            // $this->storeTransaction($result);
-            
-            return [
-                'status' => $result['status'],
-                'ref_id' => $result['order_id'],
-                'message' => $result['message']
-            ];
+            // $transaction = new Transaction($donationAmount, $userID, date("Y-m-d H:i:s"));
+            // error_log('HEEEEEEEEEEEEREEEEEEEEEEEEEEEEEEEE11111');
+            // $transaction->storeTransaction();
+
+            if($result['status'] == 1) {
+                error_log('INNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN');
+
+                $transaction = new Transaction($donationAmount, $userID, date("Y-m-d H:i:s"));
+                $transaction->storeTransaction();
+                
+                return [
+                    'status' => $result['status'],
+                    'ref_id' => $result['order_id'],
+                    'message' => $result['message']
+                ];
+            } else {
+                return [
+                    'status' => 0,
+                    'ref_id' => $result['order_id'],
+                    'message' => $result['message']
+                ];
+            }
+
+
         } catch (Exception $e) {
             return [
                 'status' => 0,

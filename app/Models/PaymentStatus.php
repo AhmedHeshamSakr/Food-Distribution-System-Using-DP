@@ -36,7 +36,7 @@ if (!empty($_GET['checkout_ref_id'])) {
 ?>
 
 <!-- Display payment status and details -->
-<?php if (!empty($payment_ref_id)) { ?>
+<!-- <?php if (!empty($payment_ref_id)) { ?>
     <h1 class="<?php echo $status; ?>"><?php echo $statusMsg; ?></h1>
     
     <h4>Donation Information</h4>
@@ -55,4 +55,4 @@ if (!empty($_GET['checkout_ref_id'])) {
 <?php } else { ?>
     <h1 class="error">Your Donation has failed!</h1>
     <p class="error"><?php echo $statusMsg; ?></p>
-<?php } ?>
+<?php } ?> -->
