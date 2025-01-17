@@ -82,15 +82,22 @@ class Address
     {
         $query = "SELECT * FROM address WHERE id = {$id}";
         $result = run_select_query($query);
-
+    
         if ($result && count($result) > 0) {
             $data = $result[0];
-            return new Address($data['name'], $data['parent_id'], $data['level']);
+    
+            // Create the Address object
+            $address = new Address($data['name'], $data['parent_id'], $data['level']);
+    
+            // Set the ID of the Address object
+            $address->setId((int)$data['id']);
+    
+            return $address;
         }
-
+    
         return null;
     }
-
+    
     // In Address class: Add this method to get the ID by name.
     public static function getIdByName(string $name): ?int
     {
@@ -196,4 +203,5 @@ public static function getCitiesByCountry(int $countryId): array
         $sql = "DELETE FROM address WHERE id = {$this->id}";
         return run_query($sql);
     }
+    
 }

@@ -150,9 +150,8 @@ class LoginController
         $firstName = $_POST['firstName'] ?? '';
         $lastName = $_POST['lastName'] ?? '';
         $phoneNo = $_POST['phoneNo'] ?? '';
-        $nationalID = $_POST['nationalId'] ?? '';
-        $country = $_POST['country'] ?? '';
-        $city = $_POST['city'] ?? '';  
+        $userTypeID = $_POST['userTypeID'] ?? ''; 
+        $nationalID = $_POST['nationalID'] ?? '';  
         $address_string = $_POST['address'] ?? ''; 
 
         $adminType = '';
@@ -170,7 +169,7 @@ class LoginController
 
         $address = new Address($address_string, $city, 'Neighborhood');
 
-        if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo, 0, $nationalID, $address, $adminType)) {
+        if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID,  $nationalID, $address)) {
             $this->errorMessage = 'Registration successful! You can now log in.';
         } else {
             $this->errorMessage = 'Registration failed. The email might already be in use.';

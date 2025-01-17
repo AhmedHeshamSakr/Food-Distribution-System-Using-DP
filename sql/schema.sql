@@ -547,6 +547,9 @@ ALTER TABLE `vehicle`
 -- Constraints for table `address`
 --
 ALTER TABLE `address`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=124;
+
+ALTER TABLE `address`
   ADD CONSTRAINT `address_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `address` (`id`) ON DELETE CASCADE;
 
 --
