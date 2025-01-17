@@ -1,5 +1,4 @@
 <?php
-
 require_once __DIR__ . "/../../config/DB.php";
 require_once "Person.php";
 require_once "User.php";
