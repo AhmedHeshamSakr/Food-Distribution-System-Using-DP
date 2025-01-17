@@ -12,7 +12,7 @@ interface iLogin {
     public function authenticate(string $username, string $password): bool;
     public function logout(): bool;
 
-    public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID): Person;
+    public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID, string $adminType): Person;
 }
 
 
@@ -29,16 +29,14 @@ class withEmail implements iLogin {
         $this->password = $password;
     }
 
-    public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID): Person{
-        error_log("User Type ID: $userTypeID");
-        error_log("Creat User, " . var_export($nationalID, true));
-
-        switch ($userTypeID) {
-            case 1 << 5: 
+    public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID, string $adminType): Person{
+        
+        switch ($adminType) {
+            case '@badmin': 
                 return new BadgeAdmin($firstName, $lastName, $email, $phoneNo);
-            case 1<< 6: 
+            case '@eadmin': 
                 return new EventAdmin($firstName, $lastName, $email, $phoneNo);
-            case 1<< 7: 
+            case '@vadmin': 
                 return new VerificationAdmin($firstName, $lastName, $email, $phoneNo);
             default:
                 return new Volunteer($userTypeID,$firstName, $lastName, $email, $phoneNo, $address, $nationalID, new Badges(badgeLvl:'Silver Tier'));
@@ -52,19 +50,6 @@ class withEmail implements iLogin {
 
         // Check if the email and password are valid by authenticating
         return $this->authenticate($this->email, $this->password);
-    }
-
-
-    public function getUserDetails(string $email): array {
-
-        
-        // Query your database to get user details
-        $query = "SELECT userID FROM person WHERE email = '$email'";
-        $result= run_select_query($query);
-        // Return array with user details
-        return [
-            'userID' => $result[0]['userID'],
-        ];
     }
 
     // This method authenticates the user by checking email and password in the database
@@ -111,7 +96,7 @@ class withEmail implements iLogin {
     }
 
     // This function should be used to register a user, storing a hashed password in the database
-    public function register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID, $nationalID, Address $address): bool {
+    public function register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID, $nationalID, Address $address, $adminType): bool {
         // Establish the database connection
         $db = Database::getInstance()->getConnection();
 
@@ -121,7 +106,6 @@ class withEmail implements iLogin {
         $firstName = mysqli_real_escape_string($db, $firstName);
         $lastName = mysqli_real_escape_string($db, $lastName);
         $phoneNo = mysqli_real_escape_string($db, $phoneNo);
-        $nationalID = mysqli_real_escape_string($db, $nationalID);
 
         // Check if the email already exists in the database
         $queryCheck = "SELECT * FROM login WHERE email = '$email'";
@@ -140,11 +124,8 @@ class withEmail implements iLogin {
             // After successful registration, get the userID
             $userID = mysqli_insert_id($db);
 
-
-            error_log("With Email, " . var_export($nationalID, true));
-
             // Use the factory to create the user object
-            $user = $this->createUser($userTypeID, $firstName, $lastName, $email, $phoneNo,$address ,$nationalID);
+            $user = $this->createUser($userTypeID, $firstName, $lastName, $email, $phoneNo,$address ,$nationalID, $adminType);
 
             // Insert additional user details into the person table
             return true;
@@ -280,122 +261,6 @@ class withEmail implements iLogin {
 //     public function logout(): bool {
 //         $this->isAuthenticated = false;
 //         return !$this->isAuthenticated;
-//     }
-// }
-
-// <?php
-
-// require_once __DIR__ . "/../../config/DB.php";
-// require_once "Person.php";
-// require_once "Volunteer.php";
-
-// class withEmail {
-//     private $email;
-//     private $password;
-
-//     public function __construct($email, $password) {
-//         $this->email = $email;
-//         $this->password = $password;
-//     }
-
-//     // Login method
-//     public function login(): bool {
-//         // Establish database connection
-//         $db = Database::getInstance()->getConnection();
-
-//         // Sanitize inputs
-//         $email = mysqli_real_escape_string($db, $this->email);
-//         $password = mysqli_real_escape_string($db, $this->password);
-
-//         // Query to fetch user by email
-//         $query = "SELECT * FROM login WHERE email = '$email'";
-//         $result = mysqli_query($db, $query);
-
-//         // Check if user exists
-//         if ($result && mysqli_num_rows($result) > 0) {
-//             $user = mysqli_fetch_assoc($result);
-
-//             // Verify password
-//             if (password_verify($password, $user['password'])) {
-//                 // Password is correct
-//                 return true;
-//             }
-//         }
-
-//         // Login failed
-//         return false;
-//     }
-
-//     // Register method
-//     public function register(
-//         $email, 
-//         $password, 
-//         $firstName, 
-//         $lastName, 
-//         $phoneNo, 
-//         $addressID, 
-//         $nationalID, 
-//         $badgeID, 
-//         $userTypeID = 0
-//     ): bool {
-//         // Establish the database connection
-//         $db = Database::getInstance()->getConnection();
-
-//         // Sanitize inputs
-//         $email = mysqli_real_escape_string($db, $email);
-//         $password = mysqli_real_escape_string($db, $password);
-//         $firstName = mysqli_real_escape_string($db, $firstName);
-//         $lastName = mysqli_real_escape_string($db, $lastName);
-//         $phoneNo = mysqli_real_escape_string($db, $phoneNo);
-//         $addressID = mysqli_real_escape_string($db, $addressID);
-//         $nationalID = mysqli_real_escape_string($db, $nationalID);
-//         $badgeID = mysqli_real_escape_string($db, $badgeID);
-
-//         // Check if the email already exists in the database
-//         $queryCheck = "SELECT * FROM login WHERE email = '$email'";
-//         $resultCheck = mysqli_query($db, $queryCheck);
-
-//         // If email already exists, return false (email is already taken)
-//         if (mysqli_num_rows($resultCheck) > 0) {
-//             return false; // Email already exists
-//         }
-
-//         // Hash the password before storing it
-//         $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-
-//         // Insert the new user into the login table with the hashed password
-//         $query = "INSERT INTO login (email, password) VALUES ('$email', '$hashedPassword')";
-
-//         // Execute the query to insert login details
-//         if (mysqli_query($db, $query)) {
-//             // After successful registration, get the userID
-//             $userID = mysqli_insert_id($db); // Get the last inserted ID (userID)
-
-//             // Insert the user's general information into the `person` table
-//             $queryPerson = "INSERT INTO person (userID, firstName, lastName, email, phoneNo, userTypeID) 
-//                             VALUES ('$userID', '$firstName', '$lastName', '$email', '$phoneNo', '$userTypeID')";
-            
-//             if (mysqli_query($db, $queryPerson)) {
-//                 // Insert the user's volunteer-specific information into the `volunteer` table
-//                 $queryVolunteer = "INSERT INTO volunteer (userID, nationalID, address, badge) 
-//                                    VALUES ('$userID', '$nationalID', '$addressID', '$badgeID')";
-
-//                 // If volunteer information is successfully inserted, return true
-//                 if (mysqli_query($db, $queryVolunteer)) {
-//                     return true;
-//                 }
-//             }
-//         }
-
-//         return false; // Registration failed
-//     }
-
-//     // Logout method (optional, placeholder for session management)
-//     public function logout() {
-//         // Example implementation: clear session or token
-//         session_start();
-//         session_unset();
-//         session_destroy();
 //     }
 // }
 
