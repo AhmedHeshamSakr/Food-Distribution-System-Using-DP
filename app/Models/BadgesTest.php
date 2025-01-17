@@ -1,56 +1,64 @@
 <?php
 
-require_once __DIR__ . "/../../config/DB.php"; 
-require_once 'Badges.php';
+require_once 'Badges.php'; // Adjust the path if necessary
 
-// CREATE a new badge
-$newBadge = new Badges();
-$newBadge->setBadgeLvl('Gold Tier');
-if ($newBadge->insertBadge()) {
-    echo "New badge inserted successfully.<br/>";
-} else {
-    echo "Failed to insert new badge.<br/>";
-}
+function testBadgeClass()
+{
+    echo "Starting tests for Badges class...\n\n";
 
-// READ a badge by ID
-$badgeID = 1; // Replace with a valid badgeID from your database
-$badge = new Badges();
-$badgeData = $badge->getBadgeByID($badgeID);
-if ($badgeData) {
-    echo "Badge Details:<br/>";
-    echo "ID: " . $badgeData['badgeID'] . "<br/>";
-    echo "Level: " . $badgeData['badgeLvl'] . "<br/>";
-} else {
-    echo "Badge not found.<br/>";
-}
+    // Create a new badge
+    echo "Testing badge creation...\n";
+    $badge = new Badges("Gold");
+    $badgeID = $badge->getBadgeID();
+    echo $badgeID > 0 ? "Badge created successfully with ID: $badgeID\n" : "Failed to create badge.\n";
 
-// READ all badges
-$allBadges = new Badges();
-$badgesList = $allBadges->getAllBadges();
-if (!empty($badgesList)) {
-    echo "All Badges:<br/>";
-    foreach ($badgesList as $badge) {
-        echo "ID: " . $badge['badgeID'] . " - Level: " . $badge['badgeLvl'] . "<br/>";
+    // Retrieve the created badge by ID
+    echo "\nTesting retrieving badge by ID...\n";
+    $retrievedBadge = $badge->getBadgeByID($badgeID);
+    if ($retrievedBadge) {
+        echo "Badge retrieved successfully: Level = {$retrievedBadge['badgeLvl']}\n";
+    } else {
+        echo "Failed to retrieve badge.\n";
     }
-} else {
-    echo "No badges found.<br/>";
+
+    // Retrieve all badges
+    echo "\nTesting retrieving all badges...\n";
+    $allBadges = $badge->getAllBadges();
+    if (!empty($allBadges)) {
+        echo "All badges retrieved successfully: \n";
+        foreach ($allBadges as $b) {
+            echo "ID: {$b['badgeID']}, Level: {$b['badgeLvl']}\n";
+        }
+    } else {
+        echo "No badges found.\n";
+    }
+
+    // Update the badge level
+    echo "\nTesting badge update...\n";
+    $badge->setBadgeLvl("Platinum");
+    if ($badge->updateBadge()) {
+        echo "Badge updated successfully to Level: Platinum\n";
+    } else {
+        echo "Failed to update badge.\n";
+    }
+
+    // Delete the badge
+    echo "\nTesting badge deletion...\n";
+    if ($badge->deleteBadge()) {
+        echo "Badge deleted successfully.\n";
+    } else {
+        echo "Failed to delete badge.\n";
+    }
+
+    // Verify deletion
+    echo "\nTesting retrieval of deleted badge...\n";
+    $deletedBadge = $badge->getBadgeByID($badgeID);
+    echo $deletedBadge ? "Badge still exists after deletion.\n" : "Badge successfully deleted.\n";
+
+    echo "\nTests completed.\n";
 }
 
-// UPDATE a badge
-$updateBadge = new Badges(1);  // Replace with an existing badgeID
-$updateBadge->setBadgeLvl('Platinum Tier');
-if ($updateBadge->updateBadge()) {
-    echo "Badge updated successfully.<br/>";
-} else {
-    echo "Failed to update badge.<br/>";
-}
-
-// DELETE a badge
-// $deleteBadge = new Badges(2);  // Replace with an existing badgeID to delete
-// if ($deleteBadge->deleteBadge()) {
-//     echo "Badge deleted successfully.<br/>";
-// } else {
-//     echo "Failed to delete badge.<br/>";
-// }
+// Run the tests
+testBadgeClass();
 
 ?>

@@ -92,38 +92,30 @@ class LoginController
     {
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
+    
+        // Map admin patterns to their corresponding views
+        $adminViews = [
+            '@admin'  => '../app/Views/AdminPageView.php',
+            '@vadmin' => '../app/Views/Core-Reports.php',
+            '@badmin' => '../app/Views/BAdminPageView.php',
+            '@eadmin' => '../app/Views/core-AllEvents.php?view=eadmin',
+        ];
 
-        if (strpos($email, '@badmin') !== false) {
-            // Redirect to the admin dashboard page if email contains @admin
-            session_start();
-            $_SESSION['email'] = $email; // Store email in session
-            header("Location: ../app/Views/AdminPageView.php"); // Admin dashboard
-            exit();
+        // Check if the email matches any admin pattern
+        foreach ($adminViews as $pattern => $view) {
+            if (strpos($email, $pattern) !== false) {
+                // Redirect to the corresponding admin dashboard page
+                session_start();
+                $_SESSION['email'] = $email; // Store email in session
+                header("Location: $view");
+                exit();
+            }
         }
-
-        if (strpos($email, '@eadmin') !== false) {
-            // Redirect to the admin dashboard page if email contains @admin
-            session_start();
-            $_SESSION['email'] = $email; // Store email in session
-            header("Location: ../app/Views/EAdminView.php"); // Admin dashboard
-            exit();
-        }
-
-
-        if (strpos($email, '@vadmin') !== false) {
-            // Redirect to the admin dashboard page if email contains @admin
-            session_start();
-            $_SESSION['email'] = $email; // Store email in session
-            header("Location: ../app/Views/vAdminView.php"); // Admin dashboard
-            exit();
-        }
-
-        // Normal login handling
+        // Normal login handling for non-admin users
         if ($this->loginHandler->login(['email' => $email, 'password' => $password])) {
             // Store email in session
             session_start();
             $_SESSION['email'] = $email;
-
             // Redirect to the regular home page
             header("Location: ../app/Views/HomePageView.php");
             exit();
@@ -131,7 +123,7 @@ class LoginController
             $this->errorMessage = 'Invalid email or password. Please try again.';
         }
     }
-
+    
     /**
      * Handle the registration action.
      */
@@ -150,8 +142,9 @@ class LoginController
         $firstName = $_POST['firstName'] ?? '';
         $lastName = $_POST['lastName'] ?? '';
         $phoneNo = $_POST['phoneNo'] ?? '';
-        $userTypeID = $_POST['userTypeID'] ?? ''; 
-        $nationalID = $_POST['nationalID'] ?? '';  
+        $nationalID = $_POST['nationalId'] ?? '';
+        $country = $_POST['country'] ?? '';
+        $city = $_POST['city'] ?? '';  
         $address_string = $_POST['address'] ?? ''; 
 
         $adminType = '';
@@ -169,7 +162,7 @@ class LoginController
 
         $address = new Address($address_string, $city, 'Neighborhood');
 
-        if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID,  $nationalID, $address)) {
+        if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo, 0, $nationalID, $address, $adminType)) {
             $this->errorMessage = 'Registration successful! You can now log in.';
         } else {
             $this->errorMessage = 'Registration failed. The email might already be in use.';

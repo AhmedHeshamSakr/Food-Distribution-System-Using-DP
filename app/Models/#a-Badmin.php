@@ -76,5 +76,3 @@ class BadgeAdmin extends Person
         return $this->userTypeID;
     }
 }
-
-

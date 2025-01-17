@@ -146,6 +146,12 @@ CREATE TABLE DeliveryGuy (
     FOREIGN KEY (mealID) REFERENCES Meal(mealID)
 );
 
+CREATE TABLE DeliveryGuy (
+    userID INT PRIMARY KEY,
+    vehicleID INT,
+    FOREIGN KEY (userID) REFERENCES Volunteer (userID),
+    FOREIGN KEY (vehicleID) REFERENCES Vehicle(vehicleID)
+);
 
 
 -- Create the Donation table with paymentMethod as ENUM
@@ -199,6 +205,47 @@ CREATE TABLE Coordinating (
     FOREIGN KEY (userID) REFERENCES Person(userID),
     FOREIGN KEY (eventID) REFERENCES Events(eventID)
 
+);
+
+CREATE TABLE Cook (
+    userID INT,
+    eventID INT,
+    PRIMARY KEY (eventID, userID),
+    FOREIGN KEY (userID) REFERENCES Volunteer(userID),
+    FOREIGN KEY (eventID) REFERENCES Event(eventID)
+);
+
+CREATE TABLE DeliveryGuyEvents (
+    userID INT,
+    eventID INT,
+    PRIMARY KEY (eventID, userID),
+    FOREIGN KEY (userID) REFERENCES Volunteer (userID),
+    FOREIGN KEY (eventID) REFERENCES Event(eventID)
+);
+
+
+
+    CREATE TABLE Cooking (
+    cookID INT PRIMARY KEY,
+    mealID INT,
+    PRIMARY KEY (cookID ,mealID ,),
+    FOREIGN KEY (cookID) REFERENCES Volunteer(userID),
+    FOREIGN KEY (mealID) REFERENCES Meal(mealID)
+);
+
+CREATE TABLE DeliveryGuy (
+    userID INT PRIMARY KEY,
+    vehicleID INT,
+    FOREIGN KEY (userID) REFERENCES Volunteer (userID),
+    FOREIGN KEY (vehicleID) REFERENCES Vehicle(vehicleID)
+);
+
+CREATE TABLE Delivering (
+    deliveryGuyID INT PRIMARY KEY,
+    deliveryID INT,
+    PRIMARY KEY (deliveryGuyID ,deliveryID),
+    FOREIGN KEY (deliveryGuyID) REFERENCES Volunteer(userID),
+    FOREIGN KEY (deliveryID) REFERENCES Delivery(deliveryID)
 );
 
     CREATE TABLE Event (

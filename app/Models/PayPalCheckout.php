@@ -10,8 +10,10 @@
  */  
  
 // Include the configuration file 
-include_once 'C:\xampp\htdocs\FDS\config\config.php'; 
- 
+require_once '../../config/config.php' ;
+// Include the database connection file 
+include_once '../../config/DB.php';  
+
 class PaypalCheckout{  
     public $paypalAuthAPI   = PAYPAL_SANDBOX?'https://api-m.sandbox.paypal.com/v1/oauth2/token':'https://api-m.paypal.com/v1/oauth2/token'; 
     public $paypalAPI    = PAYPAL_SANDBOX?'https://api-m.sandbox.paypal.com/v2/checkout':'https://api-m.paypal.com/v2/checkout'; 

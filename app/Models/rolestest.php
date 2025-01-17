@@ -17,13 +17,14 @@ require_once '#a-Badmin.php';
 
 $emailLogin = new withEmail('hello','hello');
 $loginResult = $emailLogin->login(['email' => 'hello', 'password' => 'hello']);
-$address = new Address('Tagammoa', 124, level: 'Neighborhood');
+$address = new Address('Tagammoa', null, level: 'Neighborhood');
+$address->create();
 $badge = new Badges(2, 'Gold Tier');
-$vehicle = new Vehicle(350537646455443356664, '12345');
-$user = new Volunteer(0, 'Jumana', 'Yasser', 'juamna2a6r5144444555464564525556445664456565255744552654476465644355555474446D5842459494466547524659255564465679687151a@gmail.com', '01236', $address, '0158655', $badge);
+$vehicle = new Vehicle(904);
+$user = new Volunteer(0, 'Jumana', 'Yasser', 'juamn4441a@gmail.com', '000000', $address, '0099', $badge);
 //$user = new Donor(50, 'Leon', 'Kennedy','Ada@gmail.com', '01236', $emailLogin);
 //$user = new Reporter(2,'Ada', 'Wong', 'Leon@gmail.com', '01236', $emailLogin);
-//$user = new EventAdmin(4,'Jill', 'Valentine', 'jill@gmail.com', '01236', $emailLogin);
+//$user = new EventAdmin(4,'Jill', 'Valentine', 'jill@gmail.com', '01236', $emailLogin);s
 //$user = new BadgeAdmin(4,'Jake', 'Valentine', 'jill@gmail.com', '01236', $emailLogin);
 
 // Decorate the user with the Cook, DeliveryGuy, Coordinator, Reporter, and Donor roles
@@ -63,9 +64,7 @@ $deliveryGuy = new DeliveryGuy($cook, $vehicle);  // Calls chooseRole in the con
 // $coordinator = new Coordinator($deliveryGuy);  // Calls chooseRole in the constructor
 // $reporter = new Reporter($coordinator);  // Calls chooseRole in the constructor
 // $donor = new Donor($reporter);  // Calls chooseRole in the constructor
-
 // At this point, chooseRole has already been called in the constructor of each decorator, modifying the userTypeID
-
 // Get the updated userTypeID value
 
 
