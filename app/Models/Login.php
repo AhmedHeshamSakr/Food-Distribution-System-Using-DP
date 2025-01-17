@@ -16,9 +16,7 @@ require_once "Address.php";
 require_once "Volunteer.php";
 require_once "#a-Badmin.php";
 require_once "#a-Eadmin.php";
-require_once "#a-Vadmin.php";
-
-
+require_once "a-Vadmin.php";
 interface iLogin {
     public function login($credentials): bool;
     public function authenticate(string $username, string $password): bool;
@@ -62,6 +60,20 @@ class withEmail implements iLogin {
         // Check if the email and password are valid by authenticating
         return $this->authenticate($this->email, $this->password);
     }
+
+
+    public function getUserDetails(string $email): array {
+
+        
+        // Query your database to get user details
+        $query = "SELECT userID FROM person WHERE email = '$email'";
+        $result= run_select_query($query);
+        // Return array with user details
+        return [
+            'userID' => $result[0]['userID'],
+        ];
+    }
+
     // This method authenticates the user by checking email and password in the database
     public function authenticate(string $email, string $password): bool {
         $db = Database::getInstance()->getConnection();

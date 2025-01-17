@@ -8,7 +8,6 @@ class HomePageView {
     public function __construct(Image $image) {
         $this->image = $image;
     }
-
     public function render() {
         echo "
         <!DOCTYPE html>
@@ -66,8 +65,8 @@ class HomePageView {
         echo "
                 </div>
                 <div class='btn-group d-flex justify-content-center'>
-                    <a href='core-Reporter.php' class='btn btn-primary btn-lg'>Report</a>
-                    <a href='core-Doner.php' class='btn btn-success btn-lg'>Donate</a>
+                    <a href='core-Reporter.php?view=volunteer' class='btn btn-primary btn-lg'>Report</a>
+                    <a href='core-payment.php' class='btn btn-success btn-lg'>Donate</a>
                     <a href='core-AllEvents.php' class='btn btn-warning btn-lg'>Volunteer</a>
                 </div>
             </div>

@@ -123,18 +123,6 @@ class Coordinator extends VolunteerRoles
     }
 
     // Get details of a specific event assigned to the coordinator
-    public function getEventDetails(string $eventID): ?array
-    {
-        $db = Database::getInstance()->getConnection();
-
-        $query = "SELECT * FROM event WHERE eventID = ?";
-        $stmt = $db->prepare($query);
-        $stmt->bind_param("i", $eventID);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        return $result->fetch_assoc() ?: null;
-    }
     public function getUserTypeID(): int
     {
         return $this->userTypeID;
@@ -146,9 +134,9 @@ class Coordinator extends VolunteerRoles
             'userTypeID' => $this->userTypeID
         ];
         //echo 'the new user type id is '.$this->userTypeID;
-
         $gottenvalue = $this->getUserTypeID();
         //echo 'the gotten value (COORDINATORRRRRRRRRRRRRRRRRRRRRRRRRR) is '.$gottenvalue;
         return $this->updatePerson($fieldsToUpdate); 
     }
+    
 }

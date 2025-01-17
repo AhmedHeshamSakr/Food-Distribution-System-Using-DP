@@ -4,10 +4,9 @@ class Vehicle {
     private string $licensePlateNo;
     private int $vehicleID;
 
-    public function __construct(string $licensePlateNo, int $vehicleID)
+    public function __construct(string $licensePlateNo)
      {
         $this->licensePlateNo = $licensePlateNo;
-        $this->vehicleID = $vehicleID;
         $this->insertVehicle($licensePlateNo);
     }
 

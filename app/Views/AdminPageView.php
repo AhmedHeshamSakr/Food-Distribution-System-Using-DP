@@ -11,9 +11,9 @@
     <div class="container text-center center-box">
         <h2>Home Page</h2>
         <div>
-            <a href="core-EAdmin.php" class="btn btn-primary btn-lg">Manage Events</a>
+            <a href="core-AllEvents.php?view=admin" class="btn btn-primary btn-lg">Manage Events</a>
             <a href="core-Doner.php" class="btn btn-success btn-lg">Manage Badges</a>
-            <a href="core-AllEvents.php" class="btn btn-warning btn-lg">Manage Reports</a>
+            <a href="core-Reports.php" class="btn btn-warning btn-lg">Manage Reports</a>
         </div>
     </div>
 </body>

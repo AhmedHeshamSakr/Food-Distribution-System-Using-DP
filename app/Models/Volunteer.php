@@ -3,16 +3,12 @@ require_once 'User.php';
 require_once 'Address.php';
 require_once 'Badges.php';
 require_once 'Iterator.php';
-
-
 class Volunteer extends Person
 {
     private Address $address;
     public string $nationalID;
     public Badges $badge;
-
     private VolunteerList $volunteerList;
-
     // Constructor that calls the parent constructor
     public function __construct(
         int $userTypeID, 
@@ -28,18 +24,79 @@ class Volunteer extends Person
         // Call the parent constructor to initialize the User (and Person) properties
         parent::__construct( $firstName, $lastName, $email, $phoneNo,$userTypeID );
         // Initialize the Volunteer-specific properties
-        $this->address = $address;
+        $this->address = $address;        
         $this->nationalID = $nationalID;
+        print('nationalID'.$this->nationalID);
         $this->badge = $badge;
         $this->volunteerList = new VolunteerList();
         $this->insertVolunteer($this);
-        $this->chooseRole();
+        $this->chooseRole();  
     }
+    public static function fetchById(int $userId): ?self
+    {
+        try {
+            // Query to fetch data from person and volunteer tables
+            $query = "
+                SELECT 
+                    p.userID, p.userTypeID, p.firstName, p.lastName, p.email, p.phoneNo, 
+                    v.nationalID, v.address, v.badge
+                FROM 
+                    person p
+                JOIN 
+                    volunteer v 
+                ON 
+                    p.userID = v.userID
+                WHERE 
+                    p.userID = {$userId}
+            ";
+        
+            // Execute the query
+            $result = run_select_query($query);
+        
+            // Check if the result is a valid mysqli_result object
+            if ($result && $result instanceof mysqli_result) {
+                // Fetch the data
+                $row = mysqli_fetch_assoc($result);
+                if ($row) {
+                    // Construct Address and Badge objects from database data
+                    $address = new Address($row['name'], $row['parent_id'], $row['level']); // Modify based on your Address class
+                    $badge = new Badges($row['badge']); // Modify based on your Badges class
+        
+                    // Create a new Volunteer object
+                    $volunteer = new self(
+                        $row['userTypeID'],
+                        $row['firstName'],
+                        $row['lastName'],
+                        $row['email'],
+                        $row['phoneNo'],
+                        $address,
+                        $row['nationalID'],
+                        $badge
+                    );
+        
+                    // Set the userID for the Volunteer object
+                    $volunteer->setUserID((int)$row['userID']);
+        
+                    // Return the Volunteer object
+                    return $volunteer;
+                } else {
+                    error_log("No volunteer found for user ID: {$userId}");
+                }
+            } else {
+                // Log an error if the result is not a valid mysqli_result
+                error_log("Error: Expected mysqli_result but received a different type.");
+            }
+        
+            // If no data is found or the result is invalid, return null
+            return null;
+        } catch (Exception $e) {
+            error_log("Error fetching Volunteer by ID: " . $e->getMessage());
+            return null;
+        }
+    }
+    
+    
 
-    public function chooseRole(): bool{
-        $this->setUserTypeID(0);
-        return true;
-   }
     public function insertVolunteer(Volunteer $volunteer){
         $conn = Database::getInstance()->getConnection();
         $nationalID = $volunteer->getNationalID();
@@ -73,6 +130,8 @@ class Volunteer extends Person
         $query = "DELETE FROM volunteer WHERE userID = '{$this->getUserID()}'";
         return run_query($query);
     }
+
+    
 
     public function getAddress(): int
     {
@@ -127,6 +186,9 @@ class Volunteer extends Person
 
         return $this->updateVolunteer($fieldsToUpdate);
     }
+
+
+
  
     // public function insertVolunteer(Address $address, string $nationalID): bool
     // {
@@ -156,11 +218,12 @@ abstract class VolunteerRoles extends Person
     protected Person $ref;  // Decorated User object
     public function __construct(Person $ref)
     {
-        parent::__construct( 
+        parent::__construct(
             $ref->getFirstName(), 
             $ref->getLastName(), 
             $ref->getEmail(), 
             $ref->getPhoneNo(),
+            $ref->getUserTypeID(), 
             $ref->getUserTypeID()
             // $ref->getLogin()
         );

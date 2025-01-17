@@ -1,4 +1,7 @@
 <?php
+require_once '../../config/config.php';
+require_once '../Controllers/Paypal_Checkout_Validate.php';
+
 function renderPaymentView($currency, $itemNumber) {
     ?>
     <!DOCTYPE html>
@@ -34,91 +37,75 @@ function renderPaymentView($currency, $itemNumber) {
                 </div>
             </div>
         </div>
-
+        
         <script>
+            
+
             const donationAmountInput = document.getElementById('donationAmount');
 
-            paypal.Buttons({
-                createOrder: (data, actions) => {
-                    const amount = parseFloat(donationAmountInput.value);
-                    if (amount <= 0 || isNaN(amount)) {
-                        alert('Please enter a valid donation amount.');
-                        return;
-                    }
+// Update the URL dynamically on input change
+donationAmountInput.addEventListener('input', () => {
+    const amount = parseFloat(donationAmountInput.value);
+    if (!isNaN(amount) && amount > 0) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('donationAmount', amount);
+        history.replaceState(null, '', url.toString());
+    }
+});
 
-                    return actions.order.create({
-                        "purchase_units": [{
-                            "custom_id": "<?php echo $itemNumber; ?>",
-                            "description": "Donation",
-                            "amount": {
-                                "currency_code": "<?php echo $currency; ?>",
-                                "value": amount,
-                                "breakdown": {
-                                    "item_total": {
-                                        "currency_code": "<?php echo $currency; ?>",
-                                        "value": amount
-                                    }
-                                }
-                            },
-                            "items": [
-                                {
-                                    "name": "Donation",
-                                    "description": "Donation",
-                                    "unit_amount": {
-                                        "currency_code": "<?php echo $currency; ?>",
-                                        "value": amount
-                                    },
-                                    "quantity": "1",
-                                    "category": "DIGITAL_GOODS"
-                                }
-                            ]
-                        }]
-                    });
-                },
-                onApprove: (data, actions) => {
-                    return actions.order.capture().then(function (orderData) {
-                        setProcessing(true);
-
-                        var postData = { 
-                            paypal_order_check: 1, 
-                            order_id: orderData.id, 
-                            donation_amount: parseFloat(donationAmountInput.value) 
-                        };
-                        
-                        fetch('payment_validate.php', {
-                            method: 'POST',
-                            headers: { 'Accept': 'application/json' },
-                            body: encodeFormData(postData)
-                        })
-                        .then((response) => response.json())
-                        .then((result) => {
-                            if (result.status == 1) {
-                                window.location.href = "payment-status.php?checkout_ref_id=" + result.ref_id;
-                            } else {
-                                const messageContainer = document.querySelector("#paymentResponse");
-                                messageContainer.classList.remove("hidden");
-                                messageContainer.textContent = result.msg;
-
-                                setTimeout(function () {
-                                    messageContainer.classList.add("hidden");
-                                    messageContainer.textContent = "";
-                                }, 5000);
-                            }
-                            setProcessing(false);
-                        })
-                        .catch(error => console.log(error));
-                    });
+// PayPal button logic
+paypal.Buttons({
+    createOrder: (data, actions) => {
+        const amount = parseFloat(new URL(window.location.href).searchParams.get('donationAmount'));
+        if (amount <= 0 || isNaN(amount)) {
+            alert('Please enter a valid donation amount.');
+            return;
+        }
+        
+        // <?
+        // $db = new database();
+        // $controller = new PaymentController($db);
+        // $controller->validatePayment();
+        // ?>
+        return actions.order.create({
+            
+            purchase_units: [{
+                custom_id: "<?php echo $itemNumber; ?>",
+                amount: {
+                    currency_code: "<?php echo $currency; ?>",
+                    value: amount
                 }
-            }).render('#paypal-button-container');
+            }]
+        });
+    },
+    onApprove: (data, actions) => {
+        return actions.order.capture().then(orderData => {
+            console.log('Order approved:', orderData);
 
-            const encodeFormData = (data) => {
-                var form_data = new FormData();
-                for (var key in data) {
-                    form_data.append(key, data[key]);
-                }
-                return form_data;
-            }
+            // Ensure updated donationAmount is sent to the backend
+            const urlParams = new URL(window.location.href).searchParams;
+            const updatedAmount = urlParams.get('donationAmount') || donationAmountInput.value;
 
+            fetch('../Controllers/Paypal_Checkout_Validate.php', {
+                method: 'POST',
+                headers: { 'Accept': 'application/json' },
+                body: encodeFormData({ donationAmount: updatedAmount })
+            });
+        });
+    }
+}).render('#paypal-button-container');
+
+const encodeFormData = (data) => {
+    const urlSearchParams = new URLSearchParams();
+    for (const key in data) {
+        urlSearchParams.append(key, data[key]);
+    }
+    return urlSearchParams.toString();
+}
+
+
+
+            
             const setProcessing = (isProcessing) => {
                 if (isProcessing) {
                     document.querySelector(".overlay").classList.remove("hidden");

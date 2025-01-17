@@ -33,7 +33,7 @@ class VolunteerController {
      */
     public function showDashboard() {
         // Render the volunteer dashboard view
-        echo $this->view->render();
+        // echo $this->view->render();
     }
 
     /**

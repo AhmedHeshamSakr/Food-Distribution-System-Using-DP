@@ -16,7 +16,7 @@ class PayPayPal implements IPayment {
     }
 
     public function pay(float $amount): array {
-        // PayPal specific response format
+        
         return [
             'status' => 1,
             'payment_method' => 'PayPal',
@@ -32,6 +32,7 @@ class PayPayPal implements IPayment {
 class PayCard implements IPayment {
     private $currency;
     private $orderId;
+    private $CVV;
 
     public function __construct(string $currency = 'USD', ?string $orderId = null) {
         $this->currency = $currency;
@@ -52,6 +53,7 @@ class PayCard implements IPayment {
 }
 
 // Payment Model that integrates with PayPal API
+//Facade pattern
 class PaymentModel {
     private $db;
     private $currency;
@@ -65,7 +67,6 @@ class PaymentModel {
         // Default to PayPal payment method
         $this->paymentContext = new PaymentContext(new PayPayPal($this->currency));
     }
-
     public function getCurrency() {
         return $this->currency;
     }
@@ -73,7 +74,6 @@ class PaymentModel {
     public function getItemNumber() {
         return $this->itemNumber;
     }
-
     public function setPaymentMethod(string $method, ?string $orderId = null) {
         $paymentStrategy = match($method) {
             'paypal' => new PayPayPal($this->currency, $orderId),
@@ -83,23 +83,33 @@ class PaymentModel {
         
         $this->paymentContext->setPaymentMethod($paymentStrategy);
     }
-
-    public function validateAndProcessPayment($orderId, $donationAmount, $paymentMethod = 'paypal') {
+    public function validateAndProcessPayment($userID, $orderId, $donationAmount, $paymentMethod = 'paypal') {
         try {
             // Set the payment method with order ID
             $this->setPaymentMethod($paymentMethod, $orderId);
             
             // Process the payment
             $result = $this->paymentContext->executePayment($donationAmount);
-            
-            // Store transaction in database if needed
-            // $this->storeTransaction($result);
-            
-            return [
-                'status' => $result['status'],
-                'ref_id' => $result['order_id'],
-                'message' => $result['message']
-            ];
+            if($result['status'] == 1) {
+                error_log('INNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN');
+
+                $transaction = new Transaction($donationAmount, $userID, date("Y-m-d H:i:s"));
+                $transaction->storeTransaction();
+                
+                return [
+                    'status' => $result['status'],
+                    'ref_id' => $result['order_id'],
+                    'message' => $result['message']
+                ];
+            } else {
+                return [
+                    'status' => 0,
+                    'ref_id' => $result['order_id'],
+                    'message' => $result['message']
+                ];
+            }
+
+
         } catch (Exception $e) {
             return [
                 'status' => 0,

@@ -20,7 +20,7 @@ class Event implements Subject
 {
     private ?int $eventID;
     private string $eventDate;
-    private Address $eventLocation;
+    private ?Address $eventLocation;
     private string $eventName;
     private string $eventDescription;
     private int $reqCooks;
@@ -31,14 +31,14 @@ class Event implements Subject
     public function __construct(
         ?int $eventID = 0, 
         string $eventDate = '', 
-        Address $eventLocation = null, 
+        ?Address $eventLocation = null, 
         string $eventName = '', 
         string $eventDescription = '', 
         int $reqCooks = 0, 
         int $reqForDelivery = 0, 
         int $reqCoordinators = 0
     ) {
-        if (!$eventLocation || !$eventLocation->getLevel()) {
+        if ($eventLocation !== null && !$eventLocation->getLevel()) {
             throw new Exception("Invalid Address passed to Event.");
         }
 
@@ -81,6 +81,7 @@ class Event implements Subject
     {
         return $this->eventDescription;
     }
+    
     public function setEventDescription(string $eventDescription): void
     {
         $this->eventDescription = $eventDescription;
@@ -175,14 +176,17 @@ class Event implements Subject
                 $eventLocation = null;  // Adjust accordingly
             }
             // Ensure required fields exist in $row before using them
-            if (isset($row['eventID'], $row['eventDate'], $row['name'], $row['eventDescription'])) {
+            if (isset($row['eventID'], $row['eventDate'], $row['name'], $row['eventDescription'],$row['reqCooks'], $row['reqForDelivery'], $row['reqCoordinators'])) {
                 // Create the Event object and add to the events array
                 $events[] = new Event(
                     (int)$row['eventID'],
                     $row['eventDate'],
                     $eventLocation,
                     $row['name'],
-                    $row['eventDescription']
+                    $row['eventDescription'],
+                    $row['reqCooks'],
+                    $row['reqForDelivery'],
+                    $row['reqCoordinators']
                 );
             } else {
                 // Log an error or handle missing fields gracefully
@@ -194,51 +198,18 @@ class Event implements Subject
     }
     
     // Fetch a single event by its ID
-    public static function fetchById(int $eventID): ?Event
-    {
-        $query = "SELECT * FROM `event` WHERE eventID = {$eventID}";
-        $result = run_select_query($query);
-
-        if ($result) {
-            $row = $result[0]; // Assuming one event will be returned
-
-            // Ensure $row is an array and $row['eventLocation'] is the correct data for Address
-            if (isset($row['eventLocation'])) {
-                $eventLocation = Address::read($row['eventLocation']);
-            } else {
-                // Handle the case if eventLocation is not found or is invalid
-                $eventLocation = null;  // Adjust accordingly
-            }
-
-            // Ensure required fields exist in $row before using them
-            if (isset($row['eventID'], $row['eventDate'], $row['name'], $row['eventDescription'])) {
-                // Create and return the Event object
-                return new Event(
-                    (int)$row['eventID'],
-                    $row['eventDate'],
-                    $eventLocation,
-                    $row['name'],
-                    $row['eventDescription']
-                );
-            } else {
-                // Log an error or handle missing fields gracefully
-                error_log("Missing required fields in event data: " . json_encode($row));
-            }
-        }
-
-        return null;
-    }
+   
 
     public function create(): bool
     {
         if ($this->eventLocation->getId() === 0) {
             $this->eventLocation->create();
         }
-
+    
         $locationID = $this->eventLocation->getId();
-        $sql = "INSERT INTO `event` (eventDate, eventLocation, `name`, eventDescription) 
-                VALUES ('{$this->eventDate}', {$locationID}, '{$this->eventName}', '{$this->eventDescription}')";
-
+        $sql = "INSERT INTO `event` (eventDate, eventLocation, `name`, eventDescription, reqCooks, reqForDelivery, reqCoordinators) 
+                VALUES ('{$this->eventDate}', {$locationID}, '{$this->eventName}', '{$this->eventDescription}', {$this->reqCooks}, {$this->reqForDelivery}, {$this->reqCoordinators})";
+    
         $result = run_query($sql);
         if ($result) {
             $this->eventID = Database::getInstance()->get_last_inserted_id();
@@ -246,33 +217,82 @@ class Event implements Subject
         return $result;
     }
 
-    public function read(): ?Event
-    {
-        $sql = "SELECT e.*, a.* 
-                FROM `event` e
-                JOIN address a ON e.eventLocation = a.id
-                WHERE e.eventID = {$this->eventID}";
+        
+    public static function fetchById(int $eventID): ?Event
+{
+    if ($eventID <= 0) {
+        throw new Exception("Invalid Event ID.");
+    }
 
-        $result = run_select_query($sql);
-        if ($result && !empty($result[0])) {
-            $event = $result[0];
-            $address = new Address($event['name'], $event['parent_id'], $event['level']);
-            $address->setId((int)$event['eventLocation']);
+    $sql = "SELECT e.eventID, e.eventDate, e.name AS eventName, e.eventDescription,e.reqCooks, e.reqForDelivery, e.reqCoordinators,
+    a.id AS address_id, a.name AS address_name, a.parent_id, a.level
+    FROM `event` e
+    LEFT JOIN address a ON e.eventLocation = a.id
+    WHERE e.eventID = " . intval($eventID);
 
-            return new Event(
-                (int)$event['eventID'],
-                $event['eventDate'],
-                $address,
-                $event['name'],
-                $event['eventDescription'],
-                (int)($event['reqCooks'] ?? 0),
-                (int)($event['reqForDelivery'] ?? 0),
-                (int)($event['reqCoordinators'] ?? 0)
-            );
-        }
+    $result = run_select_query($sql);
 
+    if (!$result) {
+        error_log("No results found for event ID: $eventID");
         return null;
     }
+
+    if (empty($result[0])) {
+        error_log("Empty result row for event ID: $eventID");
+        return null;
+    }
+
+    $row = $result[0];
+
+    // Verify we have all required address fields
+    $requiredAddressFields = ['address_id', 'address_name', 'parent_id', 'level'];
+    foreach ($requiredAddressFields as $field) {
+        if (!isset($row[$field])) {
+            error_log("Missing required address field '$field' for event ID: $eventID");
+            return null;
+        }
+    }
+
+    try {
+        if (!isset($row['address_id'], $row['address_name'], $row['level'])) {
+            throw new Exception("Missing required address fields");
+        }
+        
+        $address = new Address(
+            $row['address_name'],
+            (int)($row['parent_id'] ?? 0),
+            $row['level']
+        );
+        $address->setId((int)$row['address_id']);
+        
+        // Create and return Event object
+        return new Event(
+            (int)$row['eventID'],
+            $row['eventDate'],
+            $address,
+            $row['eventName'],
+            $row['eventDescription'],
+            (int)($row['reqCooks'] ?? 0),
+            (int)($row['reqForDelivery'] ?? 0),
+            (int)($row['reqCoordinators'] ?? 0)
+        );
+    } catch (Exception $e) {
+        error_log("Error creating Event/Address object for event ID $eventID: " . $e->getMessage());
+        throw $e;
+    }
+}
+    public function read(): ?Event
+    {
+    if ($this->eventID === null || $this->eventID <= 0) {
+        throw new Exception("Event ID is not set.");
+    }
+    
+    return self::fetchById($this->eventID); 
+  }
+
+  
+
+
 
     public static function fetchUpcomingEvents(): array
     {
@@ -304,9 +324,20 @@ class Event implements Subject
     {
         $locationID = $this->eventLocation->getId();
         $sql = "UPDATE `event` 
-                SET eventDate = '{$this->eventDate}', eventLocation = {$locationID}, `name` = '{$this->eventName}', eventDescription = '{$this->eventDescription}' 
+                SET eventDate = '{$this->eventDate}', 
+                    eventLocation = {$locationID}, 
+                    `name` = '{$this->eventName}', 
+                    eventDescription = '{$this->eventDescription}',
+                    reqCooks = {$this->reqCooks},
+                    reqForDelivery = {$this->reqForDelivery},
+                    reqCoordinators = {$this->reqCoordinators}
                 WHERE eventID = {$this->eventID}";
-        return run_query($sql);
+    
+        if (!run_query($sql)) {
+            error_log("Update error: " . mysqli_error(Database::getInstance()->getConnection()));
+            return false;
+        }
+        return true;
     }
 
     public function delete(): bool
@@ -318,22 +349,18 @@ class Event implements Subject
     public static function getAllEvents(): EventList
     {
         $eventList = new EventList();
-    
         // Get the database connection
         $connection = Database::getInstance()->getConnection();
         if (!$connection) {
             die("Database connection failed: " . mysqli_connect_error());
         }
-    
         // SQL query to select all events
         $query = "SELECT * FROM event";
         $result = mysqli_query($connection, $query);
-    
         // Check if the query executed successfully
         if (!$result) {
             die("Query error: " . mysqli_error($connection));
         }
-    
         // Check if the query returned any rows
         if (mysqli_num_rows($result) > 0) {
             while ($row = mysqli_fetch_assoc($result)) {
@@ -346,7 +373,7 @@ class Event implements Subject
                         print("Error reading event location: " . $e->getMessage() . "\n");
                     }
                 }
-    
+
                 // Validate required fields before creating an Event object
                 if (isset($row['eventID'], $row['eventDate'], $row['name'], $row['eventDescription'])) {
                     $event = new Event(

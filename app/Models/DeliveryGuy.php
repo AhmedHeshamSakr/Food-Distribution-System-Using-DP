@@ -9,13 +9,13 @@ class DeliveryGuy extends VolunteerRoles
 {
     //private User $user; //howa howa el ref fo2 khalas
 
-    private Vehicle $vehicleType;
+    private ?Vehicle $vehicleType;
     private int $userTypeID= Person::DELIVERY_FLAG; // 2
     private array $deliveryList = [];
     
     public function __construct(
         Person $user,    
-        Vehicle $vehicleType
+        ?Vehicle $vehicleType=null
     ) {
         parent::__construct($user);   
         $this->vehicleType = $vehicleType;
@@ -26,6 +26,80 @@ class DeliveryGuy extends VolunteerRoles
     public function getUserID(): int {
         return $this->ref->getUserID();
     }
+
+
+    public function assignDeliveryGuyToEvent(int $eventID): bool {
+        $db = Database::getInstance()->getConnection();
+        $userID = $this->ref->getUserID();
+    
+        // Step 1: Check if the user exists in the volunteer table
+        $volunteerCheckQuery = "SELECT userID FROM Volunteer WHERE userID = ?";
+        $stmt = $db->prepare($volunteerCheckQuery);
+        $stmt->bind_param('i', $userID);
+        $stmt->execute();
+        $stmt->store_result();
+        
+        if ($stmt->num_rows === 0) {
+            echo "Error: User ID $userID is not a volunteer.\n";
+            $stmt->close();
+            return false;
+        }
+        $stmt->close();
+    
+        // Step 2: Check if the event exists in the event table
+        $eventCheckQuery = "SELECT eventID FROM event WHERE eventID = ?";
+        $stmt = $db->prepare($eventCheckQuery);
+        $stmt->bind_param('i', $eventID);
+        $stmt->execute();
+        $stmt->store_result();
+    
+        if ($stmt->num_rows === 0) {
+            echo "Error: Event ID $eventID does not exist.\n";
+            $stmt->close();
+            return false;
+        }
+        $stmt->close();
+    
+        // Step 3: Assign the delivery guy to the event
+        $assignQuery = "INSERT INTO DeliveryGuyEvents (userID, eventID) VALUES (?, ?)";
+        $stmt = $db->prepare($assignQuery);
+        $stmt->bind_param('ii', $userID, $eventID);
+    
+        if ($stmt->execute()) {
+            echo "Delivery Guy assigned to Event ID: $eventID\n";
+            $stmt->close();
+            return true;
+        } else {
+            echo "Error assigning delivery guy to event: " . $stmt->error . "\n";
+            $stmt->close();
+            return false;
+        }
+    }
+    
+    public function getAssignedEvents(): array {
+        $db = Database::getInstance()->getConnection();
+        $userID = $this->ref->getUserID();
+    
+        $query = "
+            SELECT e.eventID, e.name, e.eventDate, e.eventDescription 
+            FROM event e 
+            JOIN DeliveryGuyEvents d ON e.eventID = d.eventID 
+            WHERE d.userID = ?
+        ";
+    
+        $stmt = $db->prepare($query);
+        $stmt->bind_param("i", $userID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    
+        $events = [];
+        while ($row = $result->fetch_assoc()) {
+            $events[] = $row;
+        }
+    
+        return $events;
+    }
+
     // Adds delivery management functionality
     public function insertDeliveryGuy(): bool {
         $userid = $this->ref->getUserID();

@@ -11,6 +11,7 @@ class Database
         $configs = require "config.php";
         $this->connection = new mysqli($configs->DB_SERVER, $configs->DB_USERNAME, 
         $configs->DB_PASSWORD, $configs->DB_DATABASE);
+        
        
         if ($this->connection->connect_error) {
             die("Connection failed: " . $this->connection->connect_error);

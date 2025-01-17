@@ -11,11 +11,11 @@ interface ICommand {
 }
 
 class CreateEventCommand implements ICommand {
-    private FacadReciver $facadReciver;
+    private EventReceiver $eventReceiver;
     private ?array $eventData = null;
 
-    public function __construct(FacadReciver $facadReciver) {
-        $this->facadReciver = $facadReciver;
+    public function __construct(EventReceiver $eventReceiver) {
+        $this->eventReceiver = $eventReceiver;
     }
 
     public function setEventData(array $eventData): void {
@@ -27,7 +27,7 @@ class CreateEventCommand implements ICommand {
             throw new Exception("Event data must be set before executing this command.");
         }
 
-        $this->facadReciver->createEvent(
+        $this->eventReceiver->createEvent(
             $this->eventData['eventDate'],
             $this->eventData['eventLocation'],
             $this->eventData['eventName'],
@@ -120,6 +120,136 @@ class RevokeBadgeCommand implements ICommand {
 }
 
 
+class EventReceiver{
+    protected Event $event;
+
+    public function __construct( Event $event)
+    {
+        $this->event = $event;
+    
+    }
+    public function createEvent(string $eventDate, Address $eventLocation, string $eventName, string $eventDescription, int $reqCooks, int $reqForDelivery, int $reqCoordinators): bool
+    {
+        // Validate if the address ID is properly set (make sure the address is created first)
+        if (!$eventLocation->getId()) {
+            throw new Exception("Address ID must be set before creating an event.");
+        }
+    
+        // Create a new Event object with the provided data
+        $event = new Event(
+            null, // Assuming eventID is auto-incremented, we pass null or leave it out
+            $eventDate,
+            $eventLocation,  // pass the address object
+            $eventName,
+            $eventDescription,
+            $reqCooks,
+            $reqForDelivery,
+            $reqCoordinators
+        );
+    
+        // Call the create method on the Event object to save it to the database
+        return $event->create();
+    }
+
+    public function deleteEvent(int $eventID): bool
+    {
+        // Create an Event object with the given ID and delete it
+        $event = new Event($eventID);
+        return $event->delete();
+    }
+
+
+    public function updateEvent(int $eventID, string $eventDate, Address $eventLocation, string $eventName, string $eventDescription, int $reqCooks, int $reqForDelivery, int $reqCoordinators): bool
+    {
+        // Ensure the address ID is valid
+        if (!$eventLocation->getId()) {
+            throw new Exception("Invalid Address ID. Update failed.");
+        }
+    
+        // Create an Event object with updated data
+        $event = new Event(
+            $eventID,
+            $eventDate,
+            $eventLocation,  // pass the address object
+            $eventName,
+            $eventDescription,
+            $reqCooks,
+            $reqForDelivery,
+            $reqCoordinators
+        );
+    
+        // Call the update method on the Event object to save it to the database
+        return $event->update();
+    }
+
+    public function fetchAllEvents(): array
+    {
+        return Event::fetchAll();
+    }
+
+
+}
+
+
+class RecognizeReportCommand implements ICommand {
+    private ReportReceiver $reportReceiver;
+    private ?int $reportID = null;
+
+    public function __construct(ReportReceiver $reportReceiver) {
+        $this->reportReceiver = $reportReceiver;
+    }
+
+    public function setReportID(int $reportID): void {
+        $this->reportID = $reportID;
+    }
+
+    public function execute(): void {
+        if ($this->reportID === null) {
+            throw new Exception("Report ID must be set before executing this command.");
+        }
+
+        $this->reportReceiver->recognizeReport($this->reportID);
+    }
+}
+
+class ReportReceiver{
+    protected ReportingData $reportingData;
+
+    public function __construct(ReportingData $reportingData)
+    {
+        $this->reportingData = $reportingData;
+    }
+
+    public function recognizeReport($reportID) {
+        $reportDetails = $this->reportingData->fetchReportDetails($reportID);
+    
+        if ($reportDetails) {
+            return $this->reportingData->updateReportField($reportID, 'recognized', 1);
+        }
+    
+        return false;
+    }
+
+  
+    public function updateReportStatus($reportID, $newStatus) {
+        $validStatuses = ['Pending', 'Acknowledged', 'In Progress', 'Completed'];
+        if (!in_array($newStatus, $validStatuses)) {
+            return false;
+        }
+
+        $reportDetails = $this->reportingData->fetchReportDetails($reportID);
+
+        if ($reportDetails) {
+            return $this->reportingData->updateReportField($reportID, 'status', $newStatus);
+        }
+
+        return false;
+    }
+
+    public function viewAllReports() {
+        return $this->reportingData->getAllActiveReports();
+    }
+}
 
 //Facade DP 
 class FacadReciver 
@@ -267,8 +397,9 @@ class ControlPanel {
         $this->command = $command;
     }
 
-    public function executeCommand(): void {
+    public function executeCommand(): bool {
         $this->command->execute();
+        return true;
     }
 
 }
