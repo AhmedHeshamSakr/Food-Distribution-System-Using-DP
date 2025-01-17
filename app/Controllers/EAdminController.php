@@ -1,23 +1,20 @@
 <?php
-
-// Enable error reporting for debugging
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// EAdminController.php - Updated version
 
 require_once __DIR__ . "/../Models/#a-Eadmin.php";
 require_once __DIR__ . "/../Models/Address.php";
 require_once __DIR__ . "/../Views/EAdminView.php";
+require_once __DIR__ . "/../Models/ControlePanelDPs.php";
+
 class EventAdminController
 {
     private EventAdminView $view;
     private EventAdmin $eventAdmin;
+    private ControlPanel $controlPanel;
+    private FacadReciver $facadReciver;
 
     public function __construct(EventAdminView $view)
     {
-
-        // $this->eventAdmin=new EventAdmin();
-
         session_start();
 
         $email = $_SESSION['email'] ?? null;
@@ -45,6 +42,15 @@ class EventAdminController
         }
 
         $this->view = $view;
+        
+        // Initialize the Control Panel components
+        $this->facadReciver = new FacadReciver(
+            new Event(),
+            new ReportingData('', '', '', ''),
+            new Badges(),
+            new Reporter()
+        );
+        $this->controlPanel = new ControlPanel();
     }
 
     public function handleRequest()
@@ -62,7 +68,6 @@ class EventAdminController
                         break;
                 }
 
-                // Redirect to prevent form resubmission
                 header("Location: " . $_SERVER['REQUEST_URI']);
                 exit;
             } catch (Exception $e) {
@@ -77,7 +82,6 @@ class EventAdminController
     {
         $eventData = $_POST;
 
-        // Validate required fields
         if (empty($eventData['eventDate']) || empty($eventData['eventName']) || empty($eventData['eventDescription'])) {
             throw new Exception("Missing required event fields.");
         }
@@ -88,17 +92,24 @@ class EventAdminController
             $eventData['locationLevel'] ?? ''
         );
 
-        // Ensure the address is created in the database
         if ($address->create()) {
-            $this->eventAdmin->createEvent(
-                $eventData['eventDate'],
-                $address,
-                $eventData['eventName'],
-                $eventData['eventDescription'],
-                (int) ($eventData['reqCooks'] ?? 0),
-                (int) ($eventData['reqForDelivery'] ?? 0),
-                (int) ($eventData['reqCoordinators'] ?? 0)
-            );
+            // Create the command
+            $createEventCommand = new CreateEventCommand($this->facadReciver);
+            
+            // Set the event data
+            $createEventCommand->setEventData([
+                'eventDate' => $eventData['eventDate'],
+                'eventLocation' => $address,
+                'eventName' => $eventData['eventName'],
+                'eventDescription' => $eventData['eventDescription'],
+                'reqCooks' => (int)($eventData['reqCooks'] ?? 0),
+                'reqForDelivery' => (int)($eventData['reqForDelivery'] ?? 0),
+                'reqCoordinators' => (int)($eventData['reqCoordinators'] ?? 0)
+            ]);
+
+            // Set and execute the command
+            $this->controlPanel->setCommand($createEventCommand);
+            $this->controlPanel->executeCommand();
         } else {
             throw new Exception("Failed to create address for the event.");
         }
@@ -120,10 +131,9 @@ class EventAdminController
     private function renderPage()
     {
         $this->view->renderPageHeader();
-        $events =$this->eventAdmin->getAllEvents();
+        $events = $this->eventAdmin->getAllEvents();
         $this->view->renderEventList($events);
         $this->view->renderCreateEventForm();
         $this->view->renderPageFooter();
-
     }
 }

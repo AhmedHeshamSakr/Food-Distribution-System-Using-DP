@@ -11,11 +11,11 @@ interface ICommand {
 }
 
 class CreateEventCommand implements ICommand {
-    private FacadReciver $facadReciver;
+    private EventReceiver $eventReceiver;
     private ?array $eventData = null;
 
-    public function __construct(FacadReciver $facadReciver) {
-        $this->facadReciver = $facadReciver;
+    public function __construct(EventReceiver $eventReceiver) {
+        $this->eventReceiver = $eventReceiver;
     }
 
     public function setEventData(array $eventData): void {
@@ -27,7 +27,7 @@ class CreateEventCommand implements ICommand {
             throw new Exception("Event data must be set before executing this command.");
         }
 
-        $this->facadReciver->createEvent(
+        $this->eventReceiver->createEvent(
             $this->eventData['eventDate'],
             $this->eventData['eventLocation'],
             $this->eventData['eventName'],
@@ -40,25 +40,25 @@ class CreateEventCommand implements ICommand {
 }
 
 class ViewAllReportsCommand implements ICommand {
-    private FacadReciver $facadReciver;
+    private ReportReceiver $reportReceiver;
 
-    public function __construct(FacadReciver $facadReciver) {
-        $this->facadReciver = $facadReciver;
+    public function __construct(ReportReceiver $reportReceiver) {
+        $this->reportReceiver = $reportReceiver;
     }
 
     public function execute(): void {
-        $reports = $this->facadReciver->viewAllReports();
+        $reports = $this->reportReceiver->viewAllReports();
         print_r($reports); // Display reports or handle them as needed
     }
 }
 
 class UpdateReportStatusCommand implements ICommand {
-    private FacadReciver $facadReciver;
+    private ReportReceiver $reportReceiver;
     private ?int $reportID = null;
     private ?string $newStatus = null;
 
-    public function __construct(FacadReciver $facadReciver) {
-        $this->facadReciver = $facadReciver;
+    public function __construct(ReportReceiver $reportReceiver) {
+        $this->reportReceiver = $reportReceiver;
     }
 
     public function setReportDetails(int $reportID, string $newStatus): void {
@@ -71,17 +71,17 @@ class UpdateReportStatusCommand implements ICommand {
             throw new Exception("Report ID and new status must be set before executing this command.");
         }
 
-        $this->facadReciver->updateReportStatus($this->reportID, $this->newStatus);
+        $this->reportReceiver->updateReportStatus($this->reportID, $this->newStatus);
     }
 }
 
 class GiveBadgeCommand implements ICommand {
-    private FacadReciver $facadReciver;
+    private BadgeReceiver $badgeReceiver;
     private ?Volunteer $volunteer = null;
     private ?Badges $badge = null;
 
-    public function __construct(FacadReciver $facadReciver) {
-        $this->facadReciver = $facadReciver;
+    public function __construct(BadgeReceiver $badgeReceiver) {
+        $this->badgeReceiver = $badgeReceiver;
     }
 
     public function setBadgeDetails(Volunteer $volunteer, Badges $badge): void {
@@ -94,16 +94,16 @@ class GiveBadgeCommand implements ICommand {
             throw new Exception("Volunteer and badge must be set before executing this command.");
         }
 
-        $this->facadReciver->giveBadge($this->volunteer, $this->badge);
+        $this->badgeReceiver->giveBadge($this->volunteer, $this->badge);
     }
 }
 
 class RevokeBadgeCommand implements ICommand {
-    private FacadReciver $facadReciver;
+    private BadgeReceiver $badgeReceiver;
     private ?Volunteer $volunteer = null;
 
-    public function __construct(FacadReciver $facadReciver) {
-        $this->facadReciver = $facadReciver;
+    public function __construct(BadgeReceiver $badgeReceiver) {
+        $this->badgeReceiver = $badgeReceiver;
     }
 
     public function setVolunteer(Volunteer $volunteer): void {
@@ -115,32 +115,105 @@ class RevokeBadgeCommand implements ICommand {
             throw new Exception("Volunteer must be set before executing this command.");
         }
 
-        $this->facadReciver->revokeBadge($this->volunteer);
+        $this->badgeReceiver->revokeBadge($this->volunteer);
+    }
+}
+
+class RecognizeReportCommand implements ICommand {
+    private ReportReceiver $reportReceiver;
+    private ?int $reportID = null;
+
+    public function __construct(ReportReceiver $reportReceiver) {
+        $this->reportReceiver = $reportReceiver;
+    }
+
+    public function setReportID(int $reportID): void {
+        $this->reportID = $reportID;
+    }
+
+    public function execute(): void {
+        if ($this->reportID === null) {
+            throw new Exception("Report ID must be set before executing this command.");
+        }
+
+        $this->reportReceiver->recognizeReport($this->reportID);
+    }
+}
+
+class ReportReceiver{
+    protected ReportingData $reportingData;
+
+    public function __construct(ReportingData $reportingData)
+    {
+        $this->reportingData = $reportingData;
+    }
+
+    public function recognizeReport($reportID) {
+        $reportDetails = $this->reportingData->fetchReportDetails($reportID);
+    
+        if ($reportDetails) {
+            return $this->reportingData->updateReportField($reportID, 'recognized', 1);
+        }
+    
+        return false;
+    }
+
+  
+    public function updateReportStatus($reportID, $newStatus) {
+        $validStatuses = ['Pending', 'Acknowledged', 'In Progress', 'Completed'];
+        if (!in_array($newStatus, $validStatuses)) {
+            return false;
+        }
+
+        $reportDetails = $this->reportingData->fetchReportDetails($reportID);
+
+        if ($reportDetails) {
+            return $this->reportingData->updateReportField($reportID, 'status', $newStatus);
+        }
+
+        return false;
+    }
+
+    public function viewAllReports() {
+        return $this->reportingData->getAllActiveReports();
     }
 }
 
 
 
-//Facade DP 
-class FacadReciver 
-{
-    protected Event $event;
-    protected ReportingData $reportingData;
-    protected Badges $badge;  
 
-    protected Reporter $reporter;
 
-    protected Volunteer $volunteer;
-    
 
-    public function __construct( Event $event, ReportingData $reportingData, Badges $badge , Reporter $reporter)
+############################################################################################################
+
+class BadgeReceiver{
+    protected Badges $badge;
+
+    public function __construct(Badges $badge)
     {
-        $this->event = $event;
-        $this->reportingData = $reportingData;
         $this->badge = $badge;
-        $this->reporter = $reporter;
     }
 
+    public function giveBadge(Volunteer $volunteer, Badges $badge) {
+        $volunteer->setBadge($badge);
+        return true;
+    }
+
+    public function revokeBadge(Volunteer $volunteer) {
+        $volunteer->setBadge(NULL);
+        return true;
+    }
+}
+
+
+class EventReceiver{
+    protected Event $event;
+
+    public function __construct( Event $event)
+    {
+        $this->event = $event;
+    
+    }
     public function createEvent(string $eventDate, Address $eventLocation, string $eventName, string $eventDescription, int $reqCooks, int $reqForDelivery, int $reqCoordinators): bool
     {
         // Validate if the address ID is properly set (make sure the address is created first)
@@ -200,53 +273,10 @@ class FacadReciver
         return Event::fetchAll();
     }
 
-    public function recognizeReport($reportID) {
-        $reportingData = new ReportingData('', '', '', '');
-        $reportDetails = $reportingData->fetchReportDetails($reportID);
-    
-        if ($reportDetails) {
-            return $reportingData->updateReportField($reportID, 'recognized', 1);
-        }
-    
-        return false;
-    }
 
-    // Method to update report status
-    public function updateReportStatus($reportID, $newStatus) {
-        $validStatuses = ['Pending', 'Acknowledged', 'In Progress', 'Completed'];
-        if (!in_array($newStatus, $validStatuses)) {
-            return false;
-        }
-
-        $reportingData = new ReportingData('', '', '', '');
-        $reportDetails = $reportingData->fetchReportDetails($reportID);
-
-        if ($reportDetails) {
-
-            $this->reportingData->updateReportField($reportID, 'status', $newStatus);
-        }
-
-        return false;
-    }
-
-    public function viewAllReports() {
-        $query = "SELECT * FROM report";
-        $result = run_select_query($query);
-        return $result !== false ? $result : [];
-    }
-
-    public function giveBadge(Volunteer $volunteer, Badges $badge) {
-        $volunteer->setBadge($badge);
-        return true;
-    }
-
-
-    public function revokeBadge(Volunteer $volunteer) {
-        $volunteer->setBadge(NULL);
-        return true;
-    }
-    
 }
+
+
 // class VerificationReciver{
 
 

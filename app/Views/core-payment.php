@@ -17,8 +17,6 @@ $paymentData = $controller->getPaymentData();
 // Render the view
 require_once 'PaymentView.php';
 renderPaymentView($paymentData['currency'], $paymentData['itemNumber']);
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $controller->validatePayment();
-}
+$controller->validatePayment();
 
 

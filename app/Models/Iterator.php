@@ -2,6 +2,7 @@
 
 
 
+
 interface IteratorInterface
 {
     public function hasNext(): bool;
@@ -208,6 +209,26 @@ class VolunteerList implements Lists
     public function count(): int
     {
         return count($this->volunteers);
+    }
+}
+
+class BadgeList implements Lists
+{
+    private $badges = [];
+
+    public function addBadge(Badge $badge): void
+    {
+        $this->badges[] = $badge;
+    }
+
+    public function createIterator(): IteratorInterface
+    {
+        return new BadgeIterator($this->badges);
+    }
+
+    public function count(): int
+    {
+        return count($this->badges);
     }
 }
 
