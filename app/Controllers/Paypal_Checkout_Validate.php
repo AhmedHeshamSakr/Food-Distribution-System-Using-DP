@@ -8,6 +8,15 @@ include_once '../../config/DB.php';
 require_once '../Models/PayPalCheckout.php'; 
 $paypal = new PaypalCheckout; 
  
+ function getUserDetails(string $email): int {
+
+        
+    // Query your database to get user details
+    $query = "SELECT userID FROM Person WHERE email = '$email'";
+    $result= run_select_query($query);
+    // Return array with user details
+    return (int)$result[0]['userID'];
+}
 // $response = array('status' => 0, 'msg' => 'Transaction Failed!'); 
 if(!empty($_POST['paypal_order_check']) && !empty($_POST['order_id'])){ 
     // Validate and get order details with PayPal API 
@@ -69,28 +78,15 @@ if(!empty($_POST['paypal_order_check']) && !empty($_POST['order_id'])){
         } 
  
         if(!empty($order_id) && $order_status == 'COMPLETED'){ 
-            // Check if any transaction data is exists already with the same TXN ID 
-            // $sqlQ = "SELECT id FROM transactions WHERE transaction_id = ?"; 
-            // $stmt = $db->prepare($sqlQ);  
-            // $stmt->bind_param("s", $transaction_id); 
-            // $stmt->execute(); 
-            // $stmt->bind_result($row_id); 
-            // $stmt->fetch(); 
-             
-            // $payment_id = 0; 
-            // if(!empty($row_id)){ 
-            //     $payment_id = $row_id; 
-            // }else{ 
-            //     // Insert transaction data into the database 
-            //     $sqlQ = "INSERT INTO transactions (item_number,item_name,item_price,item_price_currency,payer_id,payer_name,payer_email,payer_country,merchant_id,merchant_email,order_id,transaction_id,paid_amount,paid_amount_currency,payment_source,payment_status,created,modified) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())"; 
-            //     $stmt = $db->prepare($sqlQ); 
-            //     $stmt->bind_param("ssdsssssssssdssss", $item_number, $item_name, $itemPrice, $currency, $payer_id, $payer_full_name, $payer_email_address, $payer_country_code, $merchant_id, $payee_email_address, $order_id, $transaction_id, $amount_value, $currency_code, $payment_source, $payment_status, $order_time); 
-            //     $insert = $stmt->execute(); 
-                 
-            //     if($insert){ 
-            //         $payment_id = $stmt->insert_id; 
-            //     } 
-            // } 
+            $userID =getUserDetails($_SESSION['email']);
+
+            #########################
+            
+            if($donationAmount > 0) {  // Only create transaction if amount exists
+                $transaction = new Transaction($donationAmount, $userID, date("Y-m-d H:i:s"));
+                error_log('About to store transaction with amount: ' . $donationAmount);
+                $transaction->storeTransaction();
+            }
  
             if(!empty($payment_id)){ 
                 $ref_id_enc = base64_encode($transaction_id); 
