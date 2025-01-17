@@ -1,6 +1,11 @@
 <?php
 require_once __DIR__ . "/../../config/firebase-config.php";
 
+header('Access-Control-Allow-Origin: *');
+
+header('Access-Control-Allow-Methods: GET, POST');
+
+header("Access-Control-Allow-Headers: X-Requested-With");
 
 use Kreait\Firebase\Auth;
 use Kreait\Firebase\Exception\Auth\FailedToVerifyToken;
@@ -14,10 +19,10 @@ require_once "#a-Eadmin.php";
 require_once "#a-Vadmin.php";
 interface iLogin {
     public function login($credentials): bool;
-    public function authenticate(string $username, string $password): bool;
+    //public function authenticate(string $username, string $password): bool;
     public function logout(): bool;
 
-    public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID): Person;
+    //public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID): Person;
 }
 
 
@@ -148,135 +153,182 @@ class withEmail implements iLogin {
 }
 
 
-class withGoogle implements iLogin
-{
-    private $auth;
+
+require_once 'FirebaseFacade.php';
+
+class withGoogle implements iLogin {
+    private $firebaseFacade;
     private $isAuthenticated = false;
 
-    public function __construct(Auth $auth)
-    {
-        $this->auth = $auth;
-        error_log("Firebase Auth object is null!");
+    public function __construct(FirebaseFacade $firebaseFacade) {
+        $this->firebaseFacade = $firebaseFacade;
     }
 
-    public function login($credentials): bool
-{
-    error_log("Starting Google login process...");
-    try {
-        $idToken = $credentials['idToken'] ?? '';
-        if (!$idToken) {
-            error_log("No ID Token provided.");
-            return false;
-        }
-
-        error_log("Verifying ID token: $idToken");
-        $verifiedIdToken = $this->auth->verifyIdToken($idToken);
-        error_log("ID Token verified successfully.");
-
-        $email = $verifiedIdToken->claims()->get('email') ?? '';
-        $firstName = $verifiedIdToken->claims()->get('given_name') ?? '';
-        $lastName = $verifiedIdToken->claims()->get('family_name') ?? '';
-
-        if (!$email) {
-            error_log("Failed to extract email from token claims.");
-            return false;
-        }
-
-        error_log("Extracted user details: Email=$email, FirstName=$firstName, LastName=$lastName");
-
-        if ($this->checkIfUserExists($email)) {
-            error_log("User exists in the database.");
-            $this->isAuthenticated = true;
+    public function login($userData): bool {
+        $token_id = $userData["token"];
+        
+        // Log user data via facade
+        if ($this->authenticate($token_id)) {
+            $this->checkUserExistence($userData);
             return true;
         }
-
-        error_log("User does not exist. Creating new user...");
-        $addressObject = new Address("Google Address", null, "City");
-        if (!$addressObject->create()) {
-            error_log("Failed to create address.");
-            return false;
-        }
-
-        $user = $this->createUser(0, $firstName, $lastName, $email, "", $addressObject, "");
-        $db = Database::getInstance()->getConnection();
-        $query = "INSERT INTO login (email) VALUES ('$email')";
-
-        if (!mysqli_query($db, $query)) {
-            error_log("Failed to insert user into login table: " . mysqli_error($db));
-            return false;
-        }
-
-        error_log("User successfully created and logged in.");
-        $this->isAuthenticated = true;
-        return true;
-    } catch (FailedToVerifyToken $e) {
-        error_log("Token verification failed: " . $e->getMessage());
-        return false;
-    } catch (Exception $e) {
-        error_log("Unexpected error: " . $e->getMessage());
-        return false;
-    }
-}
-
-
-    public function authenticate(string $username, string $password): bool
-    {
+        
         return false;
     }
 
-    public function logout(): bool
-    {
+    public function logout(): bool {
         $this->isAuthenticated = false;
         return true;
     }
 
-    public function isAuthenticated(): bool
-    {
+    public function authenticate(string $credentials): bool {
+        try {
+    
+            $verifiedIdToken = $firebaseFacade->auth->verifyIdToken($credentials,false,360000);
+             // Extract user details from the token claims
+             $uid = $verifiedIdToken->claims()->get('sub');
+             $email = $verifiedIdToken->claims()->get('email');
+             $firstName = $verifiedIdToken->claims()->get('given_name') ?? '';
+             $lastName = $verifiedIdToken->claims()->get('family_name') ?? '';
+    
+            $uid = $verifiedIdToken->claims()->get('sub');
+        
+            $user = $auth->getUser($uid);
+            
+            $this->isAuthenticated = true;
+            return true;
+            
+    
+
+           
+        } catch (FailedToVerifyToken $e) {
+            $this->isAuthenticated = false;
+            return false;
+            
+        }
+        
+    }
+
+    public function isAuthenticated(): bool {
         return $this->isAuthenticated;
     }
 
-    public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID): Person
-    {
-        error_log("Creating User from Google Login with User Type ID: $userTypeID");
-
-        switch ($userTypeID) {
-            case 1 << 5:
-                return new BadgeAdmin($firstName, $lastName, $email, $phoneNo);
-            case 1 << 6:
-                return new EventAdmin($firstName, $lastName, $email, $phoneNo);
-            case 1 << 7:
-                return new VerificationAdmin($firstName, $lastName, $email, $phoneNo);
-            default:
-                return new Volunteer($userTypeID, $firstName, $lastName, $email, $phoneNo, $address, $nationalID, new Badges(badgeLvl: 'Silver Tier'));
-        }
-    }
-
-    private function checkIfUserExists(string $email): bool
-    {
-        error_log("Checking if user exists for email: $email");
-
+    private function checkUserExistence($userData) {
+        $email = $userData['email'];
+        
+        // Establish DB connection
         $db = Database::getInstance()->getConnection();
-        if (!$db) {
-            error_log("Database connection failed: " . mysqli_connect_error());
-            return false;
+        
+        // Check if the user exists
+        $queryCheck = "SELECT * FROM login WHERE email = '$email'";
+        $resultCheck = mysqli_query($db, $queryCheck);
+        
+        if (mysqli_num_rows($resultCheck) > 0) {
+            // User exists
+            error_log("User exists in the database.");
+        } else {
+            // User doesn't exist, create new user
+            error_log("User does not exist, creating new user.");
+            $this->createUser($userData);
         }
-
-        $email = mysqli_real_escape_string($db, $email);
-        $query = "SELECT * FROM login WHERE email = '$email'";
-        error_log("Executing query: $query");
-
-        $result = mysqli_query($db, $query);
-        if (!$result) {
-            error_log("Query failed: " . mysqli_error($db));
-            return false;
-        }
-
-        $userExists = mysqli_num_rows($result) > 0;
-        error_log("User exists: " . ($userExists ? "Yes" : "No"));
-        return $userExists;
     }
 
+    // Create a new user in the database
+    private function createUser($userData) {
+        $db = Database::getInstance()->getConnection();
+        
+        $email = mysqli_real_escape_string($db, $userData['email']);
+        $firstName = mysqli_real_escape_string($db, $userData['name']);
+        
+        // Insert the login data into the database
+        $query = "INSERT INTO login (email, first_name) VALUES ('$email', '$firstName')";
+        
+        if (mysqli_query($db, $query)) {
+            error_log("User successfully created in the database.");
+        } else {
+            error_log("Error inserting user into database: " . mysqli_error($db));
+        }
+    }
 }
 
+// class withGoogle implements iLogin {
+//     private $firebaseFacade;
+//     private $isAuthenticated = false;
+//     private $userName;
+//     private $userEmail;
+
+//     public function __construct() {
+//         // Initialize the FirebaseFacade
+//         $this->firebaseFacade = new FirebaseFacade();
+//     }
+
+//     // Login method, handles Firebase integration and application logic
+//     public function login($userData): bool {
+//         try {
+//             $this->userName = $userData['name'] ?? 'Unknown';
+//             $this->userEmail = $userData['email'] ?? 'Unknown';
+
+//             // Log the user data using the facade
+//             $this->firebaseFacade->logUserData($this->userName, $this->userEmail);
+
+//             // Check if the user already exists in the database
+//             if ($this->checkIfUserExists($this->userEmail)) {
+//                 $this->isAuthenticated = true;
+//                 return true;
+//             }
+
+//             // If the user doesn't exist, create a new user
+//             $addressObject = new Address("Google Address", null, "City");
+//             if (!$addressObject->create()) {
+//                 throw new Exception("Failed to create address.");
+//             }
+
+//             // Create and store the user
+//             $user = $this->createUser(0, $this->userName, "", $this->userEmail, "", $addressObject, "");
+//             $db = Database::getInstance()->getConnection();
+//             $query = "INSERT INTO login (email) VALUES ('" . mysqli_real_escape_string($db, $this->userEmail) . "')";
+//             if (!mysqli_query($db, $query)) {
+//                 throw new Exception("Failed to insert user into login table: " . mysqli_error($db));
+//             }
+
+//             $this->isAuthenticated = true;
+//             return true;
+//         } catch (Exception $e) {
+//             error_log("Error during login: " . $e->getMessage());
+//             return false;
+//         }
+//     }
+
+//     public function logout(): bool {
+//         $this->isAuthenticated = false;
+//         return true;
+//     }
+
+//     public function isAuthenticated(): bool {
+//         return $this->isAuthenticated;
+//     }
+
+//     public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID): Person {
+//         switch ($userTypeID) {
+//             case 1 << 5:
+//                 return new BadgeAdmin($firstName, $lastName, $email, $phoneNo);
+//             case 1 << 6:
+//                 return new EventAdmin($firstName, $lastName, $email, $phoneNo);
+//             case 1 << 7:
+//                 return new VerificationAdmin($firstName, $lastName, $email, $phoneNo);
+//             default:
+//                 return new Volunteer($userTypeID, $firstName, $lastName, $email, $phoneNo, $address, $nationalID, new Badges(badgeLvl: 'Silver Tier'));
+//         }
+//     }
+
+//     private function checkIfUserExists(string $email): bool {
+//         $db = Database::getInstance()->getConnection();
+//         $email = mysqli_real_escape_string($db, $email);
+//         $query = "SELECT * FROM login WHERE email = '$email'";
+//         $result = mysqli_query($db, $query);
+
+//         return $result && mysqli_num_rows($result) > 0;
+//     }
+// }
 
 ?>
