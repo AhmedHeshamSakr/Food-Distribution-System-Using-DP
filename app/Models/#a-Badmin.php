@@ -2,74 +2,90 @@
 
 require_once 'Person.php';
 require_once 'Badges.php';
-require_once 'UserBadge.php';
-
-
+require_once 'Volunteer.php';
 
 class BadgeAdmin extends Person
 {
     private int $userTypeID = Person::B_ADMIN_FLAG;
-    // Constructor to initialize BadgeAdmin with required details
+
     public function __construct(string $firstName, string $lastName, string $email, string $phoneNo)
     {   
-        $userTypeID = Person::B_ADMIN_FLAG;
-        $this->userTypeID = $userTypeID;
-        parent::__construct($firstName, $lastName, $email, $phoneNo, $userTypeID);
+        parent::__construct($firstName, $lastName, $email, $phoneNo, self::B_ADMIN_FLAG);
     }
 
-    // Badge Management Methods
     public function createBadge(string $badgeLvl): bool
     {
-        $badge = new Badges(0, $badgeLvl); // Badge ID is 0 for new badges
+        $badge = new Badges($badgeLvl);
         return $badge->insertBadge();
     }
 
     public function updateBadge(int $badgeID, string $newBadgeLvl): bool
     {
-        $badge = new Badges($badgeID, $newBadgeLvl);
+        $badge = new Badges($newBadgeLvl);
+        $badge->setBadgeID($badgeID);
         return $badge->updateBadge();
     }
 
     public function deleteBadge(int $badgeID): bool
     {
-        $badge = new Badges($badgeID);
+        $badge = new Badges('');
+        $badge->setBadgeID($badgeID);
         return $badge->deleteBadge();
     }
 
     public function getBadge(int $badgeID): ?array
     {
-        $badge = new Badges('Silver Tier');
+        $badge = new Badges('');
         return $badge->getBadgeByID($badgeID);
     }
 
     public function getAllBadges(): array
     {
-        $badge = new Badges('Silver Tier');
+        $badge = new Badges('');
         return $badge->getAllBadges();
     }
 
-    // User-Badge Assignment Methods
-    public function assignBadgeToUser(int $userID, int $badgeID, string $dateAwarded, string $expiryDate): bool
+    public function assignBadgeToUser(int $userID, int $badgeID): bool
     {
-        $userBadge = new UserBadge($userID, $badgeID, $dateAwarded, $expiryDate);
-        return $userBadge->create();
+        // Fetch the Volunteer object by userID
+        $volunteer = Volunteer::fetchById($userID);
+        if (!$volunteer) {
+            return false;
+        }
+
+        // Create a Badges object with the given badgeID
+        $badge = new Badges('');
+        $badge->setBadgeID($badgeID);
+
+        // Use the Volunteer's setBadge method to assign the badge
+        return $volunteer->setBadge($badge);
     }
 
-    public function updateBadgeAssignment(int $userID, int $badgeID, string $newDateAwarded, string $newExpiryDate): bool
+    public function revokeBadgeFromUser(int $userID): bool
     {
-        $userBadge = new UserBadge($userID, $badgeID, $newDateAwarded, $newExpiryDate);
-        return $userBadge->update();
+        // Fetch the Volunteer object by userID
+        $volunteer = Volunteer::fetchById($userID);
+        if (!$volunteer) {
+            return false;
+        }
+
+        // Set the badge to null or a default badge ID using setBadge
+        // Assuming a default badge ID of 0
+        $defaultBadge = new Badges('');
+        $defaultBadge->setBadgeID(0);
+        return $volunteer->setBadge($defaultBadge);
     }
 
-    public function revokeBadgeFromUser(int $userID, int $badgeID): bool
+    public function getUserBadge(int $userID): ?Badges
     {
-        $userBadge = new UserBadge($userID, $badgeID, '', ''); // Empty dates as placeholders
-        return $userBadge->delete();
-    }
+        // Fetch the Volunteer object by userID
+        $volunteer = Volunteer::fetchById($userID);
+        if (!$volunteer) {
+            return null;
+        }
 
-    public function getUserBadge(int $userID, int $badgeID): ?UserBadge
-    {
-        return UserBadge::read($userID, $badgeID);
+        // Return the badge property of the Volunteer object
+        return $volunteer->getBadge();
     }
 
     public function getUserTypeID(): int
@@ -77,3 +93,4 @@ class BadgeAdmin extends Person
         return $this->userTypeID;
     }
 }
+?>

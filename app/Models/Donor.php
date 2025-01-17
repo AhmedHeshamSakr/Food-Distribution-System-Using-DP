@@ -20,12 +20,12 @@ class Donor extends Person
             throw new InvalidArgumentException("Invalid payment method.");
         }
 
-        $paymentContext = new PaymentContext($this->getPaymentMethod($paymentMethod, $paymentDetails));
-        $paymentResponse = $paymentContext->executePayment($amount);
+        // // $paymentContext = new PaymentContext($this->getPaymentMethod($paymentMethod, $paymentDetails));
+        // // $paymentResponse = $paymentContext->executePayment($amount);
 
-        if (!$paymentResponse) {
-            return false;
-        }
+        // if (!$paymentResponse) {
+        //     return false;
+        // }
 
         try {
             $conn = Database::getInstance()->getConnection();
@@ -117,20 +117,20 @@ class Donor extends Person
         }
     }
 
-    private function getPaymentMethod(string $paymentMethod, string $paymentDetails): IPayment
-    {
-        switch ($paymentMethod) {
-            case 'Credit Card':
-                return new PayCreditCard($paymentDetails);
-                // return new PayCreditCard($paymentDetails['cardNumber'], new DateTime($paymentDetails['expiryDate']), $paymentDetails['cvv']);
-            case 'Visa':
-                return new PayVisa($paymentDetails);
-            case 'Fawry':
-                return new PayFawry($paymentDetails);
-            default:
-                throw new InvalidArgumentException("Unsupported payment method.");
-        }
-    }
+    // private function getPaymentMethod(string $paymentMethod, string $paymentDetails): IPayment
+    // {
+    //     switch ($paymentMethod) {
+    //         case 'Credit Card':
+    //             return new PayCreditCard($paymentDetails);
+    //             // return new PayCreditCard($paymentDetails['cardNumber'], new DateTime($paymentDetails['expiryDate']), $paymentDetails['cvv']);
+    //         case 'Visa':
+    //             return new PayVisa($paymentDetails);
+    //         case 'Fawry':
+    //             return new PayFawry($paymentDetails);
+    //         default:
+    //             throw new InvalidArgumentException("Unsupported payment method.");
+    //     }
+    // }
     public function getUserTypeID(): int
     {
         return $this->userTypeID;

@@ -370,13 +370,14 @@ class FacadReciver
         return true;
     }
 
-
     public function revokeBadge(Volunteer $volunteer) {
         $volunteer->setBadge(NULL);
         return true;
     }
     
+    
 }
+
 // class VerificationReciver{
 
 

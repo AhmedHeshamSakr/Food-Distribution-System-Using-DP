@@ -141,6 +141,19 @@ class Volunteer extends Person
     //     return run_query($query);
     // }
 
+    public static function updateBadgeByUserID(int $userID, int $badgeID): bool
+    {
+    // Escape the parameters to prevent SQL injection
+    $escapedUserID = mysqli_real_escape_string(Database::getInstance()->getConnection(), $userID);
+    $escapedBadgeID = mysqli_real_escape_string(Database::getInstance()->getConnection(), $badgeID);
+
+    // Construct the SQL query to update the badge ID for the given user ID
+    $query = "UPDATE volunteer SET badge = '{$escapedBadgeID}' WHERE userID = '{$escapedUserID}'";
+
+    // Run the query and return whether it was successful
+    return run_query($query);
+    }
+
     public function updateVolunteer(array $fieldsToUpdate): bool
     {
         // Create an array to hold the SET part of the SQL query
@@ -225,6 +238,7 @@ class Volunteer extends Person
         return $this->updateVolunteer($fieldsToUpdate);
     }
 
+   
 
 
     public function chooseRole(): bool{

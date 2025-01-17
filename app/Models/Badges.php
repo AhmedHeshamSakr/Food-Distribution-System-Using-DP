@@ -28,6 +28,14 @@ class Badges
         return $this->badgeID;
     }
 
+    public function setBadgeID(int $badgeID): void
+    {
+        if ($badgeID <= 0) {
+            throw new Exception("Badge ID must be greater than 0.");
+        }
+        $this->badgeID = $badgeID;
+    }
+
     public function getBadgeLvl(): string
     {
         return $this->badgeLvl;

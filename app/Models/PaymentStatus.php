@@ -1,9 +1,8 @@
 <?php
 // Include the configuration file
-require_once 'C:\xampp\htdocs\FDS\config\config.php';
-
-// Include the database connection file
-require_once 'C:\xampp\htdocs\FDS\config\DB.php';
+require_once '../../config/config.php' ;
+// Include the database connection file 
+include_once '../../config/DB.php'; 
 
 $payment_ref_id = $statusMsg = '';
 $status = 'error';
