@@ -10,7 +10,7 @@ class Address
     private string $level; // Level of the address ('Country', 'State', 'City', 'Neighborhood')
 
     // Constructor to initialize properties
-    public function __construct(string $name, ?int $parent_id, string $level, int $id = 0) 
+    public function __construct(string $name, ?int $parent_id, string $level)
     {
         // Validate the level
         $validLevels = ['Country', 'State', 'City', 'Neighborhood'];
@@ -21,30 +21,43 @@ class Address
         $this->name = $name;
         $this->parent_id = $parent_id;
         $this->level = $level;
+
+        // Check for duplicates and create if not exists
+        $duplicateId = $this->findDuplicate();
+        if ($duplicateId !== null) {
+            $this->id = $duplicateId;
+        } else {
+            $this->create();
+        }
     }
-    
+
     // Create a new address record in the database
-   // Create a new address record in the database
-public function create(): bool
-{
-    // Handle null values for parent_id
-    $parentIdValue = is_null($this->parent_id) ? "NULL" : (int)$this->parent_id;
+    public function create(): bool
+    {
+        // Check for duplicates
+        $duplicateId = $this->findDuplicate();
+        if ($duplicateId !== null) {
+            $this->id = $duplicateId;
+            return false; // Address already exists, no need to create
+        }
 
-    // Prepare the SQL statement
-    $sql = "INSERT INTO address (name, parent_id, level) VALUES ('{$this->name}', {$parentIdValue}, '{$this->level}')";
+        // Handle null values for parent_id
+        $parentIdValue = is_null($this->parent_id) ? "NULL" : (int)$this->parent_id;
 
-    // Execute the query
-    $result = run_query($sql);
+        // Prepare the SQL statement
+        $sql = "INSERT INTO address (name, parent_id, level) VALUES ('{$this->name}', {$parentIdValue}, '{$this->level}')";
 
-    if ($result) {
-        // Fetch and set the last inserted ID
-        $this->id = $this->getLastInsertedID();
-        print("Last inserted ID: " . $this->id);
-        return true;
+        // Execute the query
+        $result = run_query($sql);
+
+        if ($result) {
+            // Fetch and set the last inserted ID
+            $this->id = $this->getLastInsertedID();
+            return true;
+        }
+
+        return false;
     }
-
-    return false;
-}
 
     private function getLastInsertedID(): int
     {
@@ -64,32 +77,24 @@ public function create(): bool
         return $this->id;
     }
 
-
     // Read an address record from the database
     public static function read(?int $id): ?Address
     {
         $query = "SELECT * FROM address WHERE id = {$id}";
         $result = run_select_query($query);
-    
+
         if ($result && count($result) > 0) {
             $data = $result[0];
-    
-            // Create the Address object
-            $address = new Address($data['name'], $data['parent_id'], $data['level']);
-    
-            // Set the ID of the Address object
-            $address->setId((int)$data['id']);
-    
-            return $address;
+            return new Address($data['name'], $data['parent_id'], $data['level']);
         }
-    
+
         return null;
     }
-    
+
     // In Address class: Add this method to get the ID by name.
     public static function getIdByName(string $name): ?int
     {
-        $sql = "SELECT id FROM address WHERE name = '{$name}' LIMIT 1";
+        $sql = "SELECT id FROM address WHERE name = '{$name}'";
         $result = run_select_query($sql);
 
         if ($result && count($result) > 0) {
@@ -99,6 +104,55 @@ public function create(): bool
         return null; // Return null if not found
     }
 
+    // Find duplicate address
+    private function findDuplicate(): ?int
+    {
+        $parentIdValue = is_null($this->parent_id) ? "IS NULL" : "= {$this->parent_id}";
+        $sql = "SELECT id FROM address WHERE name = '{$this->name}' AND parent_id {$parentIdValue} AND level = '{$this->level}' LIMIT 1";
+        $result = run_select_query($sql);
+
+        if ($result && count($result) > 0) {
+            return (int)$result[0]['id'];
+        }
+
+        return null;
+    }
+
+    public static function getCountries(): array
+{
+    $sql = "SELECT id, name FROM address WHERE level = 'Country'";
+    $result = run_select_query($sql);
+
+    if ($result && count($result) > 0) {
+        return $result;
+    }
+
+    return []; 
+}
+
+public static function getCities(): array
+{
+    $sql = "SELECT id, name FROM address WHERE level = 'City'";
+    $result = run_select_query($sql);
+
+    if ($result && count($result) > 0) {
+        return $result;
+    }
+
+    return []; 
+}
+
+public static function getCitiesByCountry(int $countryId): array
+{
+    $sql = "SELECT id, name FROM address WHERE level = 'City' AND parent_id = {$countryId}";
+    $result = run_select_query($sql);
+
+    if ($result && count($result) > 0) {
+        return $result;
+    }
+
+    return []; 
+}
 
     // Getters and Setters
     public function getName(): string
@@ -142,5 +196,4 @@ public function create(): bool
         $sql = "DELETE FROM address WHERE id = {$this->id}";
         return run_query($sql);
     }
-    
 }

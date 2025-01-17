@@ -19,7 +19,7 @@ require_once __DIR__ . '/../Views/VolunteerView.php';
  * Helper function to determine if user is admin based on email
  */
 function isAdminEmail($email): bool {
-    return strpos($email, '@admin') !== false;
+    return strpos($email, '@eadmin') !== false;
 }
 
 /**
@@ -38,7 +38,7 @@ function determineUserContext(): bool {
         $requestedView = $_GET['view'];
         
         // Validate the requested view based on user type
-        if ($requestedView === 'admin' && !isAdminEmail($userEmail)) {
+        if ($requestedView === 'eadmin' && !isAdminEmail($userEmail)) {
             // If non-admin tries to access admin view, force volunteer view
             $_SESSION['requested_view'] = 'volunteer';
             return true;
@@ -51,7 +51,7 @@ function determineUserContext(): bool {
     // If no view in URL, check session
     if (isset($_SESSION['requested_view'])) {
         // Validate stored view preference
-        if ($_SESSION['requested_view'] === 'admin' && !isAdminEmail($userEmail)) {
+        if ($_SESSION['requested_view'] === 'eadmin' && !isAdminEmail($userEmail)) {
             $_SESSION['requested_view'] = 'volunteer';
             return true;
         }
@@ -59,7 +59,7 @@ function determineUserContext(): bool {
     }
     
     // Default based on email type
-    $defaultView = isAdminEmail($userEmail) ? 'admin' : 'volunteer';
+    $defaultView = isAdminEmail($userEmail) ? 'eadmin' : 'volunteer';
     $_SESSION['requested_view'] = $defaultView;
     return $defaultView === 'volunteer';
 }

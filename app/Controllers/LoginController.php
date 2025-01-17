@@ -1,9 +1,9 @@
 <?php
 
-
 require_once __DIR__ . '/../Models/Login.php';
 require_once __DIR__ . '/../Views/LoginView.php';
 require_once __DIR__ . '/../Models/Address.php';
+
 class LoginController
 {
     private $loginHandler;
@@ -21,7 +21,28 @@ class LoginController
         $this->errorMessage = ''; // Initialize empty error message
     }
 
-  
+    /**
+     * Main handler for the login flow.
+     */
+    public function handleRequest()
+    {
+        session_start();
+
+        // Restore mode and error message from session if available
+        $this->mode = $_SESSION['mode'] ?? 'login';
+        $this->errorMessage = $_SESSION['errorMessage'] ?? '';
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->processFormSubmission();
+        }
+
+        if ($this->mode === 'register') {
+            $this->fetchCountries();
+        } else {
+            $this->renderPage();
+        }
+    }
+
     /**
      * Process form submissions (login, register, logout).
      */
@@ -33,7 +54,7 @@ class LoginController
             case 'login':
                 $this->handleLogin();
                 break;
-    
+
             case 'register':
                 $this->handleRegistration();
                 break;
@@ -64,137 +85,101 @@ class LoginController
         exit;
     }
 
- 
-
-    
-
-
-    public function handleRequest()
-    {
-        // Ensure we have a clean session start
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        // Restore mode and error message from session if available
-        $this->mode = $_SESSION['mode'] ?? 'login';
-        $this->errorMessage = $_SESSION['errorMessage'] ?? '';
-
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $this->processFormSubmission();
-        }
-
-        $this->renderPage();
-    }
-
     /**
-     * Enhanced login handler that stores user ID and role in session
+     * Handle the login action.
      */
     private function handleLogin()
     {
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
+    
+        // Map admin patterns to their corresponding views
+        $adminViews = [
+            '@admin'  => '../app/Views/AdminPageView.php',
+            '@vadmin' => '../app/Views/Core-Reports.php',
+            '@badmin' => '../app/Views/BAdminPageView.php',
+            '@eadmin' => '../app/Views/core-AllEvents.php?view=eadmin',
+        ];
 
-        // Check for admin login first
-        if (strpos($email, '@admin') !== false) {
-            if ($this->loginHandler->login(['email' => $email, 'password' => $password])) {
-                $this->initializeUserSession($email, true);
-                header("Location: ../app/Views/AdminPageView.php");
+        // Check if the email matches any admin pattern
+        foreach ($adminViews as $pattern => $view) {
+            if (strpos($email, $pattern) !== false) {
+                // Redirect to the corresponding admin dashboard page
+                session_start();
+                $_SESSION['email'] = $email; // Store email in session
+                header("Location: $view");
                 exit();
             }
-            $this->errorMessage = 'Invalid admin credentials.';
-            return;
         }
-
-        // Handle regular user login
+        // Normal login handling for non-admin users
         if ($this->loginHandler->login(['email' => $email, 'password' => $password])) {
-            $this->initializeUserSession($email, false);
+            // Store email in session
+            session_start();
+            $_SESSION['email'] = $email;
+            // Redirect to the regular home page
             header("Location: ../app/Views/HomePageView.php");
             exit();
+        } else {
+            $this->errorMessage = 'Invalid email or password. Please try again.';
         }
-        
-        $this->errorMessage = 'Invalid email or password. Please try again.';
     }
-
+    
     /**
-     * Initialize user session with all necessary data
-     * @param string $email User's email
-     * @param bool $isAdmin Whether the user is an admin
+     * Handle the registration action.
      */
-    private function initializeUserSession(string $email, bool $isAdmin): void
+    public function fetchCountries()
     {
-        // Ensure clean session
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        // Get user details from login handler
-        $userDetails = $this->loginHandler->getUserDetails($email);
-        
-        // Store essential user information in session
-        $_SESSION['user_id'] = $userDetails['id'] ?? null;
-        $_SESSION['email'] = $email;
-        $_SESSION['is_admin'] = $isAdmin;
-        $_SESSION['user_type'] = $userDetails['userTypeID'] ?? null;
-        $_SESSION['full_name'] = $userDetails['firstName'] . ' ' . $userDetails['lastName'];
-        $_SESSION['last_activity'] = time();
-        
-        // Set session timeout to 2 hours
-        session_set_cookie_params(7200);
+        $countries = Address::getCountries();
+        $cities = Address::getCities();
+        $this->view->renderForm($this->mode, $this->errorMessage, $countries, $cities);
     }
 
-    /**
-     * Enhanced registration handler that automatically logs in the user
-     */
     private function handleRegistration()
     {
+        // Retrieve form inputs
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
         $firstName = $_POST['firstName'] ?? '';
         $lastName = $_POST['lastName'] ?? '';
         $phoneNo = $_POST['phoneNo'] ?? '';
-        $userTypeID = $_POST['userTypeID'] ?? '';
-        $nationalID = $_POST['nationalID'] ?? '';
-        $address_string = $_POST['address'] ?? '';
+        $nationalID = $_POST['nationalId'] ?? '';
+        $country = $_POST['country'] ?? '';
+        $city = $_POST['city'] ?? '';  
+        $address_string = $_POST['address'] ?? ''; 
 
-        $address = new Address($address_string, Address::getIdByName('Egypt'), 'City');
-        $address->create();
+        $adminType = '';
 
-        if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID, $nationalID, $address)) {
-            // Automatically log in the user after successful registration
-            if ($this->loginHandler->login(['email' => $email, 'password' => $password])) {
-                $this->initializeUserSession($email, false);
-                header("Location: ../app/Views/HomePageView.php");
-                exit();
-            }
-            
-            $this->errorMessage = 'Registration successful! Please log in.';
-            $this->mode = 'login';
+        // Determine userTypeID based on the email
+        if (strpos($email, '@vadmin') !== false) {
+            $adminType = '@vadmin';
+        } elseif (strpos($email, '@eadmin') !== false) {
+            $adminType = '@eadmin';
+        } elseif (strpos($email, '@badmin') !== false) {
+            $adminType = '@badmin';
+        } else {
+            $adminType = "else";
+        }
+
+        $address = new Address($address_string, $city, 'Neighborhood');
+
+        if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo, 0, $nationalID, $address, $adminType)) {
+            $this->errorMessage = 'Registration successful! You can now log in.';
         } else {
             $this->errorMessage = 'Registration failed. The email might already be in use.';
-            $this->mode = 'register';
+            $this->mode = 'register'; // Stay on the register form on failure
         }
     }
 
     /**
-     * Enhanced logout handler that properly cleans up session data
+     * Handle the logout action.
      */
     private function handleLogout()
     {
-        // Clear all session data
-        $_SESSION = array();
-
-        // Destroy the session cookie
-        if (isset($_COOKIE[session_name()])) {
-            setcookie(session_name(), '', time() - 3600, '/');
+        if ($this->loginHandler->logout()) {
+            $this->errorMessage = 'You have been logged out successfully.';
         }
-
-        // Destroy the session
-        session_destroy();
-
-        $this->errorMessage = 'You have been logged out successfully.';
-        $this->mode = 'login';
     }
+
     /**
      * Render the appropriate page based on the user's authentication status and mode.
      */

@@ -21,7 +21,8 @@ interface iLogin {
     public function login($credentials): bool;
     public function authenticate(string $username, string $password): bool;
     public function logout(): bool;
-    public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID): Person;
+
+    public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID, string $adminType): Person;
 }
 
 
@@ -36,17 +37,15 @@ class withEmail implements iLogin {
         $this->email = $email;
         $this->password = $password;
     }
-    public static function createUser(int $userTypeID, string $firstName, string $lastName, 
-    string $email, string $phoneNo, Address $address, string $nationalID): Person{
-        error_log("User Type ID: $userTypeID");
-        error_log("Creat User, " . var_export($nationalID, true));
 
-        switch ($userTypeID) {
-            case 1 << 5: 
+    public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID, string $adminType): Person{
+        
+        switch ($adminType) {
+            case '@badmin': 
                 return new BadgeAdmin($firstName, $lastName, $email, $phoneNo);
-            case 1<< 6: 
+            case '@eadmin': 
                 return new EventAdmin($firstName, $lastName, $email, $phoneNo);
-            case 1<< 7: 
+            case '@vadmin': 
                 return new VerificationAdmin($firstName, $lastName, $email, $phoneNo);
             default:
                 return new Volunteer($userTypeID,$firstName, $lastName, $email, $phoneNo, $address, 
@@ -59,19 +58,6 @@ class withEmail implements iLogin {
         $this->password = $credentials['password'];
         // Check if the email and password are valid by authenticating
         return $this->authenticate($this->email, $this->password);
-    }
-
-
-    public function getUserDetails(string $email): array {
-
-        
-        // Query your database to get user details
-        $query = "SELECT userID FROM person WHERE email = '$email'";
-        $result= run_select_query($query);
-        // Return array with user details
-        return [
-            'userID' => $result[0]['userID'],
-        ];
     }
 
     // This method authenticates the user by checking email and password in the database
@@ -114,7 +100,7 @@ class withEmail implements iLogin {
     }
 
     // This function should be used to register a user, storing a hashed password in the database
-    public function register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID, $nationalID, Address $address): bool {
+    public function register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID, $nationalID, Address $address, $adminType): bool {
         // Establish the database connection
         $db = Database::getInstance()->getConnection();
 
@@ -124,7 +110,6 @@ class withEmail implements iLogin {
         $firstName = mysqli_real_escape_string($db, $firstName);
         $lastName = mysqli_real_escape_string($db, $lastName);
         $phoneNo = mysqli_real_escape_string($db, $phoneNo);
-        $nationalID = mysqli_real_escape_string($db, $nationalID);
 
         // Check if the email already exists in the database
         $queryCheck = "SELECT * FROM login WHERE email = '$email'";
@@ -143,11 +128,8 @@ class withEmail implements iLogin {
             // After successful registration, get the userID
             $userID = mysqli_insert_id($db);
 
-
-            error_log("With Email, " . var_export($nationalID, true));
-
             // Use the factory to create the user object
-            $user = $this->createUser($userTypeID, $firstName, $lastName, $email, $phoneNo,$address ,$nationalID);
+            $user = $this->createUser($userTypeID, $firstName, $lastName, $email, $phoneNo,$address ,$nationalID, $adminType);
 
             // Insert additional user details into the person table
             return true;
