@@ -38,13 +38,13 @@ class BadgeAdmin extends Person
 
     public function getBadge(int $badgeID): ?array
     {
-        $badge = new Badges();
+        $badge = new Badges('Silver Tier');
         return $badge->getBadgeByID($badgeID);
     }
 
     public function getAllBadges(): array
     {
-        $badge = new Badges();
+        $badge = new Badges('Silver Tier');
         return $badge->getAllBadges();
     }
 

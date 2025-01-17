@@ -12,7 +12,7 @@ interface iLogin {
     public function authenticate(string $username, string $password): bool;
     public function logout(): bool;
 
-    public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID): Person;
+    public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID, string $adminType): Person;
 }
 
 
@@ -29,14 +29,14 @@ class withEmail implements iLogin {
         $this->password = $password;
     }
 
-    public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID): Person{
+    public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID, string $adminType): Person{
         
-        switch ($userTypeID) {
-            case 1 << 5: 
+        switch ($adminType) {
+            case '@badmin': 
                 return new BadgeAdmin($firstName, $lastName, $email, $phoneNo);
-            case 1<< 6: 
+            case '@eadmin': 
                 return new EventAdmin($firstName, $lastName, $email, $phoneNo);
-            case 1<< 7: 
+            case '@vadmin': 
                 return new VerificationAdmin($firstName, $lastName, $email, $phoneNo);
             default:
                 return new Volunteer($userTypeID,$firstName, $lastName, $email, $phoneNo, $address, $nationalID, new Badges(badgeLvl:'Silver Tier'));
@@ -96,7 +96,7 @@ class withEmail implements iLogin {
     }
 
     // This function should be used to register a user, storing a hashed password in the database
-    public function register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID, $nationalID, Address $address): bool {
+    public function register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID, $nationalID, Address $address, $adminType): bool {
         // Establish the database connection
         $db = Database::getInstance()->getConnection();
 
@@ -125,7 +125,7 @@ class withEmail implements iLogin {
             $userID = mysqli_insert_id($db);
 
             // Use the factory to create the user object
-            $user = $this->createUser($userTypeID, $firstName, $lastName, $email, $phoneNo,$address ,$nationalID);
+            $user = $this->createUser($userTypeID, $firstName, $lastName, $email, $phoneNo,$address ,$nationalID, $adminType);
 
             // Insert additional user details into the person table
             return true;

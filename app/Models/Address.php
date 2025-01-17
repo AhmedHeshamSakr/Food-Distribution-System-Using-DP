@@ -94,7 +94,7 @@ class Address
     // In Address class: Add this method to get the ID by name.
     public static function getIdByName(string $name): ?int
     {
-        $sql = "SELECT id FROM address WHERE name = '{$name}' LIMIT 1";
+        $sql = "SELECT id FROM address WHERE name = '{$name}'";
         $result = run_select_query($sql);
 
         if ($result && count($result) > 0) {
@@ -117,6 +117,42 @@ class Address
 
         return null;
     }
+
+    public static function getCountries(): array
+{
+    $sql = "SELECT id, name FROM address WHERE level = 'Country'";
+    $result = run_select_query($sql);
+
+    if ($result && count($result) > 0) {
+        return $result;
+    }
+
+    return []; 
+}
+
+public static function getCities(): array
+{
+    $sql = "SELECT id, name FROM address WHERE level = 'City'";
+    $result = run_select_query($sql);
+
+    if ($result && count($result) > 0) {
+        return $result;
+    }
+
+    return []; 
+}
+
+public static function getCitiesByCountry(int $countryId): array
+{
+    $sql = "SELECT id, name FROM address WHERE level = 'City' AND parent_id = {$countryId}";
+    $result = run_select_query($sql);
+
+    if ($result && count($result) > 0) {
+        return $result;
+    }
+
+    return []; 
+}
 
     // Getters and Setters
     public function getName(): string

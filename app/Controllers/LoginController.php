@@ -1,9 +1,9 @@
 <?php
 
-
 require_once __DIR__ . '/../Models/Login.php';
 require_once __DIR__ . '/../Views/LoginView.php';
 require_once __DIR__ . '/../Models/Address.php';
+
 class LoginController
 {
     private $loginHandler;
@@ -36,7 +36,11 @@ class LoginController
             $this->processFormSubmission();
         }
 
-        $this->renderPage();
+        if ($this->mode === 'register') {
+            $this->fetchCountries();
+        } else {
+            $this->renderPage();
+        }
     }
 
     /**
@@ -50,7 +54,7 @@ class LoginController
             case 'login':
                 $this->handleLogin();
                 break;
-    
+
             case 'register':
                 $this->handleRegistration();
                 break;
@@ -85,36 +89,49 @@ class LoginController
      * Handle the login action.
      */
     private function handleLogin()
-{
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
+    {
+        $email = $_POST['email'] ?? '';
+        $password = $_POST['password'] ?? '';
 
-    // Check if the email contains @admin
-    if (strpos($email, '@admin') !== false) {
-        // Redirect to the admin dashboard page if email contains @admin
-        session_start();
-        $_SESSION['email'] = $email; // Store email in session
-        header("Location: ../app/Views/AdminPageView.php"); // Admin dashboard
-        exit();
-    }
-    // Normal login handling
-    if ($this->loginHandler->login(['email' => $email, 'password' => $password])) {
-        // Store email in session
-        session_start();
-        $_SESSION['email'] = $email;
+        // Check if the email contains @admin
+        if (strpos($email, '@admin') !== false) {
+            // Redirect to the admin dashboard page if email contains @admin
+            session_start();
+            $_SESSION['email'] = $email; // Store email in session
+            header("Location: ../app/Views/AdminPageView.php"); // Admin dashboard
+            exit();
+        }
 
-        // Redirect to the regular home page
-        header("Location: ../app/Views/HomePageView.php");
-        exit();
-    } else {
-        $this->errorMessage = 'Invalid email or password. Please try again.';
+        // Normal login handling
+        if ($this->loginHandler->login(['email' => $email, 'password' => $password])) {
+            // Store email in session
+            session_start();
+            $_SESSION['email'] = $email;
+
+            // Redirect to the regular home page
+            header("Location: ../app/Views/HomePageView.php");
+            exit();
+        } else {
+            $this->errorMessage = 'Invalid email or password. Please try again.';
+        }
     }
-}
-    
 
     /**
      * Handle the registration action.
      */
+    public function fetchCountries()
+    {
+        $countries = Address::getCountries();
+        $cities = Address::getCities();
+        $this->view->renderForm($this->mode, $this->errorMessage, $countries, $cities);
+    }
+
+    public function fetchCities(): void
+    {
+        $cities = Address::getCitiesByCountry(Address::getIdByName('Egypt'));
+        $this->view->renderForm($this->mode, $this->errorMessage, [], $cities);
+    }
+
     private function handleRegistration()
     {
         // Retrieve form inputs
@@ -123,15 +140,29 @@ class LoginController
         $firstName = $_POST['firstName'] ?? '';
         $lastName = $_POST['lastName'] ?? '';
         $phoneNo = $_POST['phoneNo'] ?? '';
+        $nationalID = $_POST['nationalId'] ?? '';
         $userTypeID = $_POST['userTypeID'] ?? ''; 
-        $nationalID = $_POST['nationalId'] ?? '';  
+        $country = $_POST['country'] ?? '';
+        $city = $_POST['city'] ?? '';  
         $address_string = $_POST['address'] ?? ''; 
 
-        $address = new Address($address_string, Address::getIdByName('Egypt'),'City');
+        $adminType = '';
 
-        if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID,$nationalID,$address)) {
+        // Determine userTypeID based on the email
+        if (strpos($email, '@vadmin') !== false) {
+            $adminType = '@vadmin';
+        } elseif (strpos($email, '@eadmin') !== false) {
+            $adminType = '@eadmin';
+        } elseif (strpos($email, '@badmin') !== false) {
+            $adminType = '@badmin';
+        } else {
+            $adminType = "else";
+        }
+
+        $address = new Address($address_string, $city, 'Neighborhood');
+
+        if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID, $nationalID, $address, $adminType)) {
             $this->errorMessage = 'Registration successful! You can now log in.';
-            #$this->mode = 'login'; // Switch to login mode on success
         } else {
             $this->errorMessage = 'Registration failed. The email might already be in use.';
             $this->mode = 'register'; // Stay on the register form on failure
