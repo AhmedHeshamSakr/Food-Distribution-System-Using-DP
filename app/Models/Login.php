@@ -17,12 +17,13 @@ require_once "Volunteer.php";
 require_once "#a-Badmin.php";
 require_once "#a-Eadmin.php";
 require_once "#a-Vadmin.php";
+
+
 interface iLogin {
     public function login($credentials): bool;
-    //public function authenticate(string $username, string $password): bool;
+    public function authenticate(string $username, string $password): bool;
     public function logout(): bool;
-
-    //public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID): Person;
+    public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID): Person;
 }
 
 
@@ -33,13 +34,12 @@ class withEmail implements iLogin {
     private $password;
     private $isAuthenticated = false;
     private $userData; // to Store user data after login from person table
-
     public function __construct($email, $password) {
         $this->email = $email;
         $this->password = $password;
     }
-
-    public static function createUser(int $userTypeID, string $firstName, string $lastName, string $email, string $phoneNo, Address $address, string $nationalID): Person{
+    public static function createUser(int $userTypeID, string $firstName, string $lastName, 
+    string $email, string $phoneNo, Address $address, string $nationalID): Person{
         error_log("User Type ID: $userTypeID");
         error_log("Creat User, " . var_export($nationalID, true));
 
@@ -51,30 +51,24 @@ class withEmail implements iLogin {
             case 1<< 7: 
                 return new VerificationAdmin($firstName, $lastName, $email, $phoneNo);
             default:
-                return new Volunteer($userTypeID,$firstName, $lastName, $email, $phoneNo, $address, $nationalID, new Badges(badgeLvl:'Silver Tier'));
+                return new Volunteer($userTypeID,$firstName, $lastName, $email, $phoneNo, $address, 
+                $nationalID, new Badges(badgeLvl:'Silver Tier'));
         }
     }
-
     // The login method will authenticate the user using the credentials
     public function login($credentials): bool {
         $this->email = $credentials['email'];
         $this->password = $credentials['password'];
-
         // Check if the email and password are valid by authenticating
         return $this->authenticate($this->email, $this->password);
     }
-
     // This method authenticates the user by checking email and password in the database
     public function authenticate(string $email, string $password): bool {
-        // Establish the database connection
         $db = Database::getInstance()->getConnection();
-        // Sanitize inputs (to prevent SQL injection)
         $email = mysqli_real_escape_string($db, $email);
-        // Query to fetch the user based on email
         $query = "SELECT * FROM login WHERE email = '$email'";
-        // Execute the query
         $result = mysqli_query($db, $query);
-        // Check if the user exists
+        
         if ($result && mysqli_num_rows($result) > 0) {
             $user = mysqli_fetch_assoc($result);
             // Now check if the password matches using password_verify
@@ -172,7 +166,6 @@ class withGoogle implements iLogin {
             $this->checkUserExistence($userData);
             return true;
         }
-        
         return false;
     }
 
@@ -180,7 +173,6 @@ class withGoogle implements iLogin {
         $this->isAuthenticated = false;
         return true;
     }
-
     public function authenticate(string $credentials): bool {
         try {
     
@@ -197,32 +189,20 @@ class withGoogle implements iLogin {
             
             $this->isAuthenticated = true;
             return true;
-            
-    
-
-           
         } catch (FailedToVerifyToken $e) {
             $this->isAuthenticated = false;
             return false;
-            
         }
-        
     }
-
     public function isAuthenticated(): bool {
         return $this->isAuthenticated;
     }
-
     private function checkUserExistence($userData) {
         $email = $userData['email'];
-        
-        // Establish DB connection
+       
         $db = Database::getInstance()->getConnection();
-        
-        // Check if the user exists
         $queryCheck = "SELECT * FROM login WHERE email = '$email'";
         $resultCheck = mysqli_query($db, $queryCheck);
-        
         if (mysqli_num_rows($resultCheck) > 0) {
             // User exists
             error_log("User exists in the database.");

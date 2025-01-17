@@ -9,14 +9,13 @@ class Database
     private function __construct()
     {
         $configs = require "config.php";
-        $this->connection = new mysqli($configs->DB_SERVER, $configs->DB_USERNAME, $configs->DB_PASSWORD, $configs->DB_DATABASE);
-        //!!!!!!!!!!!!!!!1!!!IF YOU ARE NOT JUMANA COMMENT THE LINE BELOW AND USE THE LINE ABOVE!!!!!!!!!!!!!!!!!!!!!!!!
-        //$this->connection = new mysqli($configs->DB_SERVER, $configs->DB_USERNAME, $configs->DB_PASSWORD, $configs->DB_DATABASE, $configs->DB_PORT); 
+        $this->connection = new mysqli($configs->DB_SERVER, $configs->DB_USERNAME, 
+        $configs->DB_PASSWORD, $configs->DB_DATABASE);
+       
         if ($this->connection->connect_error) {
             die("Connection failed: " . $this->connection->connect_error);
         }
     }
-
     public static function getInstance(): Database
     {
         if (self::$instance === null) {
@@ -25,12 +24,10 @@ class Database
 
         return self::$instance;
     }
-
     public function getConnection(): mysqli
     {
         return $this->connection;
     }
-
     public function closeConnection()
     {
         if (isset($this->connection)) {
@@ -38,13 +35,11 @@ class Database
         }
         self::$instance = null;
     }
-
     public function get_last_inserted_id(): int
     {
         return $this->connection->insert_id;
     }
 }
-
 // Executes multiple SQL queries and optionally displays their results
 function run_queries(array $queries, bool $echo = false): array
 {
@@ -57,7 +52,6 @@ function run_queries(array $queries, bool $echo = false): array
 
     return $results;
 }
-
 // Executes a single SQL query and returns TRUE on success or FALSE on failure
 function run_query(string $query, bool $echo = false): bool
 {
@@ -87,7 +81,6 @@ function execute_query(mysqli $conn, string $query, bool $echo = false): bool
 
     return $result === true;
 }
-
 // Helper function to execute a SELECT query and return fetched results or FALSE if none
 function execute_select_query(mysqli $conn, string $query, bool $echo = false): array|bool
 {
@@ -119,5 +112,4 @@ function close_connection()
 {
     Database::getInstance()->closeConnection();
 }
-
 ?>

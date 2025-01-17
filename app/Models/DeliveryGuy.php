@@ -22,15 +22,10 @@ class DeliveryGuy extends VolunteerRoles
         $this->deliveryList = [];
         //$this->chooseRole();
         $this->insertDeliveryGuy();
-        
-
     }
-
-    
     public function getUserID(): int {
         return $this->ref->getUserID();
     }
-
     // Adds delivery management functionality
     public function insertDeliveryGuy(): bool {
         $userid = $this->ref->getUserID();
@@ -39,7 +34,6 @@ class DeliveryGuy extends VolunteerRoles
                   VALUES ('{$userid}', '{$vehicleID}')";
         return run_query($query);
     }
-
     public function updateDeliveryGuy(array $fieldsToUpdate): bool {
         // Assuming we pass the correct vehicleID, but let's ensure it exists in the vehicle table
         if (isset($fieldsToUpdate['vehicleID'])) {
@@ -52,7 +46,6 @@ class DeliveryGuy extends VolunteerRoles
                 throw new Exception("Invalid vehicleID: $vehicleID does not exist.");
             }
         }
-    
         // Continue with the update logic
         $setQuery = [];
         foreach ($fieldsToUpdate as $field => $value) {

@@ -5,7 +5,6 @@ require_once __DIR__ . "/../../config/DB.php";
 
 abstract class Person
 {
-
     protected const COOK_FLAG = 1 << 0;       // Binary 00001
     protected const DELIVERY_FLAG = 1 << 1;   // Binary 00010
     protected const COORDINATOR_FLAG = 1 << 2; // Binary 00100
@@ -15,7 +14,6 @@ abstract class Person
     protected const E_ADMIN_FLAG = 1<< 6;
     protected const V_ADMIN_FLAG = 1<< 7;
 
-
     private int $userTypeID = 0;
     private int $userID;
     private string $firstName;
@@ -24,7 +22,8 @@ abstract class Person
     private string $phoneNo;
     // private iLogin $login;
 
-    public function __construct(string $firstName, string $lastName, string $email, string $phoneNo, int $userTypeID)
+    public function __construct(string $firstName, string $lastName, 
+    string $email, string $phoneNo, int $userTypeID)
     {
         $this->userTypeID = $userTypeID;
         $this->firstName = $firstName;
@@ -160,6 +159,10 @@ abstract class Person
     //     return $this->login;
     // }
 
+    public function chooseRole(): bool {
+        $this->setUserTypeID(0);
+        return true;
+    }
 
     public function setUserTypeID(int $userTypeID): bool
     {
@@ -219,10 +222,7 @@ abstract class Person
 
 
 
-    public function chooseRole(): bool {
-        $this->setUserTypeID(0);
-        return true;
-    }
+    
 }
 
 

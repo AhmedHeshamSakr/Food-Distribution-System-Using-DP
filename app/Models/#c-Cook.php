@@ -5,7 +5,6 @@ require_once '#c-Cooking.php';
 
 class Cook extends VolunteerRoles
 {
-
     private int $userTypeID= Person::COOK_FLAG; // 1
     public function __construct(Person $user)
     {
@@ -14,13 +13,6 @@ class Cook extends VolunteerRoles
         // Assign the cook role by default
         //$this->chooseRole();
     }
-
-    // Override chooseRole to assign the Cook flag
-    // public function chooseRole(): bool
-    // {
-    //     $this->roleType |= self::COOK_FLAG; // Set Cook role flag
-    //     return true;
-    // }
     public function chooseRole(): bool {
         
         // Get the current userTypeID, then apply the Cook flag using the setter

@@ -24,26 +24,26 @@ class Volunteer extends Person
         Address $address, 
         string $nationalID,
         Badges $badge,
-    ) {
-        
+    ) { 
         // Call the parent constructor to initialize the User (and Person) properties
         parent::__construct( $firstName, $lastName, $email, $phoneNo,$userTypeID );
         // Initialize the Volunteer-specific properties
         $this->address = $address;
         $this->nationalID = $nationalID;
-        error_log("MY CONSTRUCTOR, " . var_export($nationalID, true));
-
         $this->badge = $badge;
         $this->volunteerList = new VolunteerList();
         $this->insertVolunteer($this);
         $this->chooseRole();
-        
     }
 
+    public function chooseRole(): bool{
+        $this->setUserTypeID(0);
+        return true;
+   }
     public function insertVolunteer(Volunteer $volunteer){
         $conn = Database::getInstance()->getConnection();
         $nationalID = $volunteer->getNationalID();
-        error_log("done, " . var_export($nationalID, true));
+        print($nationalID);
         $address = $volunteer->getAddress();
         
         $userid = $volunteer->getUserID();
@@ -54,46 +54,17 @@ class Volunteer extends Person
                 VALUES ('{$userid}', '{$nationalID}', '{$address}', '{$defaultBadge}')";
         // Run the query and return whether it was successful
         return run_query($query);
-
     }
-
-    // public function insertVolunteer(Address $address, string $nationalID): bool
-    // {
-    //     //$conn = Database::getInstance()->getConnection();
-        
-    //     $address = $this->address->getID();
-    //     $address = mysqli_real_escape_string(Database::getInstance()->getConnection(), $address);
-    //     $nationalID = mysqli_real_escape_string(Database::getInstance()->getConnection(), $nationalID);
-    //     $userid = $this->getUserID();
-    //     $defaultBadge = $this->badge->getBadgeID();
-    //     $this->volunteerList->addVolunteer($this);
-    //     // SQL query to insert the person into the database
-    //     $query = "INSERT INTO volunteer (userID, nationalID, `address`, badge) 
-    //             VALUES ('{$userid}', '{$nationalID}', '{$address}', '{$defaultBadge}')";
-
-    //     // Run the query and return whether it was successful
-    //     return run_query($query);
-    // }
-
     public function updateVolunteer(array $fieldsToUpdate): bool
     {
-        // Create an array to hold the SET part of the SQL query
         $setQuery = [];
-    
-        // Loop through the fieldsToUpdate array and create the SET portion of the query
         foreach ($fieldsToUpdate as $field => $value) {
             // Escape the value to prevent SQL injection
             $escapedValue = mysqli_real_escape_string(Database::getInstance()->getConnection(), $value);
             $setQuery[] = "$field = '$escapedValue'";
         }
-    
-        // Join the setQuery array into a string with commas
         $setQueryStr = implode(', ', $setQuery);
-    
-        // Construct the full SQL query
         $query = "UPDATE volunteer SET $setQueryStr WHERE userID = '{$this->getUserID()}'";
-    
-        // Run the query and return the result
         return run_query($query);
     }
 
@@ -118,7 +89,7 @@ class Volunteer extends Person
         return $this->badge->getBadgeID();
     }
 
-    public function setBadge(?Badges $badge): bool
+    public function setBadge(Badges $badge): bool
     {
         // Optional validation (e.g., ensure it's a valid Badge object)
         if (!$badge instanceof Badges) {
@@ -156,10 +127,24 @@ class Volunteer extends Person
 
         return $this->updateVolunteer($fieldsToUpdate);
     }
-    public function chooseRole(): bool{
-        $this->setUserTypeID(0);
-        return true;
-   }
+ 
+    // public function insertVolunteer(Address $address, string $nationalID): bool
+    // {
+    //     //$conn = Database::getInstance()->getConnection();
+        
+    //     $address = $this->address->getID();
+    //     $address = mysqli_real_escape_string(Database::getInstance()->getConnection(), $address);
+    //     $nationalID = mysqli_real_escape_string(Database::getInstance()->getConnection(), $nationalID);
+    //     $userid = $this->getUserID();
+    //     $defaultBadge = $this->badge->getBadgeID();
+    //     $this->volunteerList->addVolunteer($this);
+    //     // SQL query to insert the person into the database
+    //     $query = "INSERT INTO volunteer (userID, nationalID, `address`, badge) 
+    //             VALUES ('{$userid}', '{$nationalID}', '{$address}', '{$defaultBadge}')";
+
+    //     // Run the query and return whether it was successful
+    //     return run_query($query);
+    // }
     
     
 }
@@ -169,20 +154,14 @@ class Volunteer extends Person
 abstract class VolunteerRoles extends Person
 {
     protected Person $ref;  // Decorated User object
-
-
-
-
-
-    // Constructor that also initializes the parent User class
     public function __construct(Person $ref)
     {
-        parent::__construct(
-            $ref->getUserTypeID(), 
+        parent::__construct( 
             $ref->getFirstName(), 
             $ref->getLastName(), 
             $ref->getEmail(), 
-            $ref->getPhoneNo()
+            $ref->getPhoneNo(),
+            $ref->getUserTypeID()
             // $ref->getLogin()
         );
         $this->ref = $ref;
@@ -194,10 +173,8 @@ abstract class VolunteerRoles extends Person
         //echo 'this is the user type id'.$myuserTypeID . '</br>';
         return ($myuserTypeID & $roleFlag) == $roleFlag;
     }
-    
     public function getAllRoles(): array {
         $roles = [];
-
         // Check each role flag in userTypeID
         if ($this->hasRole(self::COOK_FLAG)) {
             $roles[] = 'Cook';
@@ -217,7 +194,6 @@ abstract class VolunteerRoles extends Person
     
         return $roles;
     }
-
     public function chooseRole(): bool{
          $this->setUserTypeID(0);
          return true;

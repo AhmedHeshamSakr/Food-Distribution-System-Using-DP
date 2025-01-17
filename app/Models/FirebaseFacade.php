@@ -19,10 +19,10 @@ class FirebaseFacade {
         }
     }
 
-    public function logUserData(string $name, string $email) {
-        if(is)
-        file_put_contents(__DIR__ . '/../../storage/user-log.txt', "User: $name, Email: $email\n", FILE_);
-    }
+    // public function logUserData(string $name, string $email) {
+    //     if(is)
+    //     file_put_contents(__DIR__ . '/../../storage/user-log.txt', "User: $name, Email: $email\n", FILE_);
+    // }
 
     public function getAuth() {
         return $this->auth;
