@@ -101,11 +101,6 @@ class EmailLoginView
         </div>
 
         <div class="mb-3">
-            <label for="userTypeID" class="form-label">User Type:</label>
-            <input type="text" id="userTypeID" name="userTypeID" class="form-control" required>
-        </div>
-
-        <div class="mb-3">
             <label for="nationalID" class="form-label">ID:</label>
             <input type="text" id="nationalID" name="nationalID" class="form-control" required>
         </div>

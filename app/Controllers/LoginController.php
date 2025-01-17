@@ -126,12 +126,6 @@ class LoginController
         $this->view->renderForm($this->mode, $this->errorMessage, $countries, $cities);
     }
 
-    public function fetchCities(): void
-    {
-        $cities = Address::getCitiesByCountry(Address::getIdByName('Egypt'));
-        $this->view->renderForm($this->mode, $this->errorMessage, [], $cities);
-    }
-
     private function handleRegistration()
     {
         // Retrieve form inputs
@@ -141,7 +135,6 @@ class LoginController
         $lastName = $_POST['lastName'] ?? '';
         $phoneNo = $_POST['phoneNo'] ?? '';
         $nationalID = $_POST['nationalId'] ?? '';
-        $userTypeID = $_POST['userTypeID'] ?? ''; 
         $country = $_POST['country'] ?? '';
         $city = $_POST['city'] ?? '';  
         $address_string = $_POST['address'] ?? ''; 
@@ -161,7 +154,7 @@ class LoginController
 
         $address = new Address($address_string, $city, 'Neighborhood');
 
-        if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo, $userTypeID, $nationalID, $address, $adminType)) {
+        if ($this->loginHandler->register($email, $password, $firstName, $lastName, $phoneNo, 0, $nationalID, $address, $adminType)) {
             $this->errorMessage = 'Registration successful! You can now log in.';
         } else {
             $this->errorMessage = 'Registration failed. The email might already be in use.';

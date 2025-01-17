@@ -175,12 +175,12 @@ abstract class VolunteerRoles extends Person
     // Constructor that also initializes the parent User class
     public function __construct(Person $ref)
     {
-        parent::__construct(
-            $ref->getUserTypeID(), 
+        parent::__construct( 
             $ref->getFirstName(), 
             $ref->getLastName(), 
             $ref->getEmail(), 
-            $ref->getPhoneNo()
+            $ref->getPhoneNo(),
+            $ref->getUserTypeID()
             // $ref->getLogin()
         );
         $this->ref = $ref;
