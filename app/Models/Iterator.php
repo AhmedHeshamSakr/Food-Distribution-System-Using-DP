@@ -36,10 +36,34 @@ class DeliveryIterator implements IteratorInterface
 
     public function remove(): void
     {
+
+
+
+
         if ($this->position > 0) {
             array_splice($this->deliveries, $this->position - 1, 1);
             $this->position--;
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 }
 

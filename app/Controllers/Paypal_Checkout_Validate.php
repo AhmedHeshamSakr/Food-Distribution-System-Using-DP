@@ -1,16 +1,11 @@
 <?php 
-// Include the configuration file 
 require_once '../../config/config.php' ;
-// Include the database connection file 
 include_once '../../config/DB.php'; 
  
-// Include the PayPal API library 
 require_once '../Models/PayPalCheckout.php'; 
 $paypal = new PaypalCheckout; 
  
  function getUserDetails(string $email): int {
-
-        
     // Query your database to get user details
     $query = "SELECT userID FROM Person WHERE email = '$email'";
     $result= run_select_query($query);

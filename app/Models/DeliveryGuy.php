@@ -230,12 +230,46 @@ class DeliveryGuy extends VolunteerRoles
     }
 
     public function chooseRole(): bool {
-        
-        // Get the current userTypeID, then apply the Cook flag using the setter
-        $currentType = $this->ref->getUserTypeID(); // 1 from cook
-        //echo 'delivery: the following is the current type'. $currentType . '</br>';
-        $this->setUserTypeID($currentType | Person::DELIVERY_FLAG); // Access the constant in User
-        //echo 'delivery: the following the the current delivery type'. $this->getUserTypeID() . '</br>'; // should be 3
+
+
+        $this->userTypeID = Person::DELIVERY_FLAG | $this->ref->getUserTypeID();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         return true;
     }
 
