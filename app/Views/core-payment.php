@@ -12,15 +12,16 @@ if (session_status() === PHP_SESSION_NONE) {
 
 }
 // Initialize database connection (implement as needed)
-$db = database::getInstance()->getConnection();
+$db = null; // Replace with your database connection
 
 // Initialize controller
 $controller = new PaymentController($db);
 
-
 // Get payment data
 $paymentData = $controller->getPaymentData();
 
+// Handle payment validation if POST request
+$controller->validatePayment();
 
 // Render the view
 require_once 'PaymentView.php';
